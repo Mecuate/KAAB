@@ -1,0 +1,8 @@
+# FOLDERS
+tmp
+assets
+notes
+
+# FILES
+*.log
+.env*
