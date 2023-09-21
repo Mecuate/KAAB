@@ -25,7 +25,6 @@ func StaticMediaHandler(r *mux.Router, path string) {
 
 func StaticVideoHandler(r *mux.Router, path string) {
 	redirPath := "assets/video/"
-	fmt.Println("got data")
 	r.PathPrefix(path).Handler(http.StripPrefix(path, http.FileServer(http.Dir(redirPath))))
 }
 

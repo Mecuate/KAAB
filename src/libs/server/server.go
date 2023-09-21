@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"go_server/src/libs/handlers"
+	"kaab/src/libs/handlers"
 
 	"github.com/gorilla/mux"
 )
@@ -22,6 +22,6 @@ func RunServer(portNumber string) {
 
 	port := fmt.Sprintf(":%s", portNumber)
 
-	fmt.Printf("Server status [ON] \nlistening at port: %s", portNumber)
+	fmt.Printf("Server status [ON] \nlistening at port: %s \n", portNumber)
 	log.Fatal(http.ListenAndServe(port, router))
 }

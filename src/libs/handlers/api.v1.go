@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	data "go_server/src/fixtures"
-	"go_server/src/models"
+	data "kaab/src/fixtures"
+	"kaab/src/models"
 
 	"github.com/gorilla/mux"
 )

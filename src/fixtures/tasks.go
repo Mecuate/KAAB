@@ -1,6 +1,6 @@
 package fixtures
 
-import "go_server/src/models"
+import "kaab/src/models"
 
 var TasksData = models.Tasks{
 	{

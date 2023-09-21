@@ -4,6 +4,9 @@ assets
 notes
 .air*
 id_rsa*
+
+public/*
+
 # FILES
 *.log
 .env*
