@@ -14,7 +14,17 @@ import (
 	"math"
 	"os"
 	"regexp"
+
+	crud "github.com/Mecuate/crud_module"
+	"github.com/gorilla/mux"
 )
+
+func StabilizeRouter(r *mux.Router) crud.MuxRouter {
+	router := crud.MuxRouter{
+		Router: r,
+	}
+	return router
+}
 
 func validateMediaFormattingURLString(current string) bool {
 	eval, _ := regexp.MatchString(`\d{2,4}[xX]\d{2,4}`, current)
