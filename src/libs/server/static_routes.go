@@ -2,7 +2,7 @@ package server
 
 import "kaab/src/models"
 
-var DirectoryTable = models.StaticPaths{
+var RoutesDirectory = models.StaticPaths{
 
 	LOGIN:     "/user-portal/login",
 	LOGOUT:    "/user-portal/logout",

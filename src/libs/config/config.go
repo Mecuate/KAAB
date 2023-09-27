@@ -44,7 +44,7 @@ func FromEnv() (config *models.ServiceConfig, err error) {
 
 func fromFileToEnv() {
 
-	cfgFileName := "./etc/config/config.env"
+	cfgFileName := "./config/config.env"
 	if cfgFileName != "" {
 
 		err := godotenv.Load(cfgFileName)

@@ -1,80 +1,26 @@
 package server
 
 import (
-	// "fmt"
-	// "net/http"
-	"fmt"
 	"kaab/src/libs/handlers"
-	"net/http"
-
-	// "strconv"
+	"kaab/src/models"
 
 	crud "github.com/Mecuate/crud_module"
 	"github.com/gorilla/mux"
 )
 
-const (
-	protobufContentType = "application/x-protobuf"
-	jsonContentType     = "application/json"
-	connScope           = "conn-pass"
-)
-
-var (
-	routeAuthScopes = map[string]string{
-		"healthcheck":      connScope,
-		"protobuf_enable":  connScope,
-		"protobuf_disable": connScope,
+func NewRouter() models.MuxRouter {
+	router := models.MuxRouter{
+		Router: mux.NewRouter(),
 	}
-
-	authExemptEndpoints = map[string]string{
-		"healthcheck": "notDefined.s",
-	}
-
-	jwtClaimsOptIn = map[string]string{
-		"postProfile": "user",
-	}
-)
-
-type Router struct {
-	*mux.Router
-}
-
-func NewRouter() *Router {
-	router := mux.NewRouter()
 	InitializeRoutes(router)
-	return &Router{router}
-}
-func T(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	// taskID, err := strconv.Atoi(vars["id"])
-	taskID, err := vars["id"]
-
-	if !err {
-		fmt.Fprintf(w, "Invalid User ID")
-		return
-	}
-
-	fmt.Fprintf(w, "The task with ID %v has been processed successfully", taskID)
+	return router
 }
 
-func P(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	// taskID, err := strconv.Atoi(vars["id"])
-	taskID, err := vars["id"]
-
-	if !err {
-		fmt.Fprintf(w, "Invalid User ID")
-		return
-	}
-
-	fmt.Fprintf(w, "The task with ID %v has been processed successfully", taskID)
-}
-
-func InitializeRoutes(r *mux.Router) {
+func InitializeRoutes(r models.MuxRouter) {
 	var v1 = APIVersion{"collibri"}
-	typedRouter := handlers.StabilizeRouter(r)
+	typedRouter := handlers.StabilizeRouter(r.Router)
 
-	crud.CreateSingleHandlerCRUD(typedRouter, v1.userPath(), T)
-	crud.CreateSingleHandlerCRUD(typedRouter, v1.emulatedAPIPath(), P)
-
+	crud.CreateSingleHandlerCRUD(typedRouter, v1.userPath(), handlers.UserDataSimpleHandler)
+	crud.CreateSingleHandlerCRUD(typedRouter, v1.emulatedAPIPath(), handlers.EmulatedAPISimpleHandler)
+	r.Router.HandleFunc(RoutesDirectory.LOGIN, handlers.LoginHandler)
 }
