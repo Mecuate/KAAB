@@ -1,8 +1,12 @@
 package server
 
 import (
-	"fmt"
+	// "fmt"
 	// "net/http"
+	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/gorilla/mux"
 )
 
@@ -34,37 +38,26 @@ type Router struct {
 
 func NewRouter() *Router {
 	router := mux.NewRouter()
+	InitializeRoutes(router)
 	return &Router{router}
 }
+func T(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	taskID, err := strconv.Atoi(vars["id"])
 
-// func (r *Router) InitializeRoutes(envName string) {
-// 	r.InitializeProfileRoutes(envName)
-
-// 	sub := r.Router.PathPrefix("/middleware").Subrouter()
-
-// 	sub.HandleFunc("/healthcheck", HealthCheckHandler).
-// 		Methods(http.MethodGet).
-// 		Name("healthcheck")
-
-// 	// sub.HandleFunc("/conn/create", CreateContractHandler).
-// 	// 	Methods(http.MethodPost).
-// 	// 	Name("createContract")
-
-// 	// sub.HandleFunc("/product/filter", GetFilteredProductsHandler).
-// 	// 	Methods(http.MethodPost).
-// 	// 	Name("getFilters")
-
-// }
-
-func InitializeProfileRoutes(envName string) string {
-
-	var routeWorkaround string
-
-	routeWorkaround = "middleware"
-
-	if envName == "CaaS" {
-		routeWorkaround = "ssasc"
+	if err != nil {
+		fmt.Fprintf(w, "Invalid User ID")
+		return
 	}
 
-	return fmt.Sprintf("/%s/v1/", routeWorkaround)
+	fmt.Fprintf(w, "The task with ID %v has been processed successfully", taskID)
+}
+func InitializeRoutes(r *mux.Router) {
+	r.HandleFunc("/boss/{id}", T).Methods(http.MethodGet)
+	// sub := r.PathPrefix("/middleware").Subrouter()
+
+	// sub.HandleFunc("/healthcheck", HealthCheckHandler).
+	// 	Methods(http.MethodGet).
+	// 	Name("healthcheck")
+
 }

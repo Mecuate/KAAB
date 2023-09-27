@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
-
 	"kaab/src/libs/config"
 	"kaab/src/libs/server"
 )
 
 func main() {
 	env, _ := config.GetSysFlags()
-	fmt.Println("-- port is:: ", env)
+	//  log port to work on to log_file
 
 	server.RunServer(env.PORT)
 }
