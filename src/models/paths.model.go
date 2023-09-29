@@ -6,6 +6,12 @@ type DynamicPaths struct {
 	DATA_ENTRY   string
 }
 
+type DynamicPathsParams struct {
+	EMULATED_API []string
+	USER         []string
+	DATA_ENTRY   []string
+}
+
 type StaticPaths struct {
 	LOGIN     string
 	LOGOUT    string

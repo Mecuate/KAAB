@@ -6,6 +6,7 @@ import (
 	"os"
 
 	cf "kaab/src/libs/config"
+	"kaab/src/libs/handlers"
 	"kaab/src/models"
 )
 
@@ -27,7 +28,7 @@ import (
 func NewServer(webServerConfig *models.ServiceConfig) *models.Server {
 	server := &models.Server{
 		Configuration: webServerConfig,
-		Router:        NewRouter(),
+		Router:        handlers.NewRouter(),
 	}
 
 	return server

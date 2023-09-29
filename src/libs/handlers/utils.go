@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"regexp"
 
 	crud "github.com/Mecuate/crud_module"
 	"github.com/gorilla/mux"
@@ -30,4 +31,21 @@ func GetBody(r *http.Request, mo interface{}) error {
 	}
 
 	return nil
+}
+
+func ExtractPathParams(r *http.Request, params []string) (map[string]string, bool) {
+	vars := mux.Vars(r)
+
+	newParams := make(map[string]string)
+
+	for _, v := range params {
+		rex := regexp.MustCompile(`[^A-Za-z0-9]`)
+		query := rex.ReplaceAllString(vars[v], ``)
+		if query == "" {
+			return nil, true
+		}
+		newParams[v] = query
+	}
+
+	return newParams, false
 }
