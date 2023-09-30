@@ -8,6 +8,8 @@ import (
 	cf "kaab/src/libs/config"
 	"kaab/src/libs/handlers"
 	"kaab/src/models"
+
+	"github.com/rs/cors"
 )
 
 // func RunServer2(portNumber string) {
@@ -45,14 +47,36 @@ func RunServer() (err error) {
 		os.Setenv("ENVIROMENT", "development")
 	}
 
-	serverConfig := config.WebServerConfig
 	server := NewServer(config)
+	envs := config.WebServerConfig
 
-	fmt.Println("KAAB server running")
-
-	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), server.Router.Router); err != nil {
-		panic(err)
+	if envs.CorsEnabled {
+		CORSServer(config, server)
+	} else {
+		NormalServer(config, server)
 	}
 
 	return nil
+}
+
+func NormalServer(config *models.ServiceConfig, server *models.Server) {
+	serverConfig := config.WebServerConfig
+	fmt.Println("KAAB --Normal server running", os.Getenv("ENVIROMENT"))
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), server.Router.Router); err != nil {
+		panic(err)
+	}
+}
+
+func CORSServer(config *models.ServiceConfig, server *models.Server) {
+	serverConfig := config.WebServerConfig
+	fmt.Println("KAAB --CORS server running", os.Getenv("ENVIROMENT"))
+	c := cors.New(cors.Options{
+		AllowedHeaders: []string{"X-Requested-Width", "Authorization", "Content-Type", "Accept", "Origin", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Credentials"},
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "OPTIONS", "PATCH", "CREATE", "DELETE", "PUT", "UPDATE", "READ", "PUT"},
+	})
+
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), c.Handler(server.Router.Router)); err != nil {
+		panic(err)
+	}
 }

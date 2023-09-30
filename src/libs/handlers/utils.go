@@ -49,3 +49,8 @@ func ExtractPathParams(r *http.Request, params []string) (map[string]string, boo
 
 	return newParams, false
 }
+
+func HasAuthHeader(r *http.Request) bool {
+	authHeader := r.Header.Get("Authorization")
+	return authHeader != ""
+}

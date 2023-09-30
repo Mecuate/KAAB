@@ -10,8 +10,7 @@ func DataEntryHandler(w http.ResponseWriter, r *http.Request) {
 	params, err := ExtractPathParams(r, Params.DATA_ENTRY)
 
 	if err {
-		fmt.Fprintf(w, "Invalid User ID")
-		return
+		FailReq(w, 1)
 	}
 
 	section, id, action := params["section"], params["id"], params["action"]
