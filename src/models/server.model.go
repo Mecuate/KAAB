@@ -1,6 +1,6 @@
 package models
 
 type Server struct {
-	Configuration *ServiceConfig
+	Configuration *EnvConfigs
 	Router        MuxRouter
 }

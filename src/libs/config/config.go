@@ -10,47 +10,47 @@ import (
 
 const (
 	envPrefix = "KAAB"
+	logPrefix = "LOG"
+	appPrefix = "APP"
 )
 
-func FromEnv() (config *models.ServiceConfig, err error) {
-	fromFileToEnv()
+func FromEnv() (config *models.EnvConfigs, err error) {
+	loadEnvFile("./config/config.env")
+	loadEnvFile("./config/config.app.env")
+	loadEnvFile("./config/config.log.env")
 
-	cfg := &models.WebConfigs{}
-	err = envconfig.Process(envPrefix, cfg)
+	webConf := &models.WebConfigs{}
+	err = envconfig.Process(envPrefix, webConf)
 	if err != nil {
 		return nil, err
 	}
 
-	lcfg := &models.LoggingConfig{}
-	err = envconfig.Process("", lcfg)
+	logConf := &models.LoggingConfig{}
+	err = envconfig.Process(logPrefix, logConf)
 	if err != nil {
 		return nil, err
 	}
 
-	ecf := &models.EnvConfs{}
-	err = envconfig.Process(envPrefix, ecf)
+	envConf := &models.AppConfig{}
+	err = envconfig.Process(appPrefix, envConf)
 	if err != nil {
 		return nil, err
 	}
 
-	config = &models.ServiceConfig{
-		WebServerConfig: cfg,
-		LoggingConfig:   lcfg,
-		EnvConfig:       ecf,
+	config = &models.EnvConfigs{
+		WebServerConfig: webConf,
+		LoggingConfig:   logConf,
+		EnvConfig:       envConf,
 	}
 
 	return config, nil
 }
 
-func fromFileToEnv() {
-
-	cfgFileName := "./config/config.env"
+func loadEnvFile(cfgFileName string) {
 	if cfgFileName != "" {
-
 		err := godotenv.Load(cfgFileName)
 		if err != nil {
-			fmt.Println("ENV_FILE not found")
+			fmt.Printf("Environment file:[%s] not found", cfgFileName)
 		}
 	}
-	return
 }

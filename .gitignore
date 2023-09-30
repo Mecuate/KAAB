@@ -13,3 +13,4 @@ public/*
 .env*
 config.env
 config.log.env
+config.app.env

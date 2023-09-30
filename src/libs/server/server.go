@@ -7,29 +7,15 @@ import (
 
 	cf "kaab/src/libs/config"
 	"kaab/src/libs/handlers"
+	"kaab/src/libs/utils"
 	"kaab/src/models"
 
 	"github.com/rs/cors"
 )
 
-// func RunServer2(portNumber string) {
-// 	router := NewRouter()
-
-// 	// router.HandleFunc("/tasks/{id}", handlers.UpdateTask).Methods("PUT")
-
-// 	// handlers.StaticVideoHandler(router, "/media/")
-// 	// handlers.StaticMediaHandler(router, "/static/")
-// 	// handlers.StaticFormattedMedia(router, "/img/fmt/")
-// 	// handlers.StaticFileHandler(router, "/")
-
-// 	port := fmt.Sprintf(":%s", portNumber)
-
-//		fmt.Printf("Server status [ON] \nlistening at port: %s \n", portNumber)
-//		log.Fatal(http.ListenAndServe(port, router))
-//	}
-func NewServer(webServerConfig *models.ServiceConfig) *models.Server {
+func NewServer(serverConfig *models.EnvConfigs) *models.Server {
 	server := &models.Server{
-		Configuration: webServerConfig,
+		Configuration: serverConfig,
 		Router:        handlers.NewRouter(),
 	}
 
@@ -43,14 +29,14 @@ func RunServer() (err error) {
 		return err
 	}
 
-	if os.Getenv("ENVIROMENT") == "" {
-		os.Setenv("ENVIROMENT", "development")
+	if os.Getenv("ENVIRONMENT") == "" {
+		os.Setenv("ENVIRONMENT", "DEV")
 	}
 
 	server := NewServer(config)
 	envs := config.WebServerConfig
 
-	if envs.CorsEnabled {
+	if utils.Boolean(envs.CorsEnabled).String() {
 		CORSServer(config, server)
 	} else {
 		NormalServer(config, server)
@@ -59,17 +45,17 @@ func RunServer() (err error) {
 	return nil
 }
 
-func NormalServer(config *models.ServiceConfig, server *models.Server) {
+func NormalServer(config *models.EnvConfigs, server *models.Server) {
 	serverConfig := config.WebServerConfig
-	fmt.Println("KAAB --Normal server running", os.Getenv("ENVIROMENT"))
+	fmt.Println("KAAB --Normal server running", os.Getenv("ENVIRONMENT"))
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), server.Router.Router); err != nil {
 		panic(err)
 	}
 }
 
-func CORSServer(config *models.ServiceConfig, server *models.Server) {
+func CORSServer(config *models.EnvConfigs, server *models.Server) {
 	serverConfig := config.WebServerConfig
-	fmt.Println("KAAB --CORS server running", os.Getenv("ENVIROMENT"))
+	fmt.Println("KAAB --CORS server running", os.Getenv("ENVIRONMENT"))
 	c := cors.New(cors.Options{
 		AllowedHeaders: []string{"X-Requested-Width", "Authorization", "Content-Type", "Accept", "Origin", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Credentials"},
 		AllowedOrigins: []string{"*"},
