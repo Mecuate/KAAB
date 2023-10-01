@@ -50,7 +50,26 @@ func ExtractPathParams(r *http.Request, params []string) (map[string]string, boo
 	return newParams, false
 }
 
+func JSON(vals interface{}) string {
+	res, err := json.Marshal(vals)
+	if err != nil {
+		return "[]"
+	}
+	return string(res)
+}
+
+func Response(w http.ResponseWriter, body string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(body))
+}
+
 func HasAuthHeader(r *http.Request) bool {
 	authHeader := r.Header.Get("Authorization")
+	return authHeader != ""
+}
+
+func HasAstrophytumCredentials(r *http.Request) bool {
+	authHeader := r.Header.Get("Access-Control-Astrophytum-Credentials")
 	return authHeader != ""
 }
