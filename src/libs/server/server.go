@@ -23,7 +23,6 @@ func NewServer(serverConfig *models.EnvConfigs) *models.Server {
 }
 
 func RunServer() (err error) {
-
 	config, err := cf.FromEnv()
 	if err != nil {
 		return err
@@ -31,6 +30,7 @@ func RunServer() (err error) {
 
 	if os.Getenv("ENVIRONMENT") == "" {
 		os.Setenv("ENVIRONMENT", "DEV")
+		cf.Log(fmt.Sprintf("-- Server working ENVIRONMENT: %s", os.Getenv("ENVIRONMENT")))
 	}
 
 	server := NewServer(config)
@@ -47,7 +47,8 @@ func RunServer() (err error) {
 
 func NormalServer(config *models.EnvConfigs, server *models.Server) {
 	serverConfig := config.WebServerConfig
-	fmt.Println("KAAB --Normal server running", os.Getenv("ENVIRONMENT"))
+	cf.Log(fmt.Sprintf("KAAB --Normal server running: %s", os.Getenv("ENVIRONMENT")))
+
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), server.Router.Router); err != nil {
 		panic(err)
 	}
@@ -55,11 +56,12 @@ func NormalServer(config *models.EnvConfigs, server *models.Server) {
 
 func CORSServer(config *models.EnvConfigs, server *models.Server) {
 	serverConfig := config.WebServerConfig
-	fmt.Println("KAAB --CORS server running", os.Getenv("ENVIRONMENT"))
+	cf.Log(fmt.Sprintf("KAAB --CORS server running: %s", os.Getenv("ENVIRONMENT")))
+
 	c := cors.New(cors.Options{
 		AllowedHeaders: []string{"X-Requested-Width", "Authorization", "Content-Type", "Accept", "Origin", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Credentials"},
 		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "OPTIONS", "PATCH", "CREATE", "DELETE", "PUT", "UPDATE", "READ", "PUT"},
+		AllowedMethods: []string{"OPTIONS", "GET", "READ", "POST", "CREATE", "UPDATE", "PUT", "PATCH", "DELETE"},
 	})
 
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), c.Handler(server.Router.Router)); err != nil {

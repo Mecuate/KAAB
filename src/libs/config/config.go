@@ -50,7 +50,7 @@ func loadEnvFile(cfgFileName string) {
 	if cfgFileName != "" {
 		err := godotenv.Load(cfgFileName)
 		if err != nil {
-			fmt.Printf("Environment file:[%s] not found", cfgFileName)
+			Err(fmt.Sprintf("Environment file:[%s] not found", cfgFileName))
 		}
 	}
 }
