@@ -3,10 +3,13 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+
+	auth "github.com/Mecuate/auth_module"
 )
 
 func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
-	if HasAuthHeader(r) && HasAstrophytumCredentials(r) {
+	authorized := auth.Authorized(w, r)
+	if authorized && HasAstrophytumCredentials(r) {
 		token, valid := VerifyToken(w, r)
 
 		if valid {
@@ -31,7 +34,7 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 
 			responseBody := JSON(resp)
 			fmt.Println(responseBody)
-			// Response(w, responseBody)
+
 			Response(w, TT)
 
 		} else {
