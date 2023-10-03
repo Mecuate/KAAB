@@ -1,5 +1,9 @@
+github.com/Mecuate/auth_module v0.1.0 h1:3od9tNj3laVlrxsX9n79bQI7DUvBLZZOAbFQ1UVfG+k=
+github.com/Mecuate/auth_module v0.1.0/go.mod h1:jGYEkx3vQCFb/qyIshEH551H/URBNE+qc1EqWCDDRoI=
 github.com/Mecuate/crud_module v0.0.3 h1:9KFfRWh5k1oWlu9kRF9E8yNm67HKnP5VLpdoTiOHN74=
 github.com/Mecuate/crud_module v0.0.3/go.mod h1:P5rfjdUeSylOW+37umRQTV7F5n4z1+iXXlMDNvI78Po=
+github.com/golang-jwt/jwt/v5 v5.0.0 h1:1n1XNM9hk7O9mnQoNBGolZvzebBQ7p93ULHRc28XJUE=
+github.com/golang-jwt/jwt/v5 v5.0.0/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
