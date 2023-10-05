@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -67,4 +68,8 @@ func Response(w http.ResponseWriter, body string) {
 func HasAstrophytumCredentials(r *http.Request) bool {
 	authHeader := r.Header.Get("Access-Control-Astrophytum-Credentials")
 	return authHeader != ""
+}
+
+func emptyResponse(w http.ResponseWriter) {
+	fmt.Fprint(w, "[]")
 }
