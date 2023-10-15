@@ -7,9 +7,8 @@ import (
 )
 
 func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
-	authorized, tokenData := auth.Authorized(w, r)
-	if authorized && HasAstrophytumCredentials(r) {
-
+	authorized, claims := auth.Authorized(w, r)
+	if authorized && claims.Realms.Read().Apis {
 		params, err := ExtractPathParams(r, Params.USER)
 		if err {
 			FailReq(w, 1)
@@ -18,7 +17,7 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 		id, action := params["id"], params["action"]
 
 		resp := map[string]interface{}{
-			"tokenData": tokenData,
+			"tokenData": claims,
 			"id":        id,
 			"action":    action,
 		}
@@ -28,7 +27,7 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 		http.Header.Add(w.Header(), "WWW-Authenticate", `JWT realm="Restricted"`)
-		http.Header.Add(w.Header(), "Access-Control-Astrophytum-Credentials", `SESSION`)
+		http.Header.Add(w.Header(), "User-Token", `SESSION`)
 		http.Error(w, "", http.StatusUnauthorized)
 	}
 }

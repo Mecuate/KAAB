@@ -33,7 +33,7 @@ var UserData = UserDataType{
 	{
 		Name:     "Carolina",
 		Nick:     "caro",
-		Email:    "yosh@mecuate.org",
+		Email:    "caro@mecuate.org",
 		Password: "Password-7",
 		Picture:  "https://cdnb.artstation.com/p/assets/images/images/054/674/837/smaller_square/vlx-minguillo-3dportrait01.jpg",
 	},

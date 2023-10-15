@@ -65,11 +65,6 @@ func Response(w http.ResponseWriter, body string) {
 	w.Write([]byte(body))
 }
 
-func HasAstrophytumCredentials(r *http.Request) bool {
-	authHeader := r.Header.Get("Access-Control-Astrophytum-Credentials")
-	return authHeader != ""
-}
-
 func emptyResponse(w http.ResponseWriter) {
 	fmt.Fprint(w, "[]")
 }

@@ -6,7 +6,6 @@ type APIVersion struct {
 	Version string
 }
 
-// returned registred path param endpoints
 var DynamicPath = models.DynamicPaths{
 	EMULATED_API: "/web-engine/ep/{id}/{file}.json",
 	USER:         "/user/{id}/{action}",

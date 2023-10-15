@@ -11,7 +11,7 @@ func main() {
 	err := server.RunServer()
 	if err != nil {
 
-		fmt.Println("main server application error")
+		fmt.Println("kaab server application error")
 		fmt.Println(err)
 	}
 }

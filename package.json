@@ -1,0 +1,13 @@
+{
+	"name": "kaab",
+	"version": "0.0.0",
+	"description": "kaab server",
+	"main": "main.go",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Mecuate/KAAB.git"
+	},
+	"author": "Mecuate Astrophytum",
+	"license": "MIT",
+	"homepage": "https://github.com/Mecuate/KAAB#readme"
+}
