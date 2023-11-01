@@ -9,8 +9,9 @@ func DataEntryHandler(w http.ResponseWriter, r *http.Request) {
 
 	params, err := ExtractPathParams(r, Params.DATA_ENTRY)
 
-	if err {
+	if err != nil {
 		FailReq(w, 1)
+		return
 	}
 
 	section, id, action := params["section"], params["id"], params["action"]

@@ -3,7 +3,6 @@ package models
 type WebConfigs struct {
 	Port        string `required:"true" split_words:"true" default:"11112"`
 	CorsEnabled string `required:"true" split_words:"true" default:"true"`
-	AuthEnabled string `required:"true" split_words:"true" default:"true"`
 	Environment string `required:"true" split_words:"true"`
 	ApiVersions string `required:"true" split_words:"true"`
 }
@@ -16,7 +15,7 @@ type LoggingConfig struct {
 
 type AppConfig struct {
 	ProcessName string `required:"true" split_words:"true"`
-	Secret      string `required:"true" split_words:"true"`
+	DbDir       string `required:"true" split_words:"true"`
 	Copyright   string `required:"true" split_words:"false"`
 }
 

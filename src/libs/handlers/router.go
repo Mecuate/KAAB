@@ -22,6 +22,4 @@ func InitializeRoutes(r models.MuxRouter) {
 	crud.CreateSingleHandlerCRUD(typedRouter, v1.userPath(), UserDataSimpleHandler)
 	crud.CreateSingleHandlerCRUD(typedRouter, v1.emulatedAPIPath(), EmulatedAPISimpleHandler)
 	crud.CreateSingleHandlerCRUD(typedRouter, v1.dataEntryPath(), DataEntryHandler)
-	r.Router.HandleFunc(RoutesDirectory.LOGIN, LoginHandler)
-	r.Router.HandleFunc(RoutesDirectory.LOGOUT, LogoutHandler)
 }

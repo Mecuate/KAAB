@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"kaab/src/models"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -14,34 +15,38 @@ const (
 	appPrefix = "APP"
 )
 
+var WEBENV = &models.WebConfigs{}
+var APPENV = &models.AppConfig{}
+var LOGENV = &models.LoggingConfig{}
+
 func FromEnv() (config *models.EnvConfigs, err error) {
-	loadEnvFile("./config/config.env")
-	loadEnvFile("./config/config.app.env")
-	loadEnvFile("./config/config.log.env")
+	args := os.Args
+	var configFile, logFile, appFile = args[1], args[2], args[3]
+	loadEnvFile(configFile)
+	loadEnvFile(logFile)
+	loadEnvFile(appFile)
 
-	webConf := &models.WebConfigs{}
-	err = envconfig.Process(envPrefix, webConf)
+	err = envconfig.Process(logPrefix, LOGENV)
 	if err != nil {
 		return nil, err
 	}
 
-	logConf := &models.LoggingConfig{}
-	err = envconfig.Process(logPrefix, logConf)
+	err = envconfig.Process(appPrefix, APPENV)
 	if err != nil {
 		return nil, err
 	}
 
-	envConf := &models.AppConfig{}
-	err = envconfig.Process(appPrefix, envConf)
+	err = envconfig.Process(envPrefix, WEBENV)
 	if err != nil {
 		return nil, err
 	}
 
 	config = &models.EnvConfigs{
-		WebServerConfig: webConf,
-		LoggingConfig:   logConf,
-		EnvConfig:       envConf,
+		WebServerConfig: WEBENV,
+		LoggingConfig:   LOGENV,
+		EnvConfig:       APPENV,
 	}
+	LoadLogger()
 
 	return config, nil
 }
