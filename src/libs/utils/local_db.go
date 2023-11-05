@@ -46,7 +46,6 @@ func GatherContext(instance_data models.InstanceCollection, code models.Endpoint
 	selection := newStringArray{}
 	rex := regexp.MustCompile(`useContext\(["'](.*)["']\)`)
 	allItems := rex.FindAllString(code.Generic, -1)
-	fmt.Println("@@@: allItems", allItems)
 	for i := 0; i < len(allItems); i++ {
 		match := rex.FindStringSubmatch(allItems[i])
 		if len(match) != 0 {
@@ -64,7 +63,6 @@ func GatherContext(instance_data models.InstanceCollection, code models.Endpoint
 			ctx[key] = currSelFile.Value
 		}
 	}
-	fmt.Println("@@@: ctx", ctx)
 	res, err := json.Marshal(ctx)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error utils.JSON.Marshal: %v", err))
