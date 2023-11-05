@@ -5,12 +5,28 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"kaab/src/libs/utils"
+	"kaab/src/models"
 	"net/http"
 	"regexp"
 
 	crud "github.com/Mecuate/crud_module"
 	"github.com/gorilla/mux"
 )
+
+func LoadEndpointData(instance_id string, endpoint_name string) (models.EndpointInstance, error) {
+	instanceId, err := utils.PullInstanceCollection(instance_id)
+	if err != nil {
+		return models.EndpointInstance{}, err
+	}
+
+	endpointInstance, err := utils.PullEndpoint(endpoint_name, instanceId)
+	if err != nil {
+		return models.EndpointInstance{}, err
+	}
+
+	return endpointInstance, nil
+}
 
 func StabilizeRouter(r *mux.Router) crud.MuxRouter {
 	router := crud.MuxRouter{

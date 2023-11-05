@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+	"kaab/src/libs/config"
 	"kaab/src/libs/utils"
 	"net/http"
 
@@ -10,19 +12,21 @@ import (
 func EmulatedAPISimpleHandler(w http.ResponseWriter, r *http.Request) {
 	params, err := ExtractPathParams(r, Params.EMULATED_API)
 	if err != nil {
+		config.Err(fmt.Sprintf("Error utils.instEndpointObject: %v", err))
 		FailReq(w, 1)
 	}
 
 	instance_id, endpoint_name := params["id"], params["file"]
-
-	instance, err := utils.PullInstanceCollection(instance_id, endpoint_name)
+	instEndpointObject, err := LoadEndpointData(instance_id, endpoint_name)
 	if err != nil {
+		config.Err(fmt.Sprintf("Error utils.instEndpointObject: %v", err))
 		emptyResponse(w)
 		return
 	}
 
-	endpoint, err := utils.ComposeEndpointJS(instance)
+	endpoint, err := utils.ComposeEndpointJS(instEndpointObject, r)
 	if err != nil {
+		config.Err(fmt.Sprintf("Error utils.ComposeEndpointJS: %v", err))
 		emptyResponse(w)
 		return
 	}
@@ -33,6 +37,7 @@ func EmulatedAPISimpleHandler(w http.ResponseWriter, r *http.Request) {
 	if value, err := vm.Get("response"); err == nil {
 		responseBody, errj := JSON(value)
 		if errj != nil {
+			config.Err(fmt.Sprintf("Error running otto: %v", err))
 			emptyResponse(w)
 			return
 		}
@@ -40,5 +45,6 @@ func EmulatedAPISimpleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	config.Err(fmt.Sprintf("Empty response from emulated api: %s", r.URL.Path))
 	emptyResponse(w)
 }
