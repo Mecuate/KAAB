@@ -10,10 +10,11 @@ import (
 
 func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 	authorized, claims := auth.Authorized(w, r)
+	fmt.Println("@@@ authorized", authorized)
 	if authorized && claims.Realms.Read().Apis {
 		params, err := ExtractPathParams(r, Params.USER)
 		if err != nil {
-			FailReq(w, 1)
+			FailReq(w, 4)
 			return
 		}
 
@@ -21,7 +22,7 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 
 		user_info, err := utils.PullUserData(id)
 		if err != nil {
-			FailReq(w, 1)
+			FailReq(w, 5)
 			return
 		}
 		fmt.Println(user_info)
@@ -34,7 +35,7 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 
 		responseBody, err := JSON(resp)
 		if err != nil {
-			FailReq(w, 1)
+			FailReq(w, 6)
 			return
 		}
 		Response(w, responseBody)

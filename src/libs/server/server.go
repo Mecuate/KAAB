@@ -59,7 +59,23 @@ func CORSServer(config *models.EnvConfigs, server *models.Server) {
 	cf.Log(fmt.Sprintf("KAAB --CORS server running: %s", os.Getenv("ENVIRONMENT")))
 
 	c := cors.New(cors.Options{
-		AllowedHeaders: []string{"X-Requested-Width", "Authorization", "Content-Type", "Accept", "Origin", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Credentials", "User-Token"},
+		AllowedHeaders: []string{
+			"Authorization",
+			"Cookie",
+			"Content-Length",
+			"Host",
+			"User-Agent",
+			"Accept",
+			"Accept-Encoding",
+			"Connection",
+			"X-Requested-Width",
+			"Content-Type",
+			"Origin",
+			"Access-Control-Allow-Origin",
+			"Access-Control-Allow-Headers",
+			"Access-Control-Allow-Methods",
+			"Access-Control-Allow-Credentials",
+			"User-Token"},
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"OPTIONS", "GET", "READ", "POST", "CREATE", "UPDATE", "DELETE"},
 	})
