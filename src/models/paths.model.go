@@ -11,10 +11,3 @@ type DynamicPathsParams struct {
 	USER         []string
 	DATA_ENTRY   []string
 }
-
-type StaticPaths struct {
-	LOGIN     string
-	LOGOUT    string
-	VERSION   string
-	ANALYTICS string
-}

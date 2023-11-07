@@ -16,7 +16,7 @@ func EmulatedAPISimpleHandler(w http.ResponseWriter, r *http.Request) {
 		FailReq(w, 1)
 	}
 
-	instance_id, endpoint_name := params["id"], params["file"]
+	instance_id, endpoint_name := params["instance_id"], params["file"]
 	instEndpointObject, err := LoadEndpointData(instance_id, endpoint_name)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error utils.instEndpointObject: %v", err))

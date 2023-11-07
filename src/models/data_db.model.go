@@ -105,3 +105,10 @@ type DBstorageFile struct {
 	CreationDate     string              `json:"creationDate"`
 	ModificationDate string              `json:"modificationDate"`
 }
+
+type AccountConform struct {
+	Account     AccountType `json:"account"`
+	Email       string      `json:"email"`
+	Id          string      `json:"id"`
+	AccessToken string      `json:"access_token"`
+}
