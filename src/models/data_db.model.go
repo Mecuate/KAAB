@@ -106,9 +106,40 @@ type DBstorageFile struct {
 	ModificationDate string              `json:"modificationDate"`
 }
 
+// response for conformation files
+
 type AccountConform struct {
 	Account     AccountType `json:"account"`
 	Email       string      `json:"email"`
 	Id          string      `json:"id"`
 	AccessToken string      `json:"access_token"`
+}
+
+type PermissionsConform struct {
+	Permissions RealmT `json:"realm"`
+	UserRol     string `json:"user_rol"`
+	Token       string `json:"token"`
+}
+
+type SecurityConform struct {
+	Password  string   `json:"password"`
+	Monitored bool     `json:"monitored"`
+	KnownHost []string `json:"known_host"`
+}
+
+type ProfileConform struct {
+	Name                 string `json:"name"`
+	LastName             string `json:"last_name"`
+	Nick                 string `json:"nick"`
+	UserRol              string `json:"user_rol"`
+	LastLogin            int64  `json:"last_login"`
+	Modification_date    int64  `json:"modification_date"`
+	Picture              string `json:"picture"`
+	PictureUrl           string `json:"picture_url"`
+	PicModification_date int64  `json:"pic_modification_date"`
+	ExpirationDate       int64  `json:"expiration_date"`
+}
+
+type ReportConform struct {
+	ReportFrame string `json:"report_frame"`
 }

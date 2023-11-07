@@ -9,12 +9,12 @@ type RealmT struct {
 type UserData struct {
 	AccessToken       string      `json:"access_token"`
 	Account           AccountType `json:"account"`
-	CreationDate      int32       `json:"creation_date"`
+	CreationDate      int64       `json:"creation_date"`
 	Email             string      `json:"email"`
 	Id                string      `json:"id"`
 	KnownHost         []string    `json:"known_host"`
-	LastLogin         int32       `json:"last_login"`
-	Modification_date int32       `json:"modification_date"`
+	LastLogin         int64       `json:"last_login"`
+	Modification_date int64       `json:"modification_date"`
 	Monitored         bool        `json:"monitored"`
 	Name              string      `json:"name"`
 	LastName          string      `json:"last_name"`
@@ -28,9 +28,9 @@ type UserData struct {
 type AccountType struct {
 	ApprovedBy        []string `json:"approved_by"`
 	ApproverOf        []string `json:"approver_of"`
-	CreationDate      int32    `json:"creation_date"`
-	ExpirationDate    int32    `json:"expiration_date"`
-	Modification_date int32    `json:"modification_date"`
+	CreationDate      int64    `json:"creation_date"`
+	ExpirationDate    int64    `json:"expiration_date"`
+	Modification_date int64    `json:"modification_date"`
 	Picture           string   `json:"picture"`
 	PictureUrl        string   `json:"picture_url"`
 }
