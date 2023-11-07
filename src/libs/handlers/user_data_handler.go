@@ -23,25 +23,33 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 			FailReq(w, 5)
 			return
 		}
-		resp := AllowedActions[action](user_info)
-		responseBody, err := JSON(resp)
-		if err != nil {
-			FailReq(w, 6)
-			return
-		}
-		Response(w, responseBody)
 
+		if IsReadAction(action) && user_info.Id == id {
+			resp := AllowedGetActions[action](user_info)
+			responseBody, err := JSON(resp)
+			if err != nil {
+				FailReq(w, 6)
+				return
+			}
+			Response(w, responseBody)
+		} else {
+			FailReq(w, 99)
+		}
 	} else {
-		http.Header.Add(w.Header(), "WWW-Authenticate", `JWT realm="Restricted"`)
-		http.Header.Add(w.Header(), "User-Token", `SESSION`)
-		http.Error(w, "", http.StatusUnauthorized)
+		RequestAuth(w)
 	}
+}
+
+var get_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
+
+func IsReadAction(t string) bool {
+	return get_actions.Contains(t)
 }
 
 type MUD = models.UserData
 type AllowedFunc map[string]func(any MUD) interface{}
 
-var AllowedActions = AllowedFunc{
+var AllowedGetActions = AllowedFunc{
 	"account":     GetAccount,
 	"profile":     GetProfile,
 	"permissions": GetPermissions,

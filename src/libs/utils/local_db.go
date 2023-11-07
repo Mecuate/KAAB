@@ -43,7 +43,7 @@ func PullEndpoint(endpoint_name string, instance_data models.InstanceCollection)
 }
 
 func GatherContext(instance_data models.InstanceCollection, code models.EndpointCode) string {
-	selection := newStringArray{}
+	selection := NewStringArray{}
 	rex := regexp.MustCompile(`useContext\(["'](.*)["']\)`)
 	allItems := rex.FindAllString(code.Generic, -1)
 	for i := 0; i < len(allItems); i++ {
@@ -56,7 +56,7 @@ func GatherContext(instance_data models.InstanceCollection, code models.Endpoint
 	for ii := 0; ii < len(instance_data.TextFilesList); ii++ {
 		cur := instance_data.TextFilesList[ii]
 
-		if key, ok := selection.containsKey(cur.RefId); ok {
+		if key, ok := selection.ContainsKey(cur.RefId); ok {
 			currSelFile := models.DBstorageFile{}
 			activeFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, cur.File), &currSelFile}
 			activeFile.parseJSON()

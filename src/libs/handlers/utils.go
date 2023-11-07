@@ -1,4 +1,6 @@
-package utils
+package handlers
+
+import "net/http"
 
 type NewStringArray struct {
 	elements []string
@@ -20,4 +22,10 @@ func (s NewStringArray) ContainsKey(target string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func RequestAuth(w http.ResponseWriter) {
+	http.Header.Add(w.Header(), "WWW-Authenticate", `JWT realm="Restricted"`)
+	http.Header.Add(w.Header(), "User-Token", `SESSION`)
+	http.Error(w, "", http.StatusUnauthorized)
 }

@@ -22,7 +22,15 @@ func InitializeRoutes(r models.MuxRouter) {
 	var v1 = APIVersion{vers[0]}
 	typedRouter := StabilizeRouter(r.Router)
 
-	crud.CreateSingleHandlerCRUD(typedRouter, v1.userPath(), UserDataSimpleHandler)
+	// crud.CreateSingleHandlerCRUD(typedRouter, v1.userPath(), UserDataSimpleHandler)
+	UserDataCRUD(typedRouter.Router, v1.userPath())
 	crud.CreateSingleHandlerCRUD(typedRouter, v1.emulatedAPIPath(), EmulatedAPISimpleHandler)
 	crud.CreateSingleHandlerCRUD(typedRouter, v1.dataEntryPath(), DataEntryHandler)
+}
+
+func NR(r *mux.Router) crud.MuxRouter {
+	router := crud.MuxRouter{
+		Router: r,
+	}
+	return router
 }
