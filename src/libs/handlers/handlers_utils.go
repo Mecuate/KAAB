@@ -49,6 +49,7 @@ func GetBody(r *http.Request, mo interface{}) error {
 }
 
 func ExtractPathParams(r *http.Request, params []string) (map[string]string, error) {
+	mustMatch := NewStringArray{params}
 	vars := mux.Vars(r)
 	newParams := make(map[string]string)
 	for _, v := range params {
@@ -59,7 +60,12 @@ func ExtractPathParams(r *http.Request, params []string) (map[string]string, err
 		}
 		newParams[v] = query
 	}
-	return newParams, nil
+	if len(newParams) == len(mustMatch.elements) {
+		if mustMatch.hasAllOf(MapToStringSlice(vars)) {
+			return newParams, nil
+		}
+	}
+	return nil, errors.New("missing params")
 }
 
 func JSON(vals interface{}) (string, error) {

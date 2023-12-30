@@ -1,6 +1,8 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type NewStringArray struct {
 	elements []string
@@ -22,6 +24,26 @@ func (s NewStringArray) ContainsKey(target string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func (s NewStringArray) hasAllOf(targets []string) bool {
+	val := 1
+	for _, elem := range targets {
+		if s.Contains(elem) {
+			val *= 1
+		} else {
+			val *= 0
+		}
+	}
+	return val == 1
+}
+
+func MapToStringSlice(m map[string]string) []string {
+	var result []string
+	for key := range m {
+		result = append(result, key)
+	}
+	return result
 }
 
 func RequestAuth(w http.ResponseWriter) {

@@ -82,3 +82,16 @@ func PullInstanceCollection(instance_id string) (models.InstanceCollection, erro
 	}
 	return dataInstance, errors.New("instance does not exist")
 }
+
+func VerifyServerInstance(uri string, instance_id string, user_id string) (bool, error) {
+	instance, err := PullInstanceCollection(instance_id)
+	if err != nil {
+		return false, err
+	}
+	members := NewStringArray{instance.Members}
+	allow := members.Contains(user_id)
+	if !allow {
+		return false, errors.New("user not allowed")
+	}
+	return true, nil
+}

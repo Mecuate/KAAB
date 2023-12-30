@@ -17,7 +17,7 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 			FailReq(w, 4)
 			return
 		}
-		id, action := params["id"], params["action"]
+		id, action := params["subject_id"], params["action"]
 		user_info, err := utils.PullUserData(id)
 		if err != nil {
 			FailReq(w, 5)
@@ -25,7 +25,7 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if IsReadAction(action) && user_info.Id == id {
-			resp := AllowedGetActions[action](user_info)
+			resp := AllowedReadActions[action](user_info)
 			responseBody, err := JSON(resp)
 			if err != nil {
 				FailReq(w, 6)
@@ -40,16 +40,28 @@ func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var get_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
+var read_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
+var create_actions = NewStringArray{[]string{"account"}}
+var update_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
+var delete_actions = NewStringArray{[]string{"account"}}
 
 func IsReadAction(t string) bool {
-	return get_actions.Contains(t)
+	return read_actions.Contains(t)
+}
+func IsCreateAction(t string) bool {
+	return create_actions.Contains(t)
+}
+func IsUpdateAction(t string) bool {
+	return update_actions.Contains(t)
+}
+func IsDeleteAction(t string) bool {
+	return delete_actions.Contains(t)
 }
 
 type MUD = models.UserData
 type AllowedFunc map[string]func(any MUD) interface{}
 
-var AllowedGetActions = AllowedFunc{
+var AllowedReadActions = AllowedFunc{
 	"account":     GetAccount,
 	"profile":     GetProfile,
 	"permissions": GetPermissions,

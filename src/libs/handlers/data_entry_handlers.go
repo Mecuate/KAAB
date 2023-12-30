@@ -14,7 +14,7 @@ func DataEntryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	section, id, action := params["section"], params["id"], params["action"]
+	section, id, action := params["section"], params["subject_id"], params["action"]
 
 	fmt.Fprintf(w, "SECTION %s ID %s FILE %s", section, id, action)
 }

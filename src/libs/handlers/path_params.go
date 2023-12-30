@@ -8,8 +8,8 @@ type APIVersion struct {
 
 var DynamicPath = models.DynamicPaths{
 	EMULATED_API: "/web-engine/ep/{instance_id}/{file}.json",
-	USER:         "/user/{id}/{action}",
-	DATA_ENTRY:   "/data/{section}/{id}/{action}",
+	USER:         "/user/{instance_id}/{subject_id}/{action}",
+	DATA_ENTRY:   "/data/{instance_id}/{section}/{subject_id}/{action}",
 }
 
 func (v *APIVersion) emulatedAPIPath() string {
@@ -24,6 +24,6 @@ func (v *APIVersion) dataEntryPath() string {
 
 var Params = models.DynamicPathsParams{
 	EMULATED_API: []string{"instance_id", "file"},
-	USER:         []string{"id", "action"},
-	DATA_ENTRY:   []string{"section", "id", "action"},
+	USER:         []string{"instance_id", "subject_id", "action"},
+	DATA_ENTRY:   []string{"instance_id", "section", "subject_id", "action"},
 }

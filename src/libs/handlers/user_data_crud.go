@@ -23,13 +23,19 @@ func UserDataCRUD(r *mux.Router, path string) {
 func UserDataHandler_READ(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authorized, claims := auth.Authorized(w, r)
+		fmt.Println("auth", authorized)
+		fmt.Println("claims", claims)
+
 		if authorized && claims.Realms.Read().Apis {
 			params, err := ExtractPathParams(r, Params.USER)
 			if err != nil {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["id"], params["action"]
+			instance_id, id, action := params["instance_id"], params["subject_id"], params["action"]
+			fmt.Println("instance_id", instance_id)
+			validInstance, err := utils.VerifyServerInstance(instance_id, id)
+			fmt.Println("validInstance", validInstance)
 			user_info, err := utils.PullUserData(id)
 			if err != nil {
 				FailReq(w, 5)
@@ -37,7 +43,7 @@ func UserDataHandler_READ(path string) crud.HandleFunc {
 			}
 
 			if IsReadAction(action) && user_info.Id == id {
-				resp := AllowedGetActions[action](user_info)
+				resp := AllowedReadActions[action](user_info)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
@@ -62,7 +68,7 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["id"], params["action"]
+			id, action := params["subject_id"], params["action"]
 			user_info, err := utils.PullUserData(id)
 			if err != nil {
 				FailReq(w, 5)
@@ -70,7 +76,7 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 			}
 
 			if IsReadAction(action) && user_info.Id == id {
-				resp := AllowedGetActions[action](user_info)
+				resp := AllowedReadActions[action](user_info)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
@@ -95,7 +101,7 @@ func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["id"], params["action"]
+			id, action := params["subject_id"], params["action"]
 			user_info, err := utils.PullUserData(id)
 			if err != nil {
 				FailReq(w, 5)
@@ -103,7 +109,7 @@ func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 			}
 
 			if IsReadAction(action) && user_info.Id == id {
-				resp := AllowedGetActions[action](user_info)
+				resp := AllowedReadActions[action](user_info)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
@@ -128,7 +134,7 @@ func UserDataHandler_DELETE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["id"], params["action"]
+			id, action := params["subject_id"], params["action"]
 			user_info, err := utils.PullUserData(id)
 			if err != nil {
 				FailReq(w, 5)
@@ -136,7 +142,7 @@ func UserDataHandler_DELETE(path string) crud.HandleFunc {
 			}
 
 			if IsReadAction(action) && user_info.Id == id {
-				resp := AllowedGetActions[action](user_info)
+				resp := AllowedReadActions[action](user_info)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)

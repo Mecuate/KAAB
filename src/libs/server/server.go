@@ -79,7 +79,7 @@ func CORSServer(config *models.EnvConfigs, server *models.Server) {
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"OPTIONS", "GET", "READ", "POST", "CREATE", "UPDATE", "DELETE"},
 	})
-
+	fmt.Println("CORS server running on port:", serverConfig.Port)
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), c.Handler(server.Router.Router)); err != nil {
 		panic(err)
 	}

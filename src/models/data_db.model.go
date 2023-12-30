@@ -60,8 +60,16 @@ type SchemasCollectionList []SchemaItem
 
 type TextFilesCollectionList []TextFileItem
 
+type ApiVersion struct {
+	Size      int16    `json:"size"`
+	Instances []string `json:"instances"`
+}
+
 type InstanceCollection struct {
 	Name           string                   `json:"collection_name"`
+	Owner          string                   `json:"owner"`
+	Members        []string                 `json:"members"`
+	Admin          []string                 `json:"admin"`
 	EndpointsList  EndpointsCollectionList  `json:"endpoints_collection_list"`
 	SchemasList    SchemasCollectionList    `json:"schemas_collection_list"`
 	TextFilesList  TextFilesCollectionList  `json:"text_files_collection_list"`
