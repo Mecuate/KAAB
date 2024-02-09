@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	cf "kaab/src/libs/config"
+	"kaab/src/libs/db"
 	"kaab/src/libs/handlers"
 	"kaab/src/libs/utils"
 	"kaab/src/models"
@@ -80,6 +82,10 @@ func CORSServer(config *models.EnvConfigs, server *models.Server) {
 		AllowedMethods: []string{"OPTIONS", "GET", "READ", "POST", "CREATE", "UPDATE", "DELETE"},
 	})
 	fmt.Println("CORS server running on port:", serverConfig.Port)
+	fmt.Println("serverConfig:", serverConfig)
+
+	db.InitialDataBaseBuild(serverConfig.IntDbName, strings.Split(serverConfig.ApiVersions, ","))
+
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), c.Handler(server.Router.Router)); err != nil {
 		panic(err)
 	}
