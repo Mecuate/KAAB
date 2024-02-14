@@ -30,13 +30,9 @@ func RunServer() (err error) {
 		return err
 	}
 
-	if os.Getenv("ENVIRONMENT") == "" {
-		os.Setenv("ENVIRONMENT", "DEV")
-		cf.Log(fmt.Sprintf("-- Server working ENVIRONMENT: %s", os.Getenv("ENVIRONMENT")))
-	}
-
 	server := NewServer(config)
 	envs := config.WebServerConfig
+	cf.Log(fmt.Sprintf("-- Server working ENVIRONMENT: %s", envs.Environment))
 
 	if utils.Boolean(envs.CorsEnabled).String() {
 		CORSServer(config, server)
@@ -81,10 +77,10 @@ func CORSServer(config *models.EnvConfigs, server *models.Server) {
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"OPTIONS", "GET", "READ", "POST", "CREATE", "UPDATE", "DELETE"},
 	})
-	fmt.Println("CORS server running on port:", serverConfig.Port)
-	fmt.Println("serverConfig:", serverConfig)
 
-	db.InitialDataBaseBuild(serverConfig.IntDbName, strings.Split(serverConfig.ApiVersions, ","))
+	db.DatabaseSetup(serverConfig.PubDbName, strings.Split(serverConfig.ApiVersions, ","))
+	cf.Log(fmt.Sprintf("DB initialization completed:[%s]", serverConfig.PubDbName))
+	cf.Log(fmt.Sprintf("CORS server will run on port: %s", serverConfig.Port))
 
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", serverConfig.Port), c.Handler(server.Router.Router)); err != nil {
 		panic(err)

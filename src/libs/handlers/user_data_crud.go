@@ -23,19 +23,20 @@ func UserDataCRUD(r *mux.Router, path string) {
 func UserDataHandler_READ(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authorized, claims := auth.Authorized(w, r)
-		fmt.Println("auth", authorized)
-		fmt.Println("claims", claims)
+		fmt.Println("authorized:", authorized, claims)
+		fmt.Println("claims")
 
 		if authorized && claims.Realms.Read().Apis {
+			id := claims.Id
 			params, err := ExtractPathParams(r, Params.USER)
 			if err != nil {
 				FailReq(w, 4)
 				return
 			}
-			instance_id, id, action := params["instance_id"], params["subject_id"], params["action"]
+			instance_id, action := params["instance_id"], params["action"]
 			fmt.Println("instance_id", instance_id)
-			validInstance, err := utils.VerifyServerInstance(instance_id, id)
-			fmt.Println("validInstance", validInstance)
+			validInstance, err := utils.VerifyInstanceExist(instance_id, id)
+			fmt.Println("validInstance", validInstance, err)
 			user_info, err := utils.PullUserData(id)
 			if err != nil {
 				FailReq(w, 5)

@@ -1,0 +1,65 @@
+package db
+
+import (
+	"context"
+	"fmt"
+	"kaab/src/libs/config"
+	"kaab/src/models"
+
+	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
+)
+
+func SaveInstance(databaseName string, instanceName string) (string, error) {
+	DB, err := InitMongoDB(databaseName, "instanceInfo")
+	if err != nil {
+		config.Err(fmt.Sprintf("Error building Instance [%s] Initial Data: %v", instanceName, err))
+		return "", err
+	}
+	InternalRegistryData := bson.M{"collection_name": instanceName}
+
+	exist := DB.FindOne(InternalRegistryData)
+
+	if exist != nil {
+		config.Err(fmt.Sprintf("Error building Instance [%s] already exist: %v", instanceName, err))
+		return "", err
+	}
+
+	instanceID := uuid.New().String()
+	newInstanceData := models.InstanceCollection{
+		Name:           instanceName,
+		Uuid:           instanceID,
+		Owner:          "",
+		Members:        []string{""},
+		Admin:          []string{""},
+		EndpointsList:  models.EndpointsCollectionList{},
+		SchemasList:    models.SchemasCollectionList{},
+		TextFilesList:  models.TextFilesCollectionList{},
+		MediaFilesList: models.MediaFilesCollectionList{},
+	}
+	err = DB.InsertOne(newInstanceData)
+	if err != nil {
+		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
+		return "", err
+	}
+	return instanceID, err
+}
+
+func VerifyInstanceExist(instanceId string, apiName string) (bool, error) {
+	db, err := InitMongoDB(config.WEBENV.IntDbName, apiName)
+	if err != nil {
+		return false, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"uuid": instanceId}
+	exist := db.coll.FindOne(ctx, identify)
+
+	fmt.Println("@@@", exist)
+	// instance, err := PullInstanceCollection(instance_id)
+	// members := NewStringArray{instance.Members}
+	// allow := members.Contains(user_id)
+	// if !allow {
+	// 	return false, errors.New("user not allowed")
+	// }
+	return true, nil
+}

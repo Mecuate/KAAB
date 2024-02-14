@@ -153,7 +153,7 @@ type ReportConform struct {
 	ReportFrame string `json:"report_frame" bson:"report_frame"`
 }
 type InstanceIdentData struct {
-	Name string `json:"name" bson:"instances"`
+	Name string `json:"name" bson:"name"`
 	Id   string `json:"id" bson:"id"`
 }
 

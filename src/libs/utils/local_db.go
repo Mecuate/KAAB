@@ -83,7 +83,7 @@ func PullInstanceCollection(instance_id string) (models.InstanceCollection, erro
 	return dataInstance, errors.New("instance does not exist")
 }
 
-func VerifyServerInstance(instance_id string, user_id string) (bool, error) {
+func VerifyInstanceExist(instance_id string, user_id string) (bool, error) {
 	instance, err := PullInstanceCollection(instance_id)
 	if err != nil {
 		return false, err

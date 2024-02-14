@@ -11,7 +11,7 @@ import (
 func SaveIntanceRecord(intId string, instanceName string, apiName string) (string, error) {
 	DB, err := InitMongoDB("apis_internal_registry", apiName)
 	if err != nil {
-		config.Err(fmt.Sprintf("Error with internal db records [%s]:%v", instanceName, apiName, err))
+		config.Err(fmt.Sprintf("Error with internal db records [%s|%s]:%v", instanceName, apiName, err))
 		return "", err
 	}
 	InstData := bson.M{"instances": bson.M{"name": instanceName}}

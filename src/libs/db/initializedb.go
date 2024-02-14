@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/models"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	// "go.mongodb.org/mongo-driver/mongo"
+	// "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func xetup_InternalDB(apisNames []string) error {
@@ -17,33 +20,33 @@ func xetup_InternalDB(apisNames []string) error {
 	if err != nil {
 		return err
 	}
+
 	IntDbName := config.WEBENV.IntDbName
-	cl, _ := client.ListDatabases(ctx, bson.M{})
 	conn := client.Database(IntDbName)
-	fmt.Println("[CONECTED] dbConn: ", cl)
-	// if conn == nil {
-	// 	fmt.Println("[F] empty dbConn: ", conn)
-	// }
+	if conn == nil {
+		return fmt.Errorf(fmt.Sprintf("[DB_FAILED_CONNECTION] %s connection cannot be stablished to :", IntDbName))
+	}
 
 	for _, apiName := range apisNames {
-		conn.Collection(apiName)
-		err := conn.CreateCollection(ctx, apiName)
-		if err != nil {
-			fmt.Println("[ALREADY_EXIST] apis.Internal.Collections.Setup: ", apiName, IntDbName)
+		prevConn := conn.Collection(apiName)
+		if prevConn == nil {
+			config.Log(fmt.Sprintf("[DB_COLLECTION_CONNECT_FAILED] apis.Internal.Collections.Setup: %s|%s|%v", apiName, IntDbName, prevConn))
 			continue
 		}
-		fmt.Println("[NEW COLLECTION CREATED] : ", apiName)
-		itemName := fmt.Sprintf("%s:%s", IntDbName, apiName)
-		InstData := bson.M{"_name": itemName}
-		var result bson.M
-		exist := conn.Collection(apiName).FindOne(ctx, InstData).Decode(&result)
 
-		fmt.Println(":   .", result)
+		err := conn.CreateCollection(ctx, apiName)
+		if err != nil {
+			config.Log(fmt.Sprintf("[DB_FAILED_COLLECTION_CREATION] apis.Internal.Collections.Setup: %s|%s|%v", apiName, IntDbName, err))
+			continue
+		}
+		config.Log(fmt.Sprintf("[DB_NEW_COLLECTION_CREATED]: %s", apiName))
+
+		itemName := fmt.Sprintf("%s:%s", IntDbName, apiName)
+		InternalRegistryData := bson.M{"_name": itemName}
+		var result bson.M
+		conn.Collection(apiName).FindOne(ctx, InternalRegistryData).Decode(&result)
 		if result != nil {
-			fmt.Println(":   .")
-			fmt.Println(":   .")
-			fmt.Println(":          data coll already exist.", exist)
-			config.Err("coll.data already exist")
+			config.Log(fmt.Sprintf("[DB_COLL_ITEM_ALREADY_EXIST]: %v", result))
 			continue
 		}
 
@@ -54,79 +57,159 @@ func xetup_InternalDB(apisNames []string) error {
 		}
 		res, err := conn.Collection(apiName).InsertOne(ctx, baseData)
 		if err != nil {
-			config.Err("Error inserting baseData [accounts]")
+			config.Err(fmt.Sprintf("[DB] failed insertion of baseData %s", itemName))
 			return err
 		}
-		fmt.Println("Inserted: ", res)
+		config.Log(fmt.Sprintf("[DB_SUCCESSFUL] ++++ Inserted: %v", res))
 	}
 	return nil
 }
 
-func InitialDataBaseBuild(databaseName string, apisNames []string) error {
+func DatabaseSetup(databaseName string, apisNames []string) {
+	dberr := InitialDataBaseBuild(databaseName, apisNames)
+	if dberr != nil {
+		var isPanic = false
+		for _, itemErr := range dberr {
+			if !strings.Contains(itemErr.Error(), "[ALREADY_EXIST]") {
+				config.Err(fmt.Sprintf("Error building Initial Data: %v", itemErr))
+				isPanic = true
+			}
+		}
+		if isPanic {
+			panic(dberr)
+		}
+	}
+}
+
+func InitialDataBaseBuild(databaseName string, apisNames []string) []error {
+	errReport := []error{}
 	err := xetup_InternalDB(apisNames)
 	if err != nil {
-		return err
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_InternalDB: %v", err))
+		errReport = append(errReport, err)
 	}
-	// err = xetup_Instance(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Accounts(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Audios(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_DataEntryEvents(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Files(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_KnownHosts(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Medias(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Passwords(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Stats(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Users(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = xetup_Videos(databaseName)
-	// if err != nil {
-	// 	return err
-	// }
-
-	return nil
+	err = xetup_Instance(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Instance: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Accounts(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Accounts: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Media(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Media: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_DataEntryEvents(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_DataEntryEvents: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Files(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Files: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_KnownHosts(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_KnownHosts: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Passwords(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Passwords: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Stats(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Stats: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Users(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Users: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Endpoints(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Endpoints: %v", err))
+		errReport = append(errReport, err)
+	}
+	err = xetup_Nodes(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Nodes: %v", err))
+		errReport = append(errReport, err)
+	}
+	config.Log("[DB_SUCCESSFUL]++Inserted: xetup_suite")
+	return errReport
 }
 
+/*
+	- individual functions to setup each collection
+*/
+
+func xetup_Nodes(databaseName string) error {
+	DB, err := InitMongoDB(databaseName, "nodes")
+	if err != nil {
+		config.Err("Error building nodes")
+		return err
+	}
+	InternalRegistryData := bson.M{"_name": "nodes"}
+	exist := DB.FindOne(InternalRegistryData)
+	if exist != nil {
+		config.Err("coll.nodes already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.nodes")
+	}
+	baseData := models.CollectionBasis{
+		Name:    "nodes",
+		Uuid:    uuid.New().String(),
+		Created: fmt.Sprintf("%v", time.Now().Unix()),
+	}
+	err = DB.InsertOne(baseData)
+	if err != nil {
+		config.Err("Error inserting baseData [nodes]")
+		return err
+	}
+	return nil
+}
+func xetup_Endpoints(databaseName string) error {
+	DB, err := InitMongoDB(databaseName, "endpoints")
+	if err != nil {
+		config.Err("Error building endpoints")
+		return err
+	}
+	InternalRegistryData := bson.M{"_name": "endpoints"}
+	exist := DB.FindOne(InternalRegistryData)
+	if exist != nil {
+		config.Err("coll.endpoints already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.endpoints")
+	}
+	baseData := models.CollectionBasis{
+		Name:    "endpoints",
+		Uuid:    uuid.New().String(),
+		Created: fmt.Sprintf("%v", time.Now().Unix()),
+	}
+	err = DB.InsertOne(baseData)
+	if err != nil {
+		config.Err("Error inserting baseData [endpoints]")
+		return err
+	}
+	return nil
+}
 func xetup_Accounts(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, "accounts")
 	if err != nil {
 		config.Err("Error building accounts")
 		return err
 	}
-	InstData := bson.M{"_name": "accounts"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "accounts"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("accounts coll already exist.", exist)
 		config.Err("coll.accounts already exist")
-		return fmt.Errorf("coll.accounts already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.accounts")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "accounts",
@@ -140,27 +223,26 @@ func xetup_Accounts(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Audios(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "audios")
+func xetup_Media(databaseName string) error {
+	DB, err := InitMongoDB(databaseName, "media")
 	if err != nil {
-		config.Err("Error building audios")
+		config.Err("Error building media")
 		return err
 	}
-	InstData := bson.M{"_name": "audios"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "media"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("audios coll already exist.", exist)
-		config.Err("coll.audios already exist")
-		return fmt.Errorf("coll.audios already exist")
+		config.Err("coll.media already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.media")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "audios",
+		Name:    "media",
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
 	err = DB.InsertOne(baseData)
 	if err != nil {
-		config.Err("Error inserting baseData [audios]")
+		config.Err("Error inserting baseData [media]")
 		return err
 	}
 	return nil
@@ -171,12 +253,11 @@ func xetup_DataEntryEvents(databaseName string) error {
 		config.Err("Error building data_entry_events")
 		return err
 	}
-	InstData := bson.M{"_name": "data_entry_events"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "data_entry_events"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("data_entry_events coll already exist.", exist)
 		config.Err("coll.data_entry_events already exist")
-		return fmt.Errorf("coll.data_entry_events already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.data_entry_events")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "data_entry_events",
@@ -196,12 +277,11 @@ func xetup_Files(databaseName string) error {
 		config.Err("Error building files")
 		return err
 	}
-	InstData := bson.M{"_name": "files"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "files"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("files coll already exist.", exist)
 		config.Err("coll.files already exist")
-		return fmt.Errorf("coll.files already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.files")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "files",
@@ -221,12 +301,11 @@ func xetup_KnownHosts(databaseName string) error {
 		config.Err("Error building known_host")
 		return err
 	}
-	InstData := bson.M{"_name": "known_host"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "known_host"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("known_host coll already exist.", exist)
 		config.Err("coll.known_host already exist")
-		return fmt.Errorf("coll.known_host already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.known_host")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "known_host",
@@ -240,43 +319,17 @@ func xetup_KnownHosts(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Medias(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "medias")
-	if err != nil {
-		config.Err("Error building medias")
-		return err
-	}
-	InstData := bson.M{"_name": "medias"}
-	exist := DB.FindOne(InstData)
-	if exist != nil {
-		fmt.Println("medias coll already exist.", exist)
-		config.Err("coll.medias already exist")
-		return fmt.Errorf("coll.medias already exist")
-	}
-	baseData := models.CollectionBasis{
-		Name:    "medias",
-		Uuid:    uuid.New().String(),
-		Created: fmt.Sprintf("%v", time.Now().Unix()),
-	}
-	err = DB.InsertOne(baseData)
-	if err != nil {
-		config.Err("Error inserting baseData [medias]")
-		return err
-	}
-	return nil
-}
 func xetup_Passwords(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, "passwords")
 	if err != nil {
 		config.Err("Error building passwords")
 		return err
 	}
-	InstData := bson.M{"_name": "passwords"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "passwords"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("passwords coll already exist.", exist)
 		config.Err("coll.passwords already exist")
-		return fmt.Errorf("coll.passwords already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.passwords")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "passwords",
@@ -296,12 +349,11 @@ func xetup_Stats(databaseName string) error {
 		config.Err("Error building stats")
 		return err
 	}
-	InstData := bson.M{"_name": "stats"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "stats"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("stats coll already exist.", exist)
 		config.Err("coll.stats already exist")
-		return fmt.Errorf("coll.stats already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.stats")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "stats",
@@ -321,12 +373,11 @@ func xetup_Users(databaseName string) error {
 		config.Err("Error building users")
 		return err
 	}
-	InstData := bson.M{"_name": "users"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "users"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("users coll already exist.", exist)
 		config.Err("coll.users already exist")
-		return fmt.Errorf("coll.users already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.users")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "users",
@@ -340,43 +391,17 @@ func xetup_Users(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Videos(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "videos")
-	if err != nil {
-		config.Err("Error building videos")
-		return err
-	}
-	InstData := bson.M{"_name": "videos"}
-	exist := DB.FindOne(InstData)
-	if exist != nil {
-		fmt.Println("videos coll already exist.", exist)
-		config.Err("coll.videos already exist")
-		return fmt.Errorf("coll.videos already exist")
-	}
-	baseData := models.CollectionBasis{
-		Name:    "videos",
-		Uuid:    uuid.New().String(),
-		Created: fmt.Sprintf("%v", time.Now().Unix()),
-	}
-	err = DB.InsertOne(baseData)
-	if err != nil {
-		config.Err("Error inserting baseData [videos]")
-		return err
-	}
-	return nil
-}
 func xetup_Instance(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, "instanceInfo")
 	if err != nil {
 		config.Err("Error building Instance")
 		return err
 	}
-	InstData := bson.M{"_name": "instanceInfo"}
-	exist := DB.FindOne(InstData)
+	InternalRegistryData := bson.M{"_name": "instanceInfo"}
+	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
-		fmt.Println("instanceInfo coll already exist.", exist)
 		config.Err("coll.instanceInfo already exist")
-		return fmt.Errorf("coll.instanceInfo already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.instanceInfo")
 	}
 	baseData := models.CollectionBasis{
 		Name:    "instanceInfo",
@@ -389,40 +414,4 @@ func xetup_Instance(databaseName string) error {
 		return err
 	}
 	return nil
-}
-func SaveInstance(databaseName string, instanceName string) (string, error) {
-	DB, err := InitMongoDB(databaseName, "instanceInfo")
-	if err != nil {
-		config.Err(fmt.Sprintf("Error building Instance [%s] Initial Data: %v", instanceName, err))
-		return "", err
-	}
-	InstData := bson.M{"collection_name": instanceName}
-
-	exist := DB.FindOne(InstData)
-	fmt.Println("exist", exist)
-
-	if exist != nil {
-		fmt.Println("failed to create; instance already exist.", exist)
-		config.Err(fmt.Sprintf("Error building Instance [%s] already exist: %v", instanceName, err))
-		return "", err
-	}
-
-	instanceID := uuid.New().String()
-	newInstanceData := models.InstanceCollection{
-		Name:           instanceName,
-		Uuid:           instanceID,
-		Owner:          "",
-		Members:        []string{""},
-		Admin:          []string{""},
-		EndpointsList:  models.EndpointsCollectionList{},
-		SchemasList:    models.SchemasCollectionList{},
-		TextFilesList:  models.TextFilesCollectionList{},
-		MediaFilesList: models.MediaFilesCollectionList{},
-	}
-	err = DB.InsertOne(newInstanceData)
-	if err != nil {
-		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
-		return "", err
-	}
-	return instanceID, err
 }

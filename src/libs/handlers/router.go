@@ -23,10 +23,11 @@ func InitializeRoutes(r models.MuxRouter) {
 	for i := 0; i < len(vers); i++ {
 		var api_version = APIVersion{vers[i]}
 
-		// deprecation notice "UserDataSimpleHandler"
+		// TODO: [` deprecation notice "UserDataSimpleHandler" `]-{2024-02-13}
 		UserDataCRUD(typedRouter.Router, api_version.userPath())
+		DataEntryCRUD(typedRouter.Router, api_version.dataEntryPath())
+		/* single handler */
 		crud.CreateSingleHandlerCRUD(typedRouter, api_version.emulatedAPIPath(), EmulatedAPISimpleHandler)
-		crud.CreateSingleHandlerCRUD(typedRouter, api_version.dataEntryPath(), DataEntryHandler)
 	}
 }
 

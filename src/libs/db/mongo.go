@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"kaab/src/libs/config"
 	"log"
@@ -25,7 +24,6 @@ type DBConnection struct {
 }
 
 func InitMongoDB(dbname string, collname string) (DB, error) {
-	fmt.Println("MongoDB client initializing...", dbname, collname)
 	ctx := context.Background()
 	client, err := createClient(ctx)
 	if err != nil {
@@ -33,10 +31,9 @@ func InitMongoDB(dbname string, collname string) (DB, error) {
 	}
 	coll, err := doesCollectionExist(client, dbname, collname)
 	if err != nil {
-		fmt.Println("Error connecting to collection:", err)
+		config.Err(fmt.Sprintf("Error connecting to collection: %v", err))
 		return DB{}, err
 	}
-	fmt.Println("connected to collection:", collname)
 	return DB{coll, ctx}, err
 }
 
@@ -59,11 +56,9 @@ func createClient(ctx context.Context) (*mongo.Client, error) {
 }
 
 func (db DB) InsertOne(payload interface{}) error {
-	data, _ := json.Marshal(payload)
-	fmt.Println("Inserting data...", string(data))
 	_, err := db.coll.InsertOne(db.ctx, payload)
 	if err != nil {
-		config.Log(fmt.Sprintf("Error inserting one: %v", err))
+		config.Err(fmt.Sprintf("Error inserting data: %v", err))
 	}
 	return err
 }
@@ -76,15 +71,14 @@ func (db DB) FindOne(query interface{}) primitive.M {
 	).Decode(&result)
 
 	if err != nil {
-		config.Log(fmt.Sprintf("Error finding one: %v", err))
+		config.Err(fmt.Sprintf("Error finding one: %v", err))
 	}
 
 	return result
 }
 
 func InitMongoDBWithTimeOut(dbname string, collname string) (DB, error) {
-	fmt.Println("MongoDB client initializing...", dbname, collname)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
 	dbconn := make(chan DBConnection)
 
 	go func() {
