@@ -45,21 +45,25 @@ func SaveInstance(databaseName string, instanceName string) (string, error) {
 	return instanceID, err
 }
 
-func VerifyInstanceExist(instanceId string, apiName string) (bool, error) {
-	db, err := InitMongoDB(config.WEBENV.IntDbName, apiName)
+func VerifyInstanceExist(instanceName string, apiName string) (string, error) {
+	Db, err := InitMongoDB(config.WEBENV.IntDbName, apiName)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	ctx := context.Background()
-	identify := bson.M{"uuid": instanceId}
-	exist := db.coll.FindOne(ctx, identify)
-
-	fmt.Println("@@@", exist)
-	// instance, err := PullInstanceCollection(instance_id)
-	// members := NewStringArray{instance.Members}
-	// allow := members.Contains(user_id)
-	// if !allow {
-	// 	return false, errors.New("user not allowed")
-	// }
-	return true, nil
+	identify := bson.M{"name": instanceName}
+	var res models.InstanceIdentData
+	err = Db.coll.FindOne(ctx, identify).Decode(&res)
+	if err != nil {
+		return "", err
+	}
+	return res.Id, nil
 }
+
+// fmt.Println("@@@", res)
+// instance, err := PullInstanceCollection(instance_id)
+// members := NewStringArray{instance.Members}
+// allow := members.Contains(user_id)
+// if !allow {
+// 	return false, errors.New("user not allowed")
+// }
