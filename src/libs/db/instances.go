@@ -60,6 +60,21 @@ func VerifyInstanceExist(instanceName string, apiName string) (string, error) {
 	return res.Id, nil
 }
 
+func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceCollection, error) {
+	var res models.InstanceCollection
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return res, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"collection_name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	err = Db.coll.FindOne(ctx, identify).Decode(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
 // fmt.Println("@@@", res)
 // instance, err := PullInstanceCollection(instance_id)
 // members := NewStringArray{instance.Members}

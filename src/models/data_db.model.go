@@ -28,6 +28,17 @@ type TextFileItem struct {
 	Schema      string   `json:"_schema" bson:"_schema"`
 }
 
+type NodeFileItem struct {
+	Uuid        string   `json:"uuid" bson:"uuid"`
+	Name        string   `json:"name" bson:"name"`
+	Description string   `json:"description" bson:"description"`
+	File        string   `json:"_file" bson:"_file"`
+	Versions    []string `json:"_file_versions" bson:"_file_versions"`
+	RefId       string   `json:"ref_id" bson:"ref_id"`
+	Size        int16    `json:"size" bson:"size"`
+	Schema      string   `json:"_schema" bson:"_schema"`
+}
+
 type DimentionsType struct {
 	Width  int16 `json:"width" bson:"width"`
 	Height int16 `json:"height" bson:"height"`
@@ -60,6 +71,8 @@ type SchemasCollectionList []SchemaItem
 
 type TextFilesCollectionList []TextFileItem
 
+type NodesFilesCollectionList []NodeFileItem
+
 type InstanceCollection struct {
 	Name           string                   `json:"collection_name" bson:"collection_name"`
 	Uuid           string                   `json:"uuid" bson:"uuid"`
@@ -68,8 +81,10 @@ type InstanceCollection struct {
 	Admin          []string                 `json:"admin" bson:"admin"`
 	EndpointsList  EndpointsCollectionList  `json:"endpoints_collection_list" bson:"endpoints_collection_list"`
 	SchemasList    SchemasCollectionList    `json:"schemas_collection_list" bson:"schemas_collection_list"`
-	TextFilesList  TextFilesCollectionList  `json:"text_files_collection_list" bson:"text_files_collection_list"`
+	TextFilesList  TextFilesCollectionList  `json:"files_collection_list" bson:"files_collection_list"`
+	NodesFilesList NodesFilesCollectionList `json:"nodes_collection_list" bson:"nodes_collection_list"`
 	MediaFilesList MediaFilesCollectionList `json:"media_files_collection_list" bson:"media_files_collection_list"`
+	Sys            map[string]string        `json:"sys" bson:"sys"`
 }
 
 type EndpointInstance struct {
