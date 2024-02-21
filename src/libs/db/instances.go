@@ -16,7 +16,7 @@ func SaveInstance(databaseName string, instanceName string) (string, error) {
 		config.Err(fmt.Sprintf("Error building Instance [%s] Initial Data: %v", instanceName, err))
 		return "", err
 	}
-	InternalRegistryData := bson.M{"collection_name": instanceName}
+	InternalRegistryData := bson.M{"name": instanceName}
 
 	exist := DB.FindOne(InternalRegistryData)
 
@@ -67,7 +67,7 @@ func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceColl
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"collection_name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err

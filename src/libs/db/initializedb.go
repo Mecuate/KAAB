@@ -143,7 +143,12 @@ func InitialDataBaseBuild(databaseName string, apisNames []string) []error {
 		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Nodes: %v", err))
 		errReport = append(errReport, err)
 	}
-	config.Log("[DB_SUCCESSFUL]++Inserted: xetup_suite")
+	err = xetup_Schemas(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Schemas: %v", err))
+		errReport = append(errReport, err)
+	}
+	config.Log("[DB_SUCCESSFUL] ++ Inserted: xetup_suite")
 	return errReport
 }
 
@@ -151,20 +156,44 @@ func InitialDataBaseBuild(databaseName string, apisNames []string) []error {
 	- individual functions to setup each collection
 */
 
+func xetup_Schemas(databaseName string) error {
+	DB, err := InitMongoDB(databaseName, SCHEMAS)
+	if err != nil {
+		config.Err("Error building schemas")
+		return err
+	}
+	InternalRegistryData := bson.M{"_name": SCHEMAS}
+	exist := DB.FindOne(InternalRegistryData)
+	if exist != nil {
+		config.Err("coll.schemas already exist")
+		return fmt.Errorf("[ALREADY_EXIST]:coll.schemas")
+	}
+	baseData := models.CollectionBasis{
+		Name:    SCHEMAS,
+		Uuid:    uuid.New().String(),
+		Created: fmt.Sprintf("%v", time.Now().Unix()),
+	}
+	err = DB.InsertOne(baseData)
+	if err != nil {
+		config.Err("Error inserting baseData [schemas]")
+		return err
+	}
+	return nil
+}
 func xetup_Nodes(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "nodes")
+	DB, err := InitMongoDB(databaseName, NODES)
 	if err != nil {
 		config.Err("Error building nodes")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "nodes"}
+	InternalRegistryData := bson.M{"_name": NODES}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.nodes already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.nodes")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "nodes",
+		Name:    NODES,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -176,19 +205,19 @@ func xetup_Nodes(databaseName string) error {
 	return nil
 }
 func xetup_Endpoints(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "endpoints")
+	DB, err := InitMongoDB(databaseName, ENDPOINTS)
 	if err != nil {
 		config.Err("Error building endpoints")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "endpoints"}
+	InternalRegistryData := bson.M{"_name": ENDPOINTS}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.endpoints already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.endpoints")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "endpoints",
+		Name:    ENDPOINTS,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -200,19 +229,19 @@ func xetup_Endpoints(databaseName string) error {
 	return nil
 }
 func xetup_Accounts(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "accounts")
+	DB, err := InitMongoDB(databaseName, ACCOUNTS)
 	if err != nil {
 		config.Err("Error building accounts")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "accounts"}
+	InternalRegistryData := bson.M{"_name": ACCOUNTS}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.accounts already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.accounts")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "accounts",
+		Name:    ACCOUNTS,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -224,19 +253,19 @@ func xetup_Accounts(databaseName string) error {
 	return nil
 }
 func xetup_Media(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "media")
+	DB, err := InitMongoDB(databaseName, MEDIA)
 	if err != nil {
 		config.Err("Error building media")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "media"}
+	InternalRegistryData := bson.M{"_name": MEDIA}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.media already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.media")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "media",
+		Name:    MEDIA,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -248,19 +277,19 @@ func xetup_Media(databaseName string) error {
 	return nil
 }
 func xetup_DataEntryEvents(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "data_entry_events")
+	DB, err := InitMongoDB(databaseName, DATA_ENTRY_EVENTS)
 	if err != nil {
 		config.Err("Error building data_entry_events")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "data_entry_events"}
+	InternalRegistryData := bson.M{"_name": DATA_ENTRY_EVENTS}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.data_entry_events already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.data_entry_events")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "data_entry_events",
+		Name:    DATA_ENTRY_EVENTS,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -272,19 +301,19 @@ func xetup_DataEntryEvents(databaseName string) error {
 	return nil
 }
 func xetup_Files(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "files")
+	DB, err := InitMongoDB(databaseName, FILES)
 	if err != nil {
 		config.Err("Error building files")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "files"}
+	InternalRegistryData := bson.M{"_name": FILES}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.files already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.files")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "files",
+		Name:    FILES,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -296,19 +325,19 @@ func xetup_Files(databaseName string) error {
 	return nil
 }
 func xetup_KnownHosts(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "known_host")
+	DB, err := InitMongoDB(databaseName, KNOWN_HOST)
 	if err != nil {
 		config.Err("Error building known_host")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "known_host"}
+	InternalRegistryData := bson.M{"_name": KNOWN_HOST}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.known_host already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.known_host")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "known_host",
+		Name:    KNOWN_HOST,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -320,19 +349,19 @@ func xetup_KnownHosts(databaseName string) error {
 	return nil
 }
 func xetup_Passwords(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "passwords")
+	DB, err := InitMongoDB(databaseName, PASSWORDS)
 	if err != nil {
 		config.Err("Error building passwords")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "passwords"}
+	InternalRegistryData := bson.M{"_name": PASSWORDS}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.passwords already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.passwords")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "passwords",
+		Name:    PASSWORDS,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -344,19 +373,19 @@ func xetup_Passwords(databaseName string) error {
 	return nil
 }
 func xetup_Stats(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "stats")
+	DB, err := InitMongoDB(databaseName, STATS)
 	if err != nil {
 		config.Err("Error building stats")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "stats"}
+	InternalRegistryData := bson.M{"_name": STATS}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.stats already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.stats")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "stats",
+		Name:    STATS,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -368,19 +397,19 @@ func xetup_Stats(databaseName string) error {
 	return nil
 }
 func xetup_Users(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "users")
+	DB, err := InitMongoDB(databaseName, USERS)
 	if err != nil {
 		config.Err("Error building users")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "users"}
+	InternalRegistryData := bson.M{"_name": USERS}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.users already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.users")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "users",
+		Name:    USERS,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
@@ -392,19 +421,19 @@ func xetup_Users(databaseName string) error {
 	return nil
 }
 func xetup_Instance(databaseName string) error {
-	DB, err := InitMongoDB(databaseName, "instanceInfo")
+	DB, err := InitMongoDB(databaseName, INSTANCE_INFO)
 	if err != nil {
 		config.Err("Error building Instance")
 		return err
 	}
-	InternalRegistryData := bson.M{"_name": "instanceInfo"}
+	InternalRegistryData := bson.M{"_name": INSTANCE_INFO}
 	exist := DB.FindOne(InternalRegistryData)
 	if exist != nil {
 		config.Err("coll.instanceInfo already exist")
 		return fmt.Errorf("[ALREADY_EXIST]:coll.instanceInfo")
 	}
 	baseData := models.CollectionBasis{
-		Name:    "instanceInfo",
+		Name:    INSTANCE_INFO,
 		Uuid:    uuid.New().String(),
 		Created: fmt.Sprintf("%v", time.Now().Unix()),
 	}
