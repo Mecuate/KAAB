@@ -53,7 +53,7 @@ func ExtractPathParams(r *http.Request, params []string) (map[string]string, err
 	vars := mux.Vars(r)
 	newParams := make(map[string]string)
 	for _, v := range params {
-		rex := regexp.MustCompile(`[^A-Za-z0-9-]`)
+		rex := regexp.MustCompile(`[^&A-Za-z0-9-]`)
 		query := rex.ReplaceAllString(vars[v], ``)
 		if query == "" {
 			return nil, errors.New("empty query")

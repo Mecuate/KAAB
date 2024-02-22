@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/libs/db"
 	"kaab/src/models"
-	// "kaab/src/models"
+	"strings"
 )
 
 var AllowedDataReadActions = AllowedDataFunc{
@@ -36,12 +37,6 @@ var AllowedDataReadActions = AllowedDataFunc{
 	},
 }
 
-// user_info, err := db.PullUserData(userId, validInstanceId)
-// if err != nil {
-// 	FailReq(w, 5)
-// 	return
-// }
-
 /* nodes */
 func GetNodeList(args ...any) any {
 	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
@@ -58,7 +53,7 @@ func GetNodeItem(args ...any) any {
 		config.Err(fmt.Sprintf("Error getting nodeItem: %v", err))
 		return DATA_FAIL
 	}
-	return models.NodeFileItemResponse{
+	return models.NodeItemResponse{
 		Uuid:        nodeItem.Uuid,
 		Name:        nodeItem.Name,
 		Description: nodeItem.Description,
@@ -70,8 +65,27 @@ func GetNodeItem(args ...any) any {
 	}
 }
 func GetNodeItems(args ...any) any {
-	fmt.Println("GetNodeItems", args[0], args[1])
-	return EMPTY_ARRAY
+	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
+	nodeItems := models.ManyNodeItemResponse{}
+	for _, item := range items {
+		nodeItem, err := db.GetNodeItem(item)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error getting nodeItem: %v", err))
+			return EMPTY_ARRAY
+		}
+		result := models.NodeItemResponse{
+			Uuid:        nodeItem.Uuid,
+			Name:        nodeItem.Name,
+			Description: nodeItem.Description,
+			Size:        nodeItem.Size,
+			Versions:    nodeItem.Versions,
+			Value:       nodeItem.Value,
+			RefId:       nodeItem.RefId,
+			Schema:      nodeItem.Schema,
+		}
+		nodeItems = append(nodeItems, result)
+	}
+	return nodeItems
 }
 
 /* content */
@@ -85,12 +99,44 @@ func GetContentList(args ...any) any {
 	return instance.TextFilesList
 }
 func GetContentItem(args ...any) any {
-	fmt.Println("GetContentItem", args[0], args[1])
-	return DATA_FAIL
+	contentItem, err := db.GetContentItem(fmt.Sprintf("%v", args[2]))
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting contentItem: %v", err))
+		return DATA_FAIL
+	}
+	return models.ContentItemResponse{
+		Uuid:        contentItem.Uuid,
+		Name:        contentItem.Name,
+		Description: contentItem.Description,
+		Size:        contentItem.Size,
+		Versions:    contentItem.Versions,
+		Value:       contentItem.Value,
+		RefId:       contentItem.RefId,
+		Schema:      contentItem.Schema,
+	}
 }
 func GetContentItems(args ...any) any {
-	fmt.Println("GetContentItems", args[0], args[1])
-	return EMPTY_ARRAY
+	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
+	contentItems := models.ManyContentItemResponse{}
+	for _, item := range items {
+		contentItem, err := db.GetContentItem(item)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error getting contentItem: %v", err))
+			return EMPTY_ARRAY
+		}
+		result := models.ContentItemResponse{
+			Uuid:        contentItem.Uuid,
+			Name:        contentItem.Name,
+			Description: contentItem.Description,
+			Size:        contentItem.Size,
+			Versions:    contentItem.Versions,
+			Value:       contentItem.Value,
+			RefId:       contentItem.RefId,
+			Schema:      contentItem.Schema,
+		}
+		contentItems = append(contentItems, result)
+	}
+	return contentItems
 }
 
 /* dynamic */
@@ -104,12 +150,37 @@ func GetDynamicList(args ...any) any {
 	return instance.Sys
 }
 func GetDynamicItem(args ...any) any {
-	fmt.Println("GetDynamicItem", args[0], args[1])
+	selected := fmt.Sprintf("%v", args[2])
+	instance := GetDynamicList(args[0], args[1])
+	if instance == nil {
+		config.Err(fmt.Sprintf("Error getting instance info: %v", args[0]))
+		return EMPTY_ARRAY
+	}
+	res, err := json.Marshal(instance)
+	if err != nil {
+		return DATA_FAIL
+	}
+	resp := models.SysData{}
+	err = json.Unmarshal(res, &resp)
+	if err != nil {
+		return DATA_FAIL
+	}
+	switch selected {
+	case "creation_date":
+		return resp.CreationDate
+	case "modification_date":
+		return resp.ModificationDate
+	case "created_by":
+		return resp.CreatedBy
+	case "modified_by":
+		return resp.ModifiedBy
+	case "status":
+		return resp.Status
+	}
 	return DATA_FAIL
 }
 func GetDynamicItems(args ...any) any {
-	fmt.Println("GetDynamicItems", args[0], args[1])
-	return EMPTY_ARRAY
+	return GetDynamicList(args[0], args[1])
 }
 
 /* media */
