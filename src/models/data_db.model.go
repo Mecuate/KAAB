@@ -6,9 +6,9 @@ type DimentionsType struct {
 }
 
 type ModificationRecord struct {
-	Person string `json:"person" bson:"person"`
-	Date   string `json:"date" bson:"date"`
-	Index  int16  `json:"index" bson:"index"`
+	Person string `json:"_person" bson:"_person"`
+	Date   string `json:"_date" bson:"_date"`
+	Index  int16  `json:"_index" bson:"_index"`
 }
 
 //	type ItemBasicData struct {
@@ -48,7 +48,6 @@ type EndpointItem struct {
 	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
 	CreatedBy        string               `json:"created_by" bson:"created_by"`
 	Value            []interface{}        `json:"value" bson:"value"`
-	File             string               `json:"file_data" bson:"file_data"`
 	MemFile          string               `json:"mem_file" bson:"mem_file"`
 }
 
@@ -63,7 +62,6 @@ type SchemaItem struct {
 	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
 	CreatedBy        string               `json:"created_by" bson:"created_by"`
 	Value            []interface{}        `json:"value" bson:"value"`
-	File             string               `json:"file_data" bson:"file_data"`
 }
 
 type TextFileItem struct {
@@ -77,7 +75,6 @@ type TextFileItem struct {
 	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
 	CreatedBy        string               `json:"created_by" bson:"created_by"`
 	Value            []interface{}        `json:"value" bson:"value"`
-	File             string               `json:"file_data" bson:"file_data"`
 	RefId            string               `json:"ref_id" bson:"ref_id"`
 	Schema           string               `json:"schema_ref" bson:"schema_ref"`
 }
@@ -93,7 +90,6 @@ type NodeFileItem struct {
 	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
 	CreatedBy        string               `json:"created_by" bson:"created_by"`
 	Value            []interface{}        `json:"value" bson:"value"`
-	File             interface{}          `json:"file_data" bson:"file_data"`
 	RefId            string               `json:"ref_id" bson:"ref_id"`
 	Schema           string               `json:"schema_ref" bson:"schema_ref"`
 }
@@ -119,43 +115,42 @@ type MediaFileItem struct {
 	File             string               `json:"file_data" bson:"file_data"`
 }
 
-type MediaFilesCollectionList []MediaFileItem
+type MediaFilesCollectionList []DataEntryIdentity
 
-type EndpointsCollectionList []EndpointItem
+type EndpointsCollectionList []DataEntryIdentity
 
-type SchemasCollectionList []SchemaItem
+type SchemasCollectionList []DataEntryIdentity
 
-type TextFilesCollectionList []TextFileItem
+type TextFilesCollectionList []DataEntryIdentity
 
-type NodesFilesCollectionList []NodeFileItem
+type NodesFilesCollectionList []DataEntryIdentity
 
 type InstanceCollection struct {
-	Uuid             string                   `json:"uuid" bson:"uuid"`
-	Name             string                   `json:"name" bson:"name"`
-	Description      string                   `json:"description" bson:"description"`
-	Size             int16                    `json:"size" bson:"size"`
-	Versions         []string                 `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string                   `json:"creation_date" bson:"creation_date"`
-	ModificationDate string                   `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord     `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string                   `json:"created_by" bson:"created_by"`
-	Value            []interface{}            `json:"value" bson:"value"`
-	Owner            string                   `json:"owner" bson:"owner"`
-	Members          []string                 `json:"members" bson:"members"`
-	Admin            []string                 `json:"admin" bson:"admin"`
-	EndpointsList    EndpointsCollectionList  `json:"endpoints_collection_list" bson:"endpoints_collection_list"`
-	SchemasList      SchemasCollectionList    `json:"schemas_collection_list" bson:"schemas_collection_list"`
-	TextFilesList    TextFilesCollectionList  `json:"files_collection_list" bson:"files_collection_list"`
-	NodesFilesList   NodesFilesCollectionList `json:"nodes_collection_list" bson:"nodes_collection_list"`
-	MediaFilesList   MediaFilesCollectionList `json:"media_files_collection_list" bson:"media_files_collection_list"`
-	Sys              map[string]string        `json:"sys" bson:"sys"`
+	Name           string                   `json:"name" bson:"name"`
+	Versions       []string                 `json:"versions" bson:"versions" default:"[]"`
+	Owner          string                   `json:"owner" bson:"owner"`
+	Admin          []string                 `json:"admin" bson:"admin"`
+	Members        []string                 `json:"members" bson:"members"`
+	MediaFilesList MediaFilesCollectionList `json:"media_files_collection_list" bson:"media_files_collection_list"`
+	EndpointsList  EndpointsCollectionList  `json:"endpoints_collection_list" bson:"endpoints_collection_list"`
+	SchemasList    SchemasCollectionList    `json:"schemas_collection_list" bson:"schemas_collection_list"`
+	TextFilesList  TextFilesCollectionList  `json:"files_collection_list" bson:"files_collection_list"`
+	NodesFilesList NodesFilesCollectionList `json:"nodes_collection_list" bson:"nodes_collection_list"`
+	Sys            SysData                  `json:"sys" bson:"sys"`
+}
+
+type SysData struct {
+	CreationDate     string               `json:"creation_date" bson:"creation_date"`
+	ModificationDate string               `json:"modification_date" bson:"modification_date"`
+	CreatedBy        string               `json:"created_by" bson:"created_by"`
+	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
+	Status           string               `json:"status" bson:"status"`
 }
 
 type EndpointCode struct {
-	Generic string `json:"generic" bson:"generic" default:""`
-	Get     string `json:"get" bson:"get" default:""`
-	Post    string `json:"post" bson:"post" default:""`
-	Delete  string `json:"delete" bson:"delete" default:""`
+	Get    string `json:"get" bson:"get" default:""`
+	Post   string `json:"post" bson:"post" default:""`
+	Delete string `json:"delete" bson:"delete" default:""`
 }
 
 type EndpointInstance struct {
@@ -173,7 +168,7 @@ type EndpointFile struct {
 	ModificationDate string               `json:"modification_date" bson:"modification_date"`
 	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
 	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            EndpointCode         `json:"value" bson:"value"`
+	Value            []EndpointCode       `json:"value" bson:"value"`
 }
 
 // response for conformation files
@@ -217,14 +212,16 @@ type ProfileConform struct {
 type ReportConform struct {
 	ReportFrame string `json:"report_frame" bson:"report_frame"`
 }
-type InstanceIdentData struct {
-	Name string `json:"name" bson:"name"`
-	Id   string `json:"id" bson:"id"`
+type DataEntryIdentity struct {
+	Name   string `json:"name" bson:"name"`
+	Id     string `json:"id" bson:"id"`
+	Status string `json:"status" bson:"status"`
+	RefId  string `json:"ref_id" bson:"ref_id"`
 }
 
 type APICollections struct {
 	Size      int16               `json:"size" bson:"size"`
-	Instances []InstanceIdentData `json:"instances" bson:"instances"`
+	Instances []DataEntryIdentity `json:"instances" bson:"instances"`
 }
 
 type CollectionBasis struct {

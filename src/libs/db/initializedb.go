@@ -14,7 +14,7 @@ import (
 	// "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func xetup_InternalDB(apisNames []string) error {
+func Xetup_InternalDB(apisNames []string) error {
 	ctx := context.Background()
 	client, err := createClient(ctx)
 	if err != nil {
@@ -83,72 +83,76 @@ func DatabaseSetup(databaseName string, apisNames []string) {
 
 func InitialDataBaseBuild(databaseName string, apisNames []string) []error {
 	errReport := []error{}
-	err := xetup_InternalDB(apisNames)
+	err := Xetup_InternalDB(apisNames)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_InternalDB: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_InternalDB: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Instance(databaseName)
+	err = Xetup_Instance(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Instance: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Instance: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Accounts(databaseName)
+	err = Xetup_Accounts(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Accounts: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Accounts: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Media(databaseName)
+	err = Xetup_Media(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Media: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Media: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_DataEntryEvents(databaseName)
+	err = Xetup_Files(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_DataEntryEvents: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Files: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Files(databaseName)
+	err = Xetup_Users(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Files: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Users: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_KnownHosts(databaseName)
+	err = Xetup_Endpoints(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_KnownHosts: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Endpoints: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Passwords(databaseName)
+	err = Xetup_Nodes(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Passwords: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Nodes: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Stats(databaseName)
+	err = Xetup_Schemas(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Stats: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Schemas: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Users(databaseName)
+
+	/* ----- TEMP DISABLED
+	err = Xetup_DataEntryEvents(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Users: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_DataEntryEvents: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Endpoints(databaseName)
+	err = Xetup_KnownHosts(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Endpoints: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_KnownHosts: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Nodes(databaseName)
+	err = Xetup_Stats(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Nodes: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Stats: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = xetup_Schemas(databaseName)
+	err = Xetup_Passwords(databaseName)
 	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].xetup_Schemas: %v", err))
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Passwords: %v", err))
 		errReport = append(errReport, err)
 	}
-	config.Log("[DB_SUCCESSFUL] ++ Inserted: xetup_suite")
+	*/
+
+	config.Log("[DB_SUCCESSFUL]Inserted: Xetup_suite")
 	return errReport
 }
 
@@ -156,7 +160,7 @@ func InitialDataBaseBuild(databaseName string, apisNames []string) []error {
 	- individual functions to setup each collection
 */
 
-func xetup_Schemas(databaseName string) error {
+func Xetup_Schemas(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, SCHEMAS)
 	if err != nil {
 		config.Err("Error building schemas")
@@ -180,7 +184,7 @@ func xetup_Schemas(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Nodes(databaseName string) error {
+func Xetup_Nodes(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, NODES)
 	if err != nil {
 		config.Err("Error building nodes")
@@ -204,7 +208,7 @@ func xetup_Nodes(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Endpoints(databaseName string) error {
+func Xetup_Endpoints(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, ENDPOINTS)
 	if err != nil {
 		config.Err("Error building endpoints")
@@ -228,7 +232,7 @@ func xetup_Endpoints(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Accounts(databaseName string) error {
+func Xetup_Accounts(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, ACCOUNTS)
 	if err != nil {
 		config.Err("Error building accounts")
@@ -252,7 +256,7 @@ func xetup_Accounts(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Media(databaseName string) error {
+func Xetup_Media(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, MEDIA)
 	if err != nil {
 		config.Err("Error building media")
@@ -276,7 +280,7 @@ func xetup_Media(databaseName string) error {
 	}
 	return nil
 }
-func xetup_DataEntryEvents(databaseName string) error {
+func Xetup_DataEntryEvents(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, DATA_ENTRY_EVENTS)
 	if err != nil {
 		config.Err("Error building data_entry_events")
@@ -300,7 +304,7 @@ func xetup_DataEntryEvents(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Files(databaseName string) error {
+func Xetup_Files(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, FILES)
 	if err != nil {
 		config.Err("Error building files")
@@ -324,7 +328,7 @@ func xetup_Files(databaseName string) error {
 	}
 	return nil
 }
-func xetup_KnownHosts(databaseName string) error {
+func Xetup_KnownHosts(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, KNOWN_HOST)
 	if err != nil {
 		config.Err("Error building known_host")
@@ -348,7 +352,7 @@ func xetup_KnownHosts(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Passwords(databaseName string) error {
+func Xetup_Passwords(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, PASSWORDS)
 	if err != nil {
 		config.Err("Error building passwords")
@@ -372,7 +376,7 @@ func xetup_Passwords(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Stats(databaseName string) error {
+func Xetup_Stats(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, STATS)
 	if err != nil {
 		config.Err("Error building stats")
@@ -396,7 +400,7 @@ func xetup_Stats(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Users(databaseName string) error {
+func Xetup_Users(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, USERS)
 	if err != nil {
 		config.Err("Error building users")
@@ -420,7 +424,7 @@ func xetup_Users(databaseName string) error {
 	}
 	return nil
 }
-func xetup_Instance(databaseName string) error {
+func Xetup_Instance(databaseName string) error {
 	DB, err := InitMongoDB(databaseName, INSTANCE_INFO)
 	if err != nil {
 		config.Err("Error building Instance")

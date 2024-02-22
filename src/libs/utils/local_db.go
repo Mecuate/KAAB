@@ -23,7 +23,7 @@ func PullUserData(user_id string) (models.UserData, error) {
 
 func PullEndpoint(endpoint_name string, instance_data models.InstanceCollection) (models.EndpointInstance, error) {
 	endpointData := models.EndpointInstance{}
-	selectedEndpoint := models.EndpointItem{}
+	selectedEndpoint := models.DataEntryIdentity{}
 	for _, endp := range instance_data.EndpointsList {
 		if endp.Name == endpoint_name {
 			selectedEndpoint = endp
@@ -31,12 +31,12 @@ func PullEndpoint(endpoint_name string, instance_data models.InstanceCollection)
 		}
 	}
 	endpointFile := models.EndpointFile{}
-	dataFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, selectedEndpoint.File), &endpointFile}
+	dataFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, selectedEndpoint.RefId), &endpointFile}
 	dataFile.parseJSON()
 
-	if endpointFile.Value.Generic != "" || endpointFile.Value.Get != "" || endpointFile.Value.Post != "" || endpointFile.Value.Delete != "" {
-		endpointData.EndpointCode = endpointFile.Value
-		endpointData.Context = GatherContext(instance_data, endpointFile.Value)
+	if endpointFile.Value[0].Get != "" || endpointFile.Value[0].Post != "" || endpointFile.Value[0].Delete != "" {
+		endpointData.EndpointCode = endpointFile.Value[0]
+		endpointData.Context = GatherContext(instance_data, endpointFile.Value[0])
 		return endpointData, nil
 	}
 	return endpointData, errors.New("instance does not exist")
@@ -45,7 +45,7 @@ func PullEndpoint(endpoint_name string, instance_data models.InstanceCollection)
 func GatherContext(instance_data models.InstanceCollection, code models.EndpointCode) string {
 	selection := NewStringArray{}
 	rex := regexp.MustCompile(`useContext\(["'](.*)["']\)`)
-	allItems := rex.FindAllString(code.Generic, -1)
+	allItems := rex.FindAllString(code.Get, -1)
 	for i := 0; i < len(allItems); i++ {
 		match := rex.FindStringSubmatch(allItems[i])
 		if len(match) != 0 {
@@ -58,7 +58,7 @@ func GatherContext(instance_data models.InstanceCollection, code models.Endpoint
 
 		if key, ok := selection.ContainsKey(cur.RefId); ok {
 			currSelFile := models.DBstorageFile{}
-			activeFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, cur.File), &currSelFile}
+			activeFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, cur.RefId), &currSelFile}
 			activeFile.parseJSON()
 			ctx[key] = currSelFile.Value
 		}

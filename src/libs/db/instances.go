@@ -28,14 +28,14 @@ func SaveInstance(databaseName string, instanceName string) (string, error) {
 	instanceID := uuid.New().String()
 	newInstanceData := models.InstanceCollection{
 		Name:           instanceName,
-		Uuid:           instanceID,
 		Owner:          "",
 		Members:        []string{""},
 		Admin:          []string{""},
+		MediaFilesList: models.MediaFilesCollectionList{},
 		EndpointsList:  models.EndpointsCollectionList{},
 		SchemasList:    models.SchemasCollectionList{},
 		TextFilesList:  models.TextFilesCollectionList{},
-		MediaFilesList: models.MediaFilesCollectionList{},
+		NodesFilesList: models.NodesFilesCollectionList{},
 	}
 	err = DB.InsertOne(newInstanceData)
 	if err != nil {
@@ -52,7 +52,7 @@ func VerifyInstanceExist(instanceName string, apiName string) (string, error) {
 	}
 	ctx := context.Background()
 	identify := bson.M{"name": instanceName}
-	var res models.InstanceIdentData
+	var res models.DataEntryIdentity
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return "", err

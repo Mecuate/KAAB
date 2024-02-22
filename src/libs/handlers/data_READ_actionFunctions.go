@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/libs/db"
+	"kaab/src/models"
 	// "kaab/src/models"
 )
 
@@ -52,8 +53,21 @@ func GetNodeList(args ...any) any {
 	return instance.NodesFilesList
 }
 func GetNodeItem(args ...any) any {
-	fmt.Println("GetNodeItem", args[0], args[1])
-	return EMPTY_OBJECT
+	nodeItem, err := db.GetNodeItem(fmt.Sprintf("%v", args[2]))
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting nodeItem: %v", err))
+		return DATA_FAIL
+	}
+	return models.NodeFileItemResponse{
+		Uuid:        nodeItem.Uuid,
+		Name:        nodeItem.Name,
+		Description: nodeItem.Description,
+		Size:        nodeItem.Size,
+		Versions:    nodeItem.Versions,
+		Value:       nodeItem.Value,
+		RefId:       nodeItem.RefId,
+		Schema:      nodeItem.Schema,
+	}
 }
 func GetNodeItems(args ...any) any {
 	fmt.Println("GetNodeItems", args[0], args[1])

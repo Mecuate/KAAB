@@ -24,10 +24,11 @@ func SaveIntanceRecord(intId string, instanceName string, apiName string) (strin
 		config.Err(fmt.Sprintf("Error building Instance [%s] already exist: %v", instanceName, err))
 		return "", err
 	}
-	instanceItem := []models.InstanceIdentData{
+	instanceItem := []models.DataEntryIdentity{
 		{
-			Name: instanceName,
-			Id:   intId,
+			Name:   instanceName,
+			Id:     intId,
+			Status: "active",
 		},
 	}
 	newInstanceData := models.APICollections{
