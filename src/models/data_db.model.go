@@ -11,108 +11,98 @@ type ModificationRecord struct {
 	Index  int16  `json:"_index" bson:"_index"`
 }
 
-//	type ItemBasicData struct {
-//		Uuid             string               `json:"uuid" bson:"uuid"`
-//		Name             string               `json:"name" bson:"name"`
-//		Description      string               `json:"description" bson:"description"`
-//		Size             int16                `json:"size" bson:"size"`
-//		Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-//		CreationDate     string               `json:"creation_date" bson:"creation_date"`
-//		ModificationDate string               `json:"modification_date" bson:"modification_date"`
-//		ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-//		CreatedBy        string               `json:"created_by" bson:"created_by"`
-//		Value            []interface{}        `json:"value" bson:"value"`
-//	}
+type ModificationList []ModificationRecord
+
 type DBstorageFile struct {
-	Uuid             string               `json:"uuid" bson:"uuid"`
-	Name             string               `json:"name" bson:"name"`
-	Description      string               `json:"description" bson:"description"`
-	Size             int16                `json:"size" bson:"size"`
-	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            interface{}          `json:"_value" bson:"_value"`
+	Uuid             string           `json:"uuid" bson:"uuid"`
+	Name             string           `json:"name" bson:"name"`
+	Description      string           `json:"description" bson:"description"`
+	Size             int16            `json:"size" bson:"size"`
+	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	Value            interface{}      `json:"_value" bson:"_value"`
 }
 
 /* SPECIFIC TYPES */
 type EndpointItem struct {
-	Uuid             string               `json:"uuid" bson:"uuid"`
-	Name             string               `json:"name" bson:"name"`
-	Description      string               `json:"description" bson:"description"`
-	Size             int16                `json:"size" bson:"size"`
-	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            []interface{}        `json:"value" bson:"value"`
-	MemFile          string               `json:"mem_file" bson:"mem_file"`
+	Uuid             string           `json:"uuid" bson:"uuid"`
+	Name             string           `json:"name" bson:"name"`
+	Description      string           `json:"description" bson:"description"`
+	Size             int16            `json:"size" bson:"size"`
+	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	Value            []interface{}    `json:"value" bson:"value"`
+	MemFile          string           `json:"mem_file" bson:"mem_file"`
 }
 
 type SchemaItem struct {
-	Uuid             string               `json:"uuid" bson:"uuid"`
-	Name             string               `json:"name" bson:"name"`
-	Description      string               `json:"description" bson:"description"`
-	Size             int16                `json:"size" bson:"size"`
-	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            []interface{}        `json:"value" bson:"value"`
+	Uuid             string           `json:"uuid" bson:"uuid"`
+	Name             string           `json:"name" bson:"name"`
+	Description      string           `json:"description" bson:"description"`
+	Size             int16            `json:"size" bson:"size"`
+	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	Value            []interface{}    `json:"value" bson:"value"`
 }
 
 type TextFileItem struct {
-	Uuid             string               `json:"uuid" bson:"uuid"`
-	Name             string               `json:"name" bson:"name"`
-	Description      string               `json:"description" bson:"description"`
-	Size             int16                `json:"size" bson:"size"`
-	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            []interface{}        `json:"value" bson:"value"`
-	RefId            string               `json:"ref_id" bson:"ref_id"`
-	Schema           string               `json:"schema_ref" bson:"schema_ref"`
+	Uuid             string           `json:"uuid" bson:"uuid"`
+	Name             string           `json:"name" bson:"name"`
+	Description      string           `json:"description" bson:"description"`
+	Size             int16            `json:"size" bson:"size"`
+	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	Value            []interface{}    `json:"value" bson:"value"`
+	RefId            string           `json:"ref_id" bson:"ref_id"`
+	Schema           string           `json:"schema_ref" bson:"schema_ref"`
 }
 
 type NodeFileItem struct {
-	Uuid             string               `json:"uuid" bson:"uuid"`
-	Name             string               `json:"name" bson:"name"`
-	Description      string               `json:"description" bson:"description"`
-	Size             int16                `json:"size" bson:"size"`
-	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            []interface{}        `json:"value" bson:"value"`
-	RefId            string               `json:"ref_id" bson:"ref_id"`
-	Schema           string               `json:"schema_ref" bson:"schema_ref"`
+	Uuid             string           `json:"uuid" bson:"uuid"`
+	Name             string           `json:"name" bson:"name"`
+	Description      string           `json:"description" bson:"description"`
+	Size             int16            `json:"size" bson:"size"`
+	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	Value            []interface{}    `json:"value" bson:"value"`
+	RefId            string           `json:"ref_id" bson:"ref_id"`
+	Schema           string           `json:"schema_ref" bson:"schema_ref"`
 }
 type MediaFileItem struct {
-	Uuid             string               `json:"uuid" bson:"uuid"`
-	Name             string               `json:"name" bson:"name"`
-	Description      string               `json:"description" bson:"description"`
-	Size             int16                `json:"size" bson:"size"`
-	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            []interface{}        `json:"value" bson:"value"`
-	RefId            string               `json:"ref_id" bson:"ref_id"`
-	Ttype            string               `json:"type" bson:"type"`
-	Duration         int16                `json:"duration" bson:"duration"`
-	Dimentions       DimentionsType       `json:"dimentions" bson:"dimentions"`
-	Service          string               `json:"service" bson:"service"`
-	Thumb            string               `json:"thumb" bson:"thumb"`
-	Url              string               `json:"url" bson:"url"`
-	UriAddress       string               `json:"uri" bson:"uri"`
-	File             string               `json:"file_data" bson:"file_data"`
+	Uuid             string           `json:"uuid" bson:"uuid"`
+	Name             string           `json:"name" bson:"name"`
+	Description      string           `json:"description" bson:"description"`
+	Size             int16            `json:"size" bson:"size"`
+	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	Value            []interface{}    `json:"value" bson:"value"`
+	RefId            string           `json:"ref_id" bson:"ref_id"`
+	Ttype            string           `json:"type" bson:"type"`
+	Duration         int16            `json:"duration" bson:"duration"`
+	Dimensions       DimentionsType   `json:"dimensions" bson:"dimensions"`
+	Service          string           `json:"service" bson:"service"`
+	Thumb            string           `json:"thumb" bson:"thumb"`
+	Url              string           `json:"url" bson:"url"`
+	UriAddress       string           `json:"uri" bson:"uri"`
+	File             string           `json:"file_data" bson:"file_data"`
 }
 
 type MediaFilesCollectionList []DataEntryIdentity
@@ -140,11 +130,11 @@ type InstanceCollection struct {
 }
 
 type SysData struct {
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	Status           string               `json:"status" bson:"status"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	Status           string           `json:"status" bson:"status"`
 }
 
 type EndpointCode struct {
@@ -159,16 +149,16 @@ type EndpointInstance struct {
 }
 
 type EndpointFile struct {
-	Uuid             string               `json:"uuid" bson:"uuid"`
-	Name             string               `json:"name" bson:"name"`
-	Description      string               `json:"description" bson:"description"`
-	Size             int16                `json:"size" bson:"size"`
-	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
-	CreationDate     string               `json:"creation_date" bson:"creation_date"`
-	ModificationDate string               `json:"modification_date" bson:"modification_date"`
-	ModifiedBy       []ModificationRecord `json:"modified_by" bson:"modified_by"`
-	CreatedBy        string               `json:"created_by" bson:"created_by"`
-	Value            []EndpointCode       `json:"value" bson:"value"`
+	Uuid             string           `json:"uuid" bson:"uuid"`
+	Name             string           `json:"name" bson:"name"`
+	Description      string           `json:"description" bson:"description"`
+	Size             int16            `json:"size" bson:"size"`
+	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
+	CreationDate     string           `json:"creation_date" bson:"creation_date"`
+	ModificationDate string           `json:"modification_date" bson:"modification_date"`
+	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
+	CreatedBy        string           `json:"created_by" bson:"created_by"`
+	Value            []EndpointCode   `json:"value" bson:"value"`
 }
 
 // response for conformation files

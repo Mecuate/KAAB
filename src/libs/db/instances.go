@@ -75,6 +75,21 @@ func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceColl
 	return res, nil
 }
 
+func UpdateNodeList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	res, err := Db.coll.UpdateOne(ctx, identify, bson.M{"$push": bson.M{"nodes_collection_list": data}})
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Node Items UPDATED: %v", res))
+	return nil
+}
+
 // fmt.Println("@@@", res)
 // instance, err := PullInstanceCollection(instance_id)
 // members := NewStringArray{instance.Members}

@@ -47,6 +47,7 @@ func GetNodeList(args ...any) any {
 	}
 	return instance.NodesFilesList
 }
+
 func GetNodeItem(args ...any) any {
 	nodeItem, err := db.GetNodeItem(fmt.Sprintf("%v", args[2]))
 	if err != nil {
@@ -64,6 +65,7 @@ func GetNodeItem(args ...any) any {
 		Schema:      nodeItem.Schema,
 	}
 }
+
 func GetNodeItems(args ...any) any {
 	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
 	nodeItems := models.ManyNodeItemResponse{}
@@ -98,6 +100,7 @@ func GetContentList(args ...any) any {
 	}
 	return instance.TextFilesList
 }
+
 func GetContentItem(args ...any) any {
 	contentItem, err := db.GetContentItem(fmt.Sprintf("%v", args[2]))
 	if err != nil {
@@ -115,6 +118,7 @@ func GetContentItem(args ...any) any {
 		Schema:      contentItem.Schema,
 	}
 }
+
 func GetContentItems(args ...any) any {
 	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
 	contentItems := models.ManyContentItemResponse{}
@@ -149,6 +153,7 @@ func GetDynamicList(args ...any) any {
 	}
 	return instance.Sys
 }
+
 func GetDynamicItem(args ...any) any {
 	selected := fmt.Sprintf("%v", args[2])
 	instance := GetDynamicList(args[0], args[1])
@@ -179,6 +184,7 @@ func GetDynamicItem(args ...any) any {
 	}
 	return DATA_FAIL
 }
+
 func GetDynamicItems(args ...any) any {
 	return GetDynamicList(args[0], args[1])
 }
@@ -193,13 +199,44 @@ func GetMediaList(args ...any) any {
 	}
 	return instance.MediaFilesList
 }
+
 func GetMediaItem(args ...any) any {
-	fmt.Println("GetMediaItem", args[0], args[1])
-	return DATA_FAIL
+	mediaItem, err := db.GetMediaItem(fmt.Sprintf("%v", args[2]))
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting mediaItem: %v", err))
+		return DATA_FAIL
+	}
+	return models.MediaItemResponse{
+		Uuid:        mediaItem.Uuid,
+		Name:        mediaItem.Name,
+		Description: mediaItem.Description,
+		Size:        mediaItem.Size,
+		Versions:    mediaItem.Versions,
+		Value:       mediaItem.Value,
+		RefId:       mediaItem.RefId,
+		Ttype:       mediaItem.Ttype,
+		Duration:    mediaItem.Duration,
+		Dimensions:  mediaItem.Dimensions,
+		Service:     mediaItem.Service,
+		Thumb:       mediaItem.Thumb,
+		Url:         mediaItem.Url,
+		UriAddress:  mediaItem.UriAddress,
+		File:        mediaItem.File,
+	}
 }
+
 func GetMediaItems(args ...any) any {
-	fmt.Println("GetMediaItems", args[0], args[1])
-	return EMPTY_ARRAY
+	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
+	mediaItems := models.ManyMediaItemResponse{}
+	for _, item := range items {
+		result := GetMediaItem("", "", item)
+		if result == nil {
+			config.Err(fmt.Sprintf("Error getting mediaItem: %v", item))
+			return EMPTY_ARRAY
+		}
+		mediaItems = append(mediaItems, result.(models.MediaItemResponse))
+	}
+	return mediaItems
 }
 
 /* schemas */
@@ -212,11 +249,41 @@ func GetSchemaList(args ...any) any {
 	}
 	return instance.SchemasList
 }
+
 func GetSchemaItem(args ...any) any {
-	fmt.Println("GetSchemaItem", args[0], args[1])
-	return DATA_FAIL
+	schemaItem, err := db.GetSchemaItem(fmt.Sprintf("%v", args[2]))
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting schemaItem: %v", err))
+		return DATA_FAIL
+	}
+	return models.SchemaItemResponse{
+		Uuid:        schemaItem.Uuid,
+		Name:        schemaItem.Name,
+		Description: schemaItem.Description,
+		Size:        schemaItem.Size,
+		Versions:    schemaItem.Versions,
+		Value:       schemaItem.Value,
+	}
 }
+
 func GetSchemaItems(args ...any) any {
-	fmt.Println("GetSchemaItems", args[0], args[1])
-	return EMPTY_ARRAY
+	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
+	schemaItems := models.ManySchemaItemResponse{}
+	for _, item := range items {
+		schemaItem, err := db.GetSchemaItem(item)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error getting schemaItem: %v", err))
+			return EMPTY_ARRAY
+		}
+		result := models.SchemaItemResponse{
+			Uuid:        schemaItem.Uuid,
+			Name:        schemaItem.Name,
+			Description: schemaItem.Description,
+			Size:        schemaItem.Size,
+			Versions:    schemaItem.Versions,
+			Value:       schemaItem.Value,
+		}
+		schemaItems = append(schemaItems, result)
+	}
+	return schemaItems
 }

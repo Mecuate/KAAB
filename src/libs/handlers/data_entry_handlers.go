@@ -46,7 +46,7 @@ func DataHandler_READ(path string) crud.HandleFunc {
 				return
 			}
 			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			internalInstanceID, err := db.VerifyInstanceExist(instanceId, ReqApi)
+			_, err = db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
 				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
@@ -54,7 +54,7 @@ func DataHandler_READ(path string) crud.HandleFunc {
 			}
 
 			if validDataAction(action, r.Method, section) {
-				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, internalInstanceID)
+				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))
@@ -89,16 +89,21 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			internalInstanceID, err := db.VerifyInstanceExist(instanceId, ReqApi)
+			instanceId, section, action, _ := params["instance_id"], params["section"], params["action"], params["ref_id"]
+			_, err = db.VerifyInstanceExist(instanceId, ReqApi)
+			// TODO: [` add double check for permissions:: internalInstanceID `]-{2024-02-23}
 			if err != nil {
 				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
 				return
 			}
-
 			if validDataAction(action, r.Method, section) {
-				resp := AllowedDataCreateActions[section][action](userId, ref_id, internalInstanceID)
+				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId)
+				if err != nil {
+					config.Err(fmt.Sprintf("Error getting body: %v", err))
+					FailReq(w, 4)
+					return
+				}
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))

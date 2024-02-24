@@ -3,6 +3,7 @@ package handlers
 type any = interface{}
 type ArgsObject map[string]string
 type AllowedDataFunc map[string]map[string]func(...any) interface{}
+type AllowedBodyDataFunc map[string]map[string]func(...any) (any, error)
 
 var DATA_FAIL = map[string]any{"status": "failure", "result": false}
 var DATA_SUCC = map[string]any{"status": "success", "result": true}
