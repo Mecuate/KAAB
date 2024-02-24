@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/models"
 
@@ -23,4 +24,28 @@ func GetMediaItem(ref_id string) (models.MediaFileItem, error) {
 		return res, err
 	}
 	return res, nil
+}
+
+func CreateMediaItem(data models.MediaFileItem, instName string, subjectId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	res, err := Db.coll.InsertOne(ctx, data)
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("Media Item Created: %v", res))
+	newRecord := models.DataEntryIdentity{
+		Name:   data.Name,
+		Id:     data.Uuid,
+		Status: "active",
+		RefId:  data.Thumb,
+	}
+	err = UpdateMediaList(instName, subjectId, newRecord)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error updating Media List: %v", err))
+	}
+	return nil
 }

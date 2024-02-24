@@ -77,3 +77,43 @@ type CreateNodeRequest struct {
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
 }
+
+type CreateContentRequest struct {
+	Name        string        `json:"name" bson:"name"`
+	Description string        `json:"description" bson:"description"`
+	Value       []interface{} `json:"value" bson:"value"`
+	RefId       string        `json:"ref_id" bson:"ref_id"`
+	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+}
+
+type CreateSchemaRequest struct {
+	Name        string        `json:"name" bson:"name"`
+	Description string        `json:"description" bson:"description"`
+	Value       []interface{} `json:"value" bson:"value"`
+}
+
+type CreateMediaRequest struct {
+	Name        string         `json:"name" bson:"name"`
+	Description string         `json:"description" bson:"description"`
+	Size        int16          `json:"size" bson:"size"`
+	Value       []interface{}  `json:"value" bson:"value"`
+	RefId       string         `json:"ref_id" bson:"ref_id"`
+	Ttype       string         `json:"type" bson:"type"`
+	Duration    int16          `json:"duration" bson:"duration"`
+	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
+	Service     string         `json:"service" bson:"service"`
+}
+
+type InternalMediaCtrlFields struct {
+	Thumb      string `json:"thumb" bson:"thumb"`
+	Url        string `json:"url" bson:"url"`
+	UriAddress string `json:"uri" bson:"uri"`
+	File       string `json:"file_data" bson:"file_data"`
+}
+
+type SystemMediaAddress struct {
+	UrlAddress      string
+	ThumbAddres     string
+	UriAddress      string
+	PhysicalAddress string
+}

@@ -90,10 +90,62 @@ func UpdateNodeList(instanceName string, subjectId string, data models.DataEntry
 	return nil
 }
 
-// fmt.Println("@@@", res)
-// instance, err := PullInstanceCollection(instance_id)
-// members := NewStringArray{instance.Members}
-// allow := members.Contains(user_id)
-// if !allow {
-// 	return false, errors.New("user not allowed")
-// }
+func UpdateMediaList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	res, err := Db.coll.UpdateOne(ctx, identify, bson.M{"$push": bson.M{"media_files_collection_list": data}})
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Media Items UPDATED: %v", res))
+	return nil
+}
+
+func UpdateEndpointsList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	res, err := Db.coll.UpdateOne(ctx, identify, bson.M{"$push": bson.M{"endpoints_collection_list": data}})
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Endpoints Items UPDATED: %v", res))
+	return nil
+}
+
+func UpdateSchemasList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	res, err := Db.coll.UpdateOne(ctx, identify, bson.M{"$push": bson.M{"schemas_collection_list": data}})
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Schemas Items UPDATED: %v", res))
+	return nil
+}
+
+func UpdateContentList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	res, err := Db.coll.UpdateOne(ctx, identify, bson.M{"$push": bson.M{"files_collection_list": data}})
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Files Items UPDATED: %v", res))
+	return nil
+}

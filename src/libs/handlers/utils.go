@@ -74,7 +74,7 @@ func getReqApi(r *http.Request) (string, error) {
 
 func CreateCtrlFields(idnt string) models.InternalCtrlFields {
 	t := fmt.Sprintf("%v", time.Now().Unix())
-	var list []string
+	list := []string{"1.0"}
 
 	res := models.InternalCtrlFields{
 		Uuid:             uuid.New().String(),
@@ -85,6 +85,28 @@ func CreateCtrlFields(idnt string) models.InternalCtrlFields {
 		ModifiedBy:       models.ModificationList{ModificationRecord(idnt, 0)},
 		CreatedBy:        idnt,
 	}
+	return res
+}
+
+func CreateMediaCtrlFields(ref_id string) models.InternalMediaCtrlFields {
+	sys := ObtainSystemMedia(ref_id)
+	res := models.InternalMediaCtrlFields{
+		Thumb:      sys.ThumbAddres,
+		Url:        sys.UrlAddress,
+		UriAddress: sys.UriAddress,
+		File:       sys.PhysicalAddress,
+	}
+	return res
+}
+
+func ObtainSystemMedia(ref_id string) models.SystemMediaAddress {
+	res := models.SystemMediaAddress{
+		UrlAddress:      fmt.Sprintf("https://kaab.mecuate.org/film/%s", ref_id),
+		ThumbAddres:     fmt.Sprintf("https://kaab.mecuate.org/pub/%s/thumbs", ref_id),
+		UriAddress:      fmt.Sprintf("home/kaab/mecuate/org/%s", ref_id),
+		PhysicalAddress: fmt.Sprintf("ffmpeg-%s.m3u8", ref_id),
+	}
+
 	return res
 }
 

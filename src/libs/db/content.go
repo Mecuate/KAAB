@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/models"
 
@@ -27,7 +27,7 @@ func GetContentItem(ref_id string) (models.ContentItemResponse, error) {
 	if err != nil {
 		return res, err
 	}
-	marshalled, _ := MarshalContentObject(res.Value)
+	marshalled, _ := MarshalKeyValueObject(res.Value)
 	if err != nil {
 		return res, err
 	}
@@ -35,27 +35,26 @@ func GetContentItem(ref_id string) (models.ContentItemResponse, error) {
 	return res, nil
 }
 
-func MarshalContentObject(value []interface{}) ([]interface{}, error) {
-	var resp [][]KeyValue
-	var r []map[string]interface{}
-	res, err := json.Marshal(value)
+func CreateContentItem(data models.TextFileItem, instName string, subjectId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
 	if err != nil {
-		return value, err
+		return err
 	}
-	err = json.Unmarshal(res, &resp)
+	ctx := context.Background()
+	res, err := Db.coll.InsertOne(ctx, data)
 	if err != nil {
-		return value, err
+		return err
 	}
-	for i := 0; i < len(resp); i++ {
-		rx_ := obj{}
-		for _, v := range resp[i] {
-			rx_[v.Key] = v.Value
-		}
-		r = append(r, rx_)
+	config.Log(fmt.Sprintf("Content Item Created: %v", res))
+	newRecord := models.DataEntryIdentity{
+		Name:   data.Name,
+		Id:     data.Uuid,
+		Status: "active",
+		RefId:  data.RefId,
 	}
-	var result []interface{}
-	for _, kv := range r {
-		result = append(result, kv)
+	err = UpdateContentList(instName, subjectId, newRecord)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error updating Content List: %v", err))
 	}
-	return result, nil
+	return nil
 }

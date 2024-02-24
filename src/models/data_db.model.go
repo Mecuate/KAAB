@@ -83,6 +83,7 @@ type NodeFileItem struct {
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	Schema           string           `json:"schema_ref" bson:"schema_ref"`
 }
+
 type MediaFileItem struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
