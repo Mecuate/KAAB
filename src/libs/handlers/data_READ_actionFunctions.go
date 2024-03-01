@@ -108,13 +108,14 @@ func GetContentItem(args ...any) any {
 		config.Err(fmt.Sprintf("Error getting contentItem: %v", err))
 		return DATA_FAIL
 	}
+	ReqSearch := args[3].(models.URLFilterSearchParams)
 	return models.ContentItemResponse{
 		Uuid:        contentItem.Uuid,
 		Name:        contentItem.Name,
 		Description: contentItem.Description,
 		Size:        contentItem.Size,
 		Versions:    contentItem.Versions,
-		Value:       contentItem.Value[0:1],
+		Value:       AssortData(contentItem.Value, ReqSearch, contentItem.Versions),
 		RefId:       contentItem.RefId,
 		Schema:      contentItem.Schema,
 	}
@@ -207,13 +208,14 @@ func GetMediaItem(args ...any) any {
 		config.Err(fmt.Sprintf("Error getting mediaItem: %v", err))
 		return DATA_FAIL
 	}
+	ReqSearch := args[3].(models.URLFilterSearchParams)
 	return models.MediaItemResponse{
 		Uuid:        mediaItem.Uuid,
 		Name:        mediaItem.Name,
 		Description: mediaItem.Description,
 		Size:        mediaItem.Size,
 		Versions:    mediaItem.Versions,
-		Value:       mediaItem.Value[0:1],
+		Value:       AssortData(mediaItem.Value, ReqSearch, mediaItem.Versions),
 		RefId:       mediaItem.RefId,
 		Ttype:       mediaItem.Ttype,
 		Duration:    mediaItem.Duration,
@@ -230,7 +232,7 @@ func GetMediaItems(args ...any) any {
 	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
 	mediaItems := models.ManyMediaItemResponse{}
 	for _, item := range items {
-		result := GetMediaItem("", "", item)
+		result := GetMediaItem("", "", item, args[3])
 		if result == nil {
 			config.Err(fmt.Sprintf("Error getting mediaItem: %v", item))
 			return EMPTY_ARRAY
@@ -257,13 +259,14 @@ func GetSchemaItem(args ...any) any {
 		config.Err(fmt.Sprintf("Error getting schemaItem: %v", err))
 		return DATA_FAIL
 	}
+	ReqSearch := args[3].(models.URLFilterSearchParams)
 	return models.SchemaItemResponse{
 		Uuid:        schemaItem.Uuid,
 		Name:        schemaItem.Name,
 		Description: schemaItem.Description,
 		Size:        schemaItem.Size,
 		Versions:    schemaItem.Versions,
-		Value:       schemaItem.Value[0:1],
+		Value:       AssortData(schemaItem.Value, ReqSearch, schemaItem.Versions),
 	}
 }
 

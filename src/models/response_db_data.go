@@ -128,7 +128,6 @@ type Delition struct {
 
 type URLFilterSearchParams struct {
 	Version    string `json:"version" bson:"version"`
-	Filters    string `json:"filters" bson:"filters"`
 	Sorting    string `json:"sorting" bson:"sorting"`
 	Pagination string `json:"pagination" bson:"pagination"`
 	Limit      string `json:"limit" bson:"limit"`

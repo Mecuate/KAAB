@@ -27,11 +27,6 @@ func GetContentItem(ref_id string) (models.ContentItemResponse, error) {
 	if err != nil {
 		return res, err
 	}
-	marshalled, _ := MarshalKeyValueObject(res.Value)
-	if err != nil {
-		return res, err
-	}
-	res.Value = marshalled
 	return res, nil
 }
 

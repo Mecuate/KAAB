@@ -6,6 +6,7 @@ import (
 	"kaab/src/libs/config"
 	"kaab/src/models"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,13 @@ import (
 type NewStringArray struct {
 	elements []string
 }
+type KeyValue struct {
+	Key   string      `json:"Key"`
+	Value interface{} `json:"Value"`
+}
+type obj map[string]interface{}
+
+/* funcs */
 
 func (s NewStringArray) Contains(target string) bool {
 	for _, elem := range s.elements {
@@ -91,8 +99,6 @@ func GetRequestFSS(requestURI string) (models.URLFilterSearchParams, error) {
 					Res.Limit = c[1]
 				case "s":
 					Res.Sorting = c[1]
-				case "f":
-					Res.Filters = c[1]
 				}
 			}
 		}
@@ -101,107 +107,110 @@ func GetRequestFSS(requestURI string) (models.URLFilterSearchParams, error) {
 	return Res, nil
 }
 
-type KeyValue struct {
-	Key   string      `json:"Key"`
-	Value interface{} `json:"Value"`
+type KV = map[string]interface{}
+type By func(p1, p2 *KV) bool
+type pSorter struct {
+	items []KV
+	by    func(p1, p2 *KV) bool
 }
-type obj map[string]interface{}
 
-func MarshalKeyValueObject(value interface{}) ([]interface{}, error) {
-	var r []map[string]interface{}
-	var resp [][]KeyValue
+func (by By) Sort(items []KV) {
+	ps := &pSorter{
+		items: items,
+		by:    by,
+	}
+	sort.Sort(ps)
+}
 
-	res, err := json.Marshal(value)
-	if err != nil {
-		return []interface{}{value}, err
+func (s *pSorter) Len() int {
+	return len(s.items)
+}
+
+func (s *pSorter) Swap(i, j int) {
+	s.items[i], s.items[j] = s.items[j], s.items[i]
+}
+
+func (s *pSorter) Less(i, j int) bool {
+	return s.by(&s.items[i], &s.items[j])
+}
+
+func SortData(itemValues []KV, sortVal string) []map[string]interface{} {
+	str := strings.Split(sortVal, ":")
+	if len(str) < 3 {
+		return itemValues
 	}
-	err = json.Unmarshal(res, &resp)
-	if err != nil {
-		return []interface{}{value}, err
-	}
-	for i := 0; i < len(resp); i++ {
-		rx_ := obj{}
-		for _, v := range resp[i] {
-			nested, ok := v.Value.([]interface{})
-			if !ok {
-				rx_[v.Key] = v.Value
-			} else {
-				nnested, err := MarshalKeyValueObjectItem(nested)
-				if err != nil {
-					val, err := MarshalKeyValueObject(v.Value.([]interface{}))
-					if err != nil {
-						rx_[v.Key] = v.Value
-						continue
-					}
-					rx_[v.Key] = val
-				} else {
-					rx_[v.Key] = nnested
+	sortKey := str[0]
+	sortDir := str[1] == "desc"
+	dataT := str[2]
+
+	strvals := func(p1, p2 *KV) bool {
+		if a, ok := (*p1)[sortKey].(string); ok {
+			if b, ook := (*p2)[sortKey].(string); ook {
+				if sortDir {
+					return a > b
 				}
+				return a < b
 			}
 		}
-		r = append(r, rx_)
+		return false
 	}
-	var result []interface{}
-	for _, kv := range r {
-		result = append(result, kv)
-	}
-	return result, nil
-}
-func MarshalKeyValueObjectItem(value interface{}) (interface{}, error) {
-	var resp []KeyValue
-	res, err := json.Marshal(value)
-	if err != nil {
-		return value, err
-	}
-	err = json.Unmarshal(res, &resp)
-	if err != nil {
-		return value, err
-	}
-	if len(resp) > 0 {
-		r := make(map[string]interface{})
-		for _, v := range resp {
-			r[v.Key] = v.Value
+	intvals := func(p1, p2 *KV) bool {
+		if a, ok := (*p1)[sortKey].(float64); ok {
+			if b, ook := (*p2)[sortKey].(float64); ook {
+				if sortDir {
+					return a > b
+				}
+				return a < b
+			}
 		}
-		return r, nil
+		return false
 	}
-	return value, fmt.Errorf("no nested object found")
+	bolvals := func(p1, p2 *KV) bool {
+		if ar, ok := (*p1)[sortKey].(bool); ok {
+			if br, ook := (*p2)[sortKey].(bool); ook {
+				a := fmt.Sprintf("%v", ar)
+				b := fmt.Sprintf("%v", br)
+				if sortDir {
+					return a > b
+				}
+				return a < b
+			}
+		}
+		return false
+	}
+
+	switch dataT {
+	case "str":
+		By(strvals).Sort(itemValues)
+	case "num":
+		By(intvals).Sort(itemValues)
+	case "bol":
+		By(bolvals).Sort(itemValues)
+	}
+
+	return itemValues
 }
 
-func AssortData(nodeItemValues []interface{}, ReqSearch models.URLFilterSearchParams, versions []string) []interface{} {
+func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams, versions []string) []interface{} {
 	var Res []interface{}
 	var Result []interface{}
 	var selItem int
 	if ReqSearch.Version != "" {
 		selItem = IndexOf(versions, ReqSearch.Version)
 		if selItem > -1 {
-			// compound, _ := MarshalKeyValueObject(nodeItemValues[selItem])
-			Res = append(Res, nodeItemValues[selItem])
+			Res = append(Res, itemValues[selItem])
 		}
 	} else {
 		selItem = 0
-		// compound, _ := MarshalKeyValueObject(nodeItemValues[selItem])
-		Res = append(Res, nodeItemValues[selItem])
+		Res = append(Res, itemValues[selItem])
 	}
 
 	var selectedItem []map[string]interface{}
 	res, _ := json.Marshal(Res[0])
 	json.Unmarshal(res, &selectedItem)
 
-	if ReqSearch.Filters != "" {
-		fmt.Println("ReqSearch.Filters: ", ReqSearch.Filters)
-		// for _, v := range nodeItemValues {
-		// 	if strings.Contains(fmt.Sprintf("%v", v), ReqSearch.Search) {
-		// 		Res = append(Res, v)
-		// 	}
-		// }
-	}
 	if ReqSearch.Sorting != "" {
-		fmt.Println("ReqSearch.Sorting: ", ReqSearch.Sorting)
-		// for _, v := range nodeItemValues {
-		// 	if strings.Contains(fmt.Sprintf("%v", v), ReqSearch.Search) {
-		// 		Res = append(Res, v)
-		// 	}
-		// }
+		selectedItem = SortData(selectedItem, ReqSearch.Sorting)
 	}
 	if ReqSearch.Limit != "" {
 		fin, err := strconv.Atoi(ReqSearch.Limit)
@@ -230,6 +239,9 @@ func AssortData(nodeItemValues []interface{}, ReqSearch models.URLFilterSearchPa
 			}
 			Result = append(Result, selectedItem[0:fin])
 		}
+	}
+	if Result == nil {
+		Result = append(Result, selectedItem)
 	}
 
 	return Result
