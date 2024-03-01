@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"log"
+	"reflect"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -47,12 +49,21 @@ func doesCollectionExist(client *mongo.Client, dbname string, collname string) (
 }
 
 func createClient(ctx context.Context) (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI(config.WEBENV.Mongodburi)
+	tM := reflect.TypeOf(bson.M{})
+	reg := bson.NewRegistry()
+	reg.RegisterTypeMapEntry(bsontype.EmbeddedDocument, tM)
+	clientOptions := options.Client().ApplyURI(config.WEBENV.Mongodburi).SetRegistry(reg)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return client, err
+	/*
+			 tM := reflect.TypeOf(bson.M{})
+		    reg := bson.NewRegistryBuilder().RegisterTypeMapEntry(bsontype.EmbeddedDocument, tM).Build()
+		    clientOpts := options.Client().ApplyURI(SOMEURI).SetAuth(authVal).SetRegistry(reg)
+		    client, err := mongo.Connect(ctx, clientOpts)
+	*/
 }
 
 func (db DB) InsertOne(payload interface{}) error {

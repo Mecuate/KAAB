@@ -137,6 +137,7 @@ func CreateContentItem(args ...any) (any, error) {
 	R["item"] = ctrlData.Uuid
 	return R, nil
 }
+
 func CreateContentItems(args ...any) (any, error) {
 	id := fmt.Sprintf("%v", args[0])
 	instName := fmt.Sprintf("%v", args[2])
@@ -219,8 +220,49 @@ func CreateMediaItem(args ...any) (any, error) {
 }
 
 func CreateMediaItems(args ...any) (any, error) {
-	fmt.Println("CreateMediaItems", args[0], args[1])
-	return EMPTY_ARRAY, nil
+	id := fmt.Sprintf("%v", args[0])
+	instName := fmt.Sprintf("%v", args[2])
+	subjectId := fmt.Sprintf("%v", args[3])
+	r := args[1].(*http.Request)
+	var payload []models.CreateMediaRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+	RES := []any{}
+	for _, item := range payload {
+		ctrlData := CreateCtrlFields(id)
+		mediaAddress := CreateMediaCtrlFields(item.RefId)
+		mediaItem := models.MediaFileItem{
+			Uuid:             ctrlData.Uuid,
+			Versions:         ctrlData.Versions,
+			CreationDate:     ctrlData.CreationDate,
+			ModificationDate: ctrlData.ModificationDate,
+			ModifiedBy:       ctrlData.ModifiedBy,
+			CreatedBy:        ctrlData.CreatedBy,
+			Name:             item.Name,
+			Description:      item.Description,
+			Size:             item.Size,
+			Value:            item.Value,
+			RefId:            item.RefId,
+			Ttype:            item.Ttype,
+			Duration:         item.Duration,
+			Dimensions:       item.Dimensions,
+			Service:          item.Service,
+			Thumb:            mediaAddress.Thumb,
+			Url:              mediaAddress.Url,
+			UriAddress:       mediaAddress.UriAddress,
+			File:             mediaAddress.File,
+		}
+		err = db.CreateMediaItem(mediaItem, instName, subjectId)
+		if err != nil {
+			return DATA_FAIL, err
+		}
+		R := DATA_SUCC
+		R["item"] = ctrlData.Uuid
+		RES = append(RES, R)
+	}
+	return RES, nil
 }
 
 /* schemas */
@@ -294,8 +336,8 @@ func CreateSchemaItems(args ...any) (any, error) {
 
 /* dynamic */
 func CreateDynamicItem(args ...any) (any, error) {
-	return EMPTY_OBJECT, nil
+	return DATA_FAIL, nil
 }
 func CreateDynamicItems(args ...any) (any, error) {
-	return EMPTY_ARRAY, nil
+	return DATA_FAIL, nil
 }

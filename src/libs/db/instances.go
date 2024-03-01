@@ -90,6 +90,26 @@ func UpdateNodeList(instanceName string, subjectId string, data models.DataEntry
 	return nil
 }
 
+func UnsetNodeList(instanceName string, subjectId string, itemId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	update := bson.M{
+		"$pull": bson.M{
+			"nodes_collection_list": bson.M{"id": itemId},
+		},
+	}
+	res, err := Db.coll.UpdateOne(ctx, identify, update)
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Node Items UPDATED: %v", res))
+	return nil
+}
+
 func UpdateMediaList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
@@ -105,6 +125,26 @@ func UpdateMediaList(instanceName string, subjectId string, data models.DataEntr
 	return nil
 }
 
+func UnsetMediaList(instanceName string, subjectId string, itemId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	update := bson.M{
+		"$pull": bson.M{
+			"media_files_collection_list": bson.M{"id": itemId},
+		},
+	}
+	res, err := Db.coll.UpdateOne(ctx, identify, update)
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of MEdia Items UPDATED: %v", res))
+	return nil
+}
+
 func UpdateEndpointsList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
@@ -113,6 +153,26 @@ func UpdateEndpointsList(instanceName string, subjectId string, data models.Data
 	ctx := context.Background()
 	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	res, err := Db.coll.UpdateOne(ctx, identify, bson.M{"$push": bson.M{"endpoints_collection_list": data}})
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Endpoints Items UPDATED: %v", res))
+	return nil
+}
+
+func UnsetEndpointList(instanceName string, subjectId string, itemId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	update := bson.M{
+		"$pull": bson.M{
+			"endpoints_collection_list": bson.M{"id": itemId},
+		},
+	}
+	res, err := Db.coll.UpdateOne(ctx, identify, update)
 	if err != nil {
 		return err
 	}
@@ -135,6 +195,26 @@ func UpdateSchemasList(instanceName string, subjectId string, data models.DataEn
 	return nil
 }
 
+func UnsetSchemasList(instanceName string, subjectId string, itemId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	update := bson.M{
+		"$pull": bson.M{
+			"schemas_collection_list": bson.M{"id": itemId},
+		},
+	}
+	res, err := Db.coll.UpdateOne(ctx, identify, update)
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Schemas Items UPDATED: %v", res))
+	return nil
+}
+
 func UpdateContentList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
@@ -148,4 +228,41 @@ func UpdateContentList(instanceName string, subjectId string, data models.DataEn
 	}
 	config.Log(fmt.Sprintf("List of Files Items UPDATED: %v", res))
 	return nil
+}
+
+func UnsetContentList(instanceName string, subjectId string, itemId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	update := bson.M{
+		"$pull": bson.M{
+			"files_collection_list": bson.M{"id": itemId},
+		},
+	}
+	res, err := Db.coll.UpdateOne(ctx, identify, update)
+	if err != nil {
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Content Items UPDATED: %v", res))
+	return nil
+}
+
+func DeleteInstanceItem(ref_id string) (models.Delition, error) {
+	var R models.Delition
+	var res models.InstanceCollection
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, NODES)
+	if err != nil {
+		return R, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"uuid": ref_id}
+	err = Db.coll.FindOneAndDelete(ctx, identify).Decode(&res)
+	if err != nil {
+		return R, err
+	}
+	R.Id = ref_id
+	return R, nil
 }

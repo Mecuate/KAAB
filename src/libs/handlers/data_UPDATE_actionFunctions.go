@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"fmt"
+	"kaab/src/libs/db"
+	"kaab/src/models"
+	"net/http"
 	// "kaab/src/models"
 )
 
@@ -30,8 +33,21 @@ var AllowedDataUpdateActions = AllowedDataFunc{
 
 /* nodes */
 func UpdateNodeItem(args ...any) any {
-	fmt.Println("UpdateNodeItem", args[0], args[1])
-	return EMPTY_OBJECT
+	r := args[0].(*http.Request)
+	instanceName := fmt.Sprintf("%v", args[1])
+	subjectId := fmt.Sprintf("%v", args[2])
+	itemId := fmt.Sprintf("%v", args[3])
+
+	var payload models.CreateNodeRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL
+	}
+	R, err := db.UpdateNodeItem(payload, instanceName, subjectId, itemId)
+	if err != nil {
+		return DATA_FAIL
+	}
+	return R
 }
 func UpdateNodeItems(args ...any) any {
 	fmt.Println("UpdateNodeItems", args[0], args[1])

@@ -58,3 +58,20 @@ func CreateContentItem(data models.TextFileItem, instName string, subjectId stri
 	}
 	return nil
 }
+
+func DeleteContentItem(ref_id string) (models.Delition, error) {
+	var R models.Delition
+	var res models.NodeFileItem
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
+	if err != nil {
+		return R, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"uuid": ref_id}
+	err = Db.coll.FindOneAndDelete(ctx, identify).Decode(&res)
+	if err != nil {
+		return R, err
+	}
+	R.Id = ref_id
+	return R, nil
+}

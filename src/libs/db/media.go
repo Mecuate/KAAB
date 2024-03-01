@@ -49,3 +49,20 @@ func CreateMediaItem(data models.MediaFileItem, instName string, subjectId strin
 	}
 	return nil
 }
+
+func DeleteMediaItem(ref_id string) (models.Delition, error) {
+	var R models.Delition
+	var res models.MediaFileItem
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
+	if err != nil {
+		return R, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"uuid": ref_id}
+	err = Db.coll.FindOneAndDelete(ctx, identify).Decode(&res)
+	if err != nil {
+		return R, err
+	}
+	R.Id = ref_id
+	return R, nil
+}

@@ -76,6 +76,7 @@ type CreateNodeRequest struct {
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+	Bump        bool          `json:"bump" bson:"bump"`
 }
 
 type CreateContentRequest struct {
@@ -84,12 +85,14 @@ type CreateContentRequest struct {
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+	Bump        bool          `json:"bump" bson:"bump"`
 }
 
 type CreateSchemaRequest struct {
 	Name        string        `json:"name" bson:"name"`
 	Description string        `json:"description" bson:"description"`
 	Value       []interface{} `json:"value" bson:"value"`
+	Bump        bool          `json:"bump" bson:"bump"`
 }
 
 type CreateMediaRequest struct {
@@ -102,6 +105,7 @@ type CreateMediaRequest struct {
 	Duration    int16          `json:"duration" bson:"duration"`
 	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
 	Service     string         `json:"service" bson:"service"`
+	Bump        bool           `json:"bump" bson:"bump"`
 }
 
 type InternalMediaCtrlFields struct {
@@ -116,4 +120,16 @@ type SystemMediaAddress struct {
 	ThumbAddres     string
 	UriAddress      string
 	PhysicalAddress string
+}
+
+type Delition struct {
+	Id string `json:"id" bson:"id"`
+}
+
+type URLFilterSearchParams struct {
+	Version    string `json:"version" bson:"version"`
+	Filters    string `json:"filters" bson:"filters"`
+	Sorting    string `json:"sorting" bson:"sorting"`
+	Pagination string `json:"pagination" bson:"pagination"`
+	Limit      string `json:"limit" bson:"limit"`
 }

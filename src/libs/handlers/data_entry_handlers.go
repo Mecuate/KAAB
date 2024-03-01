@@ -46,6 +46,13 @@ func DataHandler_READ(path string) crud.HandleFunc {
 				return
 			}
 			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
+			ReqSearch, err := GetRequestFSS(r.RequestURI)
+			if err != nil {
+				config.Err(fmt.Sprintf("Bad URL: %v [%s]", err, r.RequestURI))
+				FailReq(w, 5)
+				return
+			}
+
 			_, err = db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
 				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
@@ -54,7 +61,7 @@ func DataHandler_READ(path string) crud.HandleFunc {
 			}
 
 			if validDataAction(action, r.Method, section) {
-				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id)
+				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, ReqSearch)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))
@@ -146,7 +153,7 @@ func DataHandler_UPDATE(path string) crud.HandleFunc {
 			}
 
 			if validDataAction(action, r.Method, section) {
-				resp := AllowedDataUpdateActions[section][action](userId, ref_id, internalInstanceID)
+				resp := AllowedDataUpdateActions[section][action](r, instanceId, userId, ref_id, internalInstanceID)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))
@@ -189,7 +196,7 @@ func DataHandler_DELETE(path string) crud.HandleFunc {
 			}
 
 			if validDataAction(action, r.Method, section) {
-				resp := AllowedDataDeleteActions[section][action](userId, ref_id, internalInstanceID)
+				resp := AllowedDataDeleteActions[section][action](ref_id, userId, instanceId, internalInstanceID)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))

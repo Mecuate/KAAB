@@ -47,3 +47,56 @@ func CreateSchemaItem(data models.SchemaItem, instName string, subjectId string)
 	}
 	return nil
 }
+
+func DeleteSchemaItem(ref_id string) (models.Delition, error) {
+	var R models.Delition
+	var res models.SchemaItem
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
+	if err != nil {
+		return R, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"uuid": ref_id}
+	err = Db.coll.FindOneAndDelete(ctx, identify).Decode(&res)
+	if err != nil {
+		return R, err
+	}
+	R.Id = ref_id
+	return R, nil
+}
+
+func UpdateSchemaItem(data models.CreateSchemaRequest, instName string, subjectId string, itemId string) (interface{}, error) {
+	var R models.Delition
+	var recordDocument models.SchemaItem
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
+	if err != nil {
+		return R, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"uuid": itemId}
+	err = Db.coll.FindOne(ctx, identify).Decode(&recordDocument)
+	if err != nil {
+		return R, err
+	}
+
+	update := bson.M{
+		"$set": bson.M{},
+	}
+	if val := data.Name; val != "" {
+		update["$set"].(bson.M)["name"] = val
+	}
+	if val := data.Description; val != "" {
+		update["$set"].(bson.M)["description"] = val
+	}
+	if val := data.Value; len(val) > 0 {
+		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
+	}
+	bump := data.Bump
+	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, bump)
+
+	updateRes, err := Db.coll.UpdateOne(ctx, identify, update)
+	if err != nil {
+		return R, err
+	}
+	return updateRes, nil
+}

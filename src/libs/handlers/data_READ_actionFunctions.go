@@ -54,13 +54,14 @@ func GetNodeItem(args ...any) any {
 		config.Err(fmt.Sprintf("Error getting nodeItem: %v", err))
 		return DATA_FAIL
 	}
+	ReqSearch := args[3].(models.URLFilterSearchParams)
 	return models.NodeItemResponse{
 		Uuid:        nodeItem.Uuid,
 		Name:        nodeItem.Name,
 		Description: nodeItem.Description,
 		Size:        nodeItem.Size,
 		Versions:    nodeItem.Versions,
-		Value:       nodeItem.Value,
+		Value:       AssortData(nodeItem.Value, ReqSearch, nodeItem.Versions),
 		RefId:       nodeItem.RefId,
 		Schema:      nodeItem.Schema,
 	}
@@ -81,7 +82,7 @@ func GetNodeItems(args ...any) any {
 			Description: nodeItem.Description,
 			Size:        nodeItem.Size,
 			Versions:    nodeItem.Versions,
-			Value:       nodeItem.Value,
+			Value:       nodeItem.Value[0:1],
 			RefId:       nodeItem.RefId,
 			Schema:      nodeItem.Schema,
 		}
@@ -113,7 +114,7 @@ func GetContentItem(args ...any) any {
 		Description: contentItem.Description,
 		Size:        contentItem.Size,
 		Versions:    contentItem.Versions,
-		Value:       contentItem.Value,
+		Value:       contentItem.Value[0:1],
 		RefId:       contentItem.RefId,
 		Schema:      contentItem.Schema,
 	}
@@ -134,7 +135,7 @@ func GetContentItems(args ...any) any {
 			Description: contentItem.Description,
 			Size:        contentItem.Size,
 			Versions:    contentItem.Versions,
-			Value:       contentItem.Value,
+			Value:       contentItem.Value[0:1],
 			RefId:       contentItem.RefId,
 			Schema:      contentItem.Schema,
 		}
@@ -212,7 +213,7 @@ func GetMediaItem(args ...any) any {
 		Description: mediaItem.Description,
 		Size:        mediaItem.Size,
 		Versions:    mediaItem.Versions,
-		Value:       mediaItem.Value,
+		Value:       mediaItem.Value[0:1],
 		RefId:       mediaItem.RefId,
 		Ttype:       mediaItem.Ttype,
 		Duration:    mediaItem.Duration,
@@ -262,7 +263,7 @@ func GetSchemaItem(args ...any) any {
 		Description: schemaItem.Description,
 		Size:        schemaItem.Size,
 		Versions:    schemaItem.Versions,
-		Value:       schemaItem.Value,
+		Value:       schemaItem.Value[0:1],
 	}
 }
 
@@ -281,7 +282,7 @@ func GetSchemaItems(args ...any) any {
 			Description: schemaItem.Description,
 			Size:        schemaItem.Size,
 			Versions:    schemaItem.Versions,
-			Value:       schemaItem.Value,
+			Value:       schemaItem.Value[0:1],
 		}
 		schemaItems = append(schemaItems, result)
 	}
