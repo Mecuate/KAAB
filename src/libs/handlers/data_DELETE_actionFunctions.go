@@ -11,9 +11,9 @@ var AllowedDataDeleteActions = AllowedDataFunc{
 		"item":  DeleteNodeItem,
 		"items": DeleteNodeItems,
 	},
-	"dynamic": {
-		"item":  DeleteDynamicItem,
-		"items": DeleteDynamicItems,
+	"instance": {
+		"item":  DeleteInstanceItem,
+		"items": DeleteFailed,
 	},
 	"content": {
 		"item":  DeleteContentItem,
@@ -27,6 +27,31 @@ var AllowedDataDeleteActions = AllowedDataFunc{
 		"item":  DeleteSchemaItem,
 		"items": DeleteSchemaItems,
 	},
+	"endpoint": {
+		"item":  DeleteEndpointItem,
+		"items": DeleteFailed,
+	},
+}
+
+func DeleteFailed(args ...any) any {
+	return DATA_FAIL
+}
+
+func DeleteEndpointItem(args ...any) any {
+	itemId := fmt.Sprintf("%v", args[0])
+	subjectId := fmt.Sprintf("%v", args[1])
+	instanceName := fmt.Sprintf("%v", args[2])
+	res, err := db.DeleteEndpointItem(itemId)
+	if err != nil {
+		return DATA_FAIL
+	}
+	err = db.UnsetEndpointList(instanceName, subjectId, itemId)
+	if err != nil {
+		return DATA_FAIL
+	}
+	R := DATA_SUCC
+	R["item"] = res.Id
+	return R
 }
 
 /* nodes */
@@ -46,6 +71,7 @@ func DeleteNodeItem(args ...any) any {
 	R["item"] = res.Id
 	return R
 }
+
 func DeleteNodeItems(args ...any) any {
 	items := strings.Split(fmt.Sprintf("%v", args[0]), "&")
 	RES := []any{}
@@ -73,6 +99,7 @@ func DeleteContentItem(args ...any) any {
 	R["item"] = res.Id
 	return R
 }
+
 func DeleteContentItems(args ...any) any {
 	items := strings.Split(fmt.Sprintf("%v", args[0]), "&")
 	RES := []any{}
@@ -100,6 +127,7 @@ func DeleteMediaItem(args ...any) any {
 	R["item"] = res.Id
 	return R
 }
+
 func DeleteMediaItems(args ...any) any {
 	items := strings.Split(fmt.Sprintf("%v", args[0]), "&")
 	RES := []any{}
@@ -127,6 +155,7 @@ func DeleteSchemaItem(args ...any) any {
 	R["item"] = res.Id
 	return R
 }
+
 func DeleteSchemaItems(args ...any) any {
 	items := strings.Split(fmt.Sprintf("%v", args[0]), "&")
 	RES := []any{}
@@ -137,8 +166,8 @@ func DeleteSchemaItems(args ...any) any {
 	return RES
 }
 
-/* dynamic */
-func DeleteDynamicItem(args ...any) any {
+/* instance */
+func DeleteInstanceItem(args ...any) any {
 	res, err := db.DeleteInstanceItem(fmt.Sprintf("%v", args[0]))
 	if err != nil {
 		return DATA_FAIL
@@ -146,7 +175,4 @@ func DeleteDynamicItem(args ...any) any {
 	R := DATA_SUCC
 	R["item"] = res.Id
 	return R
-}
-func DeleteDynamicItems(args ...any) any {
-	return EMPTY_ARRAY
 }

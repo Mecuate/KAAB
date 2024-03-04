@@ -17,14 +17,13 @@ import (
 type NewStringArray struct {
 	elements []string
 }
+
 type KeyValue struct {
 	Key   string      `json:"Key"`
 	Value interface{} `json:"Value"`
 }
-type obj map[string]interface{}
 
 /* funcs */
-
 func (s NewStringArray) Contains(target string) bool {
 	for _, elem := range s.elements {
 		if elem == target {

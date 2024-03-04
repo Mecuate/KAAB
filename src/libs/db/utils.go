@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/base64"
 	"fmt"
+	"kaab/src/models"
 	"strconv"
 	"strings"
 )
@@ -18,6 +19,29 @@ func EncodeSignature(instId string, usrId string) string {
 	data := []byte(string(enc))
 
 	return base64.StdEncoding.EncodeToString(data)
+}
+
+func AppendModificationRecord(modifiedBy models.ModificationList, subjectId string, timeStamp string) models.ModificationList {
+	var resp models.ModificationList
+	xVal := models.ModificationRecord{
+		Person: subjectId,
+		Date:   timeStamp,
+		Index:  0,
+	}
+	if len(modifiedBy) == 0 || modifiedBy == nil {
+		resp = append(modifiedBy, xVal)
+		return resp
+	} else {
+		if len(modifiedBy) >= 15 {
+			resp = append(models.ModificationList{xVal}, modifiedBy[0:14]...)
+		} else {
+			resp = append(models.ModificationList{xVal}, modifiedBy...)
+		}
+	}
+	for i := 1; i < len(resp); i++ {
+		resp[i].Index = int16(i)
+	}
+	return resp
 }
 
 func UpdateVersions(versions []string, bump interface{}) []string {

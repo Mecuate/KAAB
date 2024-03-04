@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var data_sections = NewStringArray{[]string{"nodes", "schemas", "content", "media", "dynamic"}}
+var data_sections = NewStringArray{[]string{"nodes", "schemas", "content", "media", "endpoint", "instance"}}
 
 var data_action_read = NewStringArray{[]string{"list", "item", "items"}}
 var data_action_create = NewStringArray{[]string{"item", "items"}}
@@ -105,7 +105,7 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 				return
 			}
 			if validDataAction(action, r.Method, section) {
-				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId)
+				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error getting body: %v", err))
 					FailReq(w, 4)

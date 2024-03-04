@@ -38,7 +38,9 @@ type EndpointItem struct {
 	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
 	CreatedBy        string           `json:"created_by" bson:"created_by"`
 	Value            []interface{}    `json:"value" bson:"value"`
+	RefId            string           `json:"ref_id" bson:"ref_id"`
 	MemFile          string           `json:"mem_file" bson:"mem_file"`
+	Status           string           `json:"status" bson:"status"`
 }
 
 type SchemaItem struct {
@@ -52,6 +54,8 @@ type SchemaItem struct {
 	ModifiedBy       ModificationList `json:"modified_by" bson:"modified_by"`
 	CreatedBy        string           `json:"created_by" bson:"created_by"`
 	Value            []interface{}    `json:"value" bson:"value"`
+	RefId            string           `json:"ref_id" bson:"ref_id"`
+	Status           string           `json:"status" bson:"status"`
 }
 
 type TextFileItem struct {
@@ -67,6 +71,7 @@ type TextFileItem struct {
 	Value            []interface{}    `json:"value" bson:"value"`
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	Schema           string           `json:"schema_ref" bson:"schema_ref"`
+	Status           string           `json:"status" bson:"status"`
 }
 
 type NodeFileItem struct {
@@ -82,6 +87,7 @@ type NodeFileItem struct {
 	Value            []interface{}    `json:"value" bson:"value"`
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	Schema           string           `json:"schema_ref" bson:"schema_ref"`
+	Status           string           `json:"status" bson:"status"`
 }
 
 type MediaFileItem struct {
@@ -104,6 +110,7 @@ type MediaFileItem struct {
 	Url              string           `json:"url" bson:"url"`
 	UriAddress       string           `json:"uri" bson:"uri"`
 	File             string           `json:"file_data" bson:"file_data"`
+	Status           string           `json:"status" bson:"status"`
 }
 
 type MediaFilesCollectionList []DataEntryIdentity

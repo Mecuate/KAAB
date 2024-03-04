@@ -10,9 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetSchemaItem(ref_id string) (models.SchemaItemResponse, error) {
-	var res models.SchemaItemResponse
-	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
+func GetEndpointItem(ref_id string) (models.EndpointItem, error) {
+	var res models.EndpointItem
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
 		return res, err
 	}
@@ -25,8 +25,8 @@ func GetSchemaItem(ref_id string) (models.SchemaItemResponse, error) {
 	return res, nil
 }
 
-func CreateSchemaItem(data models.SchemaItem, instName string, subjectId string) error {
-	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
+func CreateEndpointItem(data models.EndpointItem, instName string, subjectId string) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
 		return err
 	}
@@ -35,24 +35,24 @@ func CreateSchemaItem(data models.SchemaItem, instName string, subjectId string)
 	if err != nil {
 		return err
 	}
-	config.Log(fmt.Sprintf("Schema Item Created: %v", res))
+	config.Log(fmt.Sprintf("Endpoint Item Created: %v", res))
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
 		Status: "active",
-		RefId:  "",
+		RefId:  data.RefId,
 	}
-	err = AddNewSchemasList(instName, subjectId, newRecord)
+	err = AddNewEndpointToList(instName, subjectId, newRecord)
 	if err != nil {
-		config.Err(fmt.Sprintf("Error updating Schema List: %v", err))
+		config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
 	}
 	return nil
 }
 
-func DeleteSchemaItem(ref_id string) (models.Delition, error) {
+func DeleteEndpointItem(ref_id string) (models.Delition, error) {
 	var R models.Delition
-	var res models.SchemaItem
-	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
+	var res models.EndpointItem
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
 		return R, err
 	}
@@ -66,10 +66,10 @@ func DeleteSchemaItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateSchemaItem(data models.CreateSchemaRequest, instName string, subjectId string, itemId string) (interface{}, error) {
+func UpdateEndpointItem(data models.CreateEndpointRequest, instName string, subjectId string, itemId string) (interface{}, error) {
 	var R models.Delition
-	var recordDocument models.SchemaItem
-	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
+	var recordDocument models.EndpointItem
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
 		return R, err
 	}
@@ -89,11 +89,14 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instName string, subjectI
 	if val := data.Description; val != "" {
 		update["$set"].(bson.M)["description"] = val
 	}
-	if val := data.Status; val != "" {
-		update["$set"].(bson.M)["status"] = val
-	}
 	if val := data.RefId; val != "" {
 		update["$set"].(bson.M)["ref_id"] = val
+	}
+	if val := data.Schema; val != "" {
+		update["$set"].(bson.M)["schema_ref"] = val
+	}
+	if val := data.Status; val != "" {
+		update["$set"].(bson.M)["status"] = val
 	}
 	if val := data.Value; len(val) > 0 {
 		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
@@ -127,9 +130,9 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instName string, subjectI
 			return recordDocument.RefId
 		}(),
 	}
-	err = UpdateSchemaListItem(instName, subjectId, newRecord)
+	err = UpdateEndpointListItem(instName, subjectId, newRecord)
 	if err != nil {
-		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
+		config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
 	}
 
 	return updateRes, nil

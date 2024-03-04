@@ -15,10 +15,10 @@ var AllowedDataReadActions = AllowedDataFunc{
 		"item":  GetNodeItem,
 		"items": GetNodeItems,
 	},
-	"dynamic": {
-		"list":  GetDynamicList,
-		"item":  GetDynamicItem,
-		"items": GetDynamicItems,
+	"instance": {
+		"list":  GetInstanceList,
+		"item":  GetInstanceItem,
+		"items": GetInstanceItems,
 	},
 	"content": {
 		"list":  GetContentList,
@@ -35,6 +35,46 @@ var AllowedDataReadActions = AllowedDataFunc{
 		"item":  GetSchemaItem,
 		"items": GetSchemaItems,
 	},
+	"endpoint": {
+		"list":  GetEndpointList,
+		"item":  GetEndpointItem,
+		"items": FailedGetItem,
+	},
+}
+
+func FailedGetItem(args ...any) any {
+	return DATA_FAIL
+}
+
+/* nodes */
+func GetEndpointList(args ...any) any {
+	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
+	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
+		return EMPTY_ARRAY
+	}
+	return instance.EndpointsList
+}
+
+func GetEndpointItem(args ...any) any {
+	endpointItem, err := db.GetEndpointItem(fmt.Sprintf("%v", args[2]))
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting endpointItem: %v", err))
+		return DATA_FAIL
+	}
+	ReqSearch := args[3].(models.URLFilterSearchParams)
+	return models.EndpointItemResponse{
+		Uuid:        endpointItem.Uuid,
+		Name:        endpointItem.Name,
+		Description: endpointItem.Description,
+		Size:        endpointItem.Size,
+		Versions:    endpointItem.Versions,
+		Value:       AssortData(endpointItem.Value, ReqSearch, endpointItem.Versions),
+		RefId:       endpointItem.RefId,
+		MemFile:     endpointItem.MemFile,
+		Status:      endpointItem.Status,
+	}
 }
 
 /* nodes */
@@ -64,6 +104,7 @@ func GetNodeItem(args ...any) any {
 		Value:       AssortData(nodeItem.Value, ReqSearch, nodeItem.Versions),
 		RefId:       nodeItem.RefId,
 		Schema:      nodeItem.Schema,
+		Status:      nodeItem.Status,
 	}
 }
 
@@ -85,6 +126,7 @@ func GetNodeItems(args ...any) any {
 			Value:       nodeItem.Value[0:1],
 			RefId:       nodeItem.RefId,
 			Schema:      nodeItem.Schema,
+			Status:      nodeItem.Status,
 		}
 		nodeItems = append(nodeItems, result)
 	}
@@ -118,6 +160,7 @@ func GetContentItem(args ...any) any {
 		Value:       AssortData(contentItem.Value, ReqSearch, contentItem.Versions),
 		RefId:       contentItem.RefId,
 		Schema:      contentItem.Schema,
+		Status:      contentItem.Status,
 	}
 }
 
@@ -139,56 +182,11 @@ func GetContentItems(args ...any) any {
 			Value:       contentItem.Value[0:1],
 			RefId:       contentItem.RefId,
 			Schema:      contentItem.Schema,
+			Status:      contentItem.Status,
 		}
 		contentItems = append(contentItems, result)
 	}
 	return contentItems
-}
-
-/* dynamic */
-func GetDynamicList(args ...any) any {
-	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
-	if err != nil {
-		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
-		return EMPTY_ARRAY
-	}
-	return instance.Sys
-}
-
-func GetDynamicItem(args ...any) any {
-	selected := fmt.Sprintf("%v", args[2])
-	instance := GetDynamicList(args[0], args[1])
-	if instance == nil {
-		config.Err(fmt.Sprintf("Error getting instance info: %v", args[0]))
-		return EMPTY_ARRAY
-	}
-	res, err := json.Marshal(instance)
-	if err != nil {
-		return DATA_FAIL
-	}
-	resp := models.SysData{}
-	err = json.Unmarshal(res, &resp)
-	if err != nil {
-		return DATA_FAIL
-	}
-	switch selected {
-	case "creation_date":
-		return resp.CreationDate
-	case "modification_date":
-		return resp.ModificationDate
-	case "created_by":
-		return resp.CreatedBy
-	case "modified_by":
-		return resp.ModifiedBy
-	case "status":
-		return resp.Status
-	}
-	return DATA_FAIL
-}
-
-func GetDynamicItems(args ...any) any {
-	return GetDynamicList(args[0], args[1])
 }
 
 /* media */
@@ -225,6 +223,7 @@ func GetMediaItem(args ...any) any {
 		Url:         mediaItem.Url,
 		UriAddress:  mediaItem.UriAddress,
 		File:        mediaItem.File,
+		Status:      mediaItem.Status,
 	}
 }
 
@@ -267,6 +266,7 @@ func GetSchemaItem(args ...any) any {
 		Size:        schemaItem.Size,
 		Versions:    schemaItem.Versions,
 		Value:       AssortData(schemaItem.Value, ReqSearch, schemaItem.Versions),
+		Status:      schemaItem.Status,
 	}
 }
 
@@ -286,8 +286,55 @@ func GetSchemaItems(args ...any) any {
 			Size:        schemaItem.Size,
 			Versions:    schemaItem.Versions,
 			Value:       schemaItem.Value[0:1],
+			Status:      schemaItem.Status,
 		}
 		schemaItems = append(schemaItems, result)
 	}
 	return schemaItems
+}
+
+/* instance */
+func GetInstanceList(args ...any) any {
+	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
+	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
+		return EMPTY_ARRAY
+	}
+	return instance.Sys
+}
+
+func GetInstanceItem(args ...any) any {
+	selected := fmt.Sprintf("%v", args[2])
+	instance := GetInstanceList(args[0], args[1])
+	if instance == nil {
+		config.Err(fmt.Sprintf("Error getting instance info: %v", args[0]))
+		return EMPTY_ARRAY
+	}
+	res, err := json.Marshal(instance)
+	if err != nil {
+		return DATA_FAIL
+	}
+	resp := models.SysData{}
+	err = json.Unmarshal(res, &resp)
+	if err != nil {
+		return DATA_FAIL
+	}
+	switch selected {
+	case "creation_date":
+		return resp.CreationDate
+	case "modification_date":
+		return resp.ModificationDate
+	case "created_by":
+		return resp.CreatedBy
+	case "modified_by":
+		return resp.ModifiedBy
+	case "status":
+		return resp.Status
+	}
+	return DATA_FAIL
+}
+
+func GetInstanceItems(args ...any) any {
+	return GetInstanceList(args[0], args[1])
 }

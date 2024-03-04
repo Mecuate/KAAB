@@ -12,9 +12,9 @@ var AllowedDataCreateActions = AllowedBodyDataFunc{
 		"item":  CreateNodeItem,
 		"items": CreateNodeItems,
 	},
-	"dynamic": {
-		"item":  CreateDynamicItem,
-		"items": CreateDynamicItems,
+	"instance": {
+		"item":  CreateInstanceItem,
+		"items": CreateInstanceItems,
 	},
 	"content": {
 		"item":  CreateContentItem,
@@ -28,6 +28,48 @@ var AllowedDataCreateActions = AllowedBodyDataFunc{
 		"item":  CreateSchemaItem,
 		"items": CreateSchemaItems,
 	},
+	"endpoint": {
+		"item":  CreateEndpointItem,
+		"items": CreateFailed,
+	},
+}
+
+func CreateFailed(args ...any) (any, error) {
+	return DATA_FAIL, nil
+}
+
+func CreateEndpointItem(args ...any) (any, error) {
+	id := fmt.Sprintf("%v", args[0])
+	instName := fmt.Sprintf("%v", args[2])
+	subjectId := fmt.Sprintf("%v", args[3])
+	r := args[1].(*http.Request)
+	var payload models.CreateEndpointRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+	ctrlData := CreateCtrlFields(id)
+	endpointItem := models.EndpointItem{
+		Name:             payload.Name,
+		Description:      payload.Description,
+		Value:            payload.Value,
+		RefId:            payload.RefId,
+		Uuid:             ctrlData.Uuid,
+		Size:             int16(len(fmt.Sprintf("%v", payload.Value))),
+		Versions:         ctrlData.Versions,
+		CreationDate:     ctrlData.CreationDate,
+		ModificationDate: ctrlData.ModificationDate,
+		ModifiedBy:       ctrlData.ModifiedBy,
+		CreatedBy:        ctrlData.CreatedBy,
+		Status:           payload.Status,
+	}
+	err = db.CreateEndpointItem(endpointItem, instName, subjectId)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+	R := DATA_SUCC
+	R["item"] = ctrlData.Uuid
+	return R, nil
 }
 
 /* nodes */
@@ -55,6 +97,7 @@ func CreateNodeItem(args ...any) (any, error) {
 		ModificationDate: ctrlData.ModificationDate,
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
+		Status:           payload.Status,
 	}
 	err = db.CreateNodeItem(nodeItem, instName, subjectId)
 	if err != nil {
@@ -91,6 +134,7 @@ func CreateNodeItems(args ...any) (any, error) {
 			ModificationDate: ctrlData.ModificationDate,
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
+			Status:           item.Status,
 		}
 		err = db.CreateNodeItem(nodeItem, instName, subjectId)
 		if err != nil {
@@ -115,7 +159,7 @@ func CreateContentItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
-	nodeItem := models.TextFileItem{
+	contentItem := models.TextFileItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
 		Value:            payload.Value,
@@ -128,8 +172,9 @@ func CreateContentItem(args ...any) (any, error) {
 		ModificationDate: ctrlData.ModificationDate,
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
+		Status:           payload.Status,
 	}
-	err = db.CreateContentItem(nodeItem, instName, subjectId)
+	err = db.CreateContentItem(contentItem, instName, subjectId)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -164,6 +209,7 @@ func CreateContentItems(args ...any) (any, error) {
 			ModificationDate: ctrlData.ModificationDate,
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
+			Status:           item.Status,
 		}
 		err = db.CreateContentItem(nodeItem, instName, subjectId)
 		if err != nil {
@@ -209,6 +255,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		Url:              mediaAddress.Url,
 		UriAddress:       mediaAddress.UriAddress,
 		File:             mediaAddress.File,
+		Status:           payload.Status,
 	}
 	err = db.CreateMediaItem(mediaItem, instName, subjectId)
 	if err != nil {
@@ -253,6 +300,7 @@ func CreateMediaItems(args ...any) (any, error) {
 			Url:              mediaAddress.Url,
 			UriAddress:       mediaAddress.UriAddress,
 			File:             mediaAddress.File,
+			Status:           item.Status,
 		}
 		err = db.CreateMediaItem(mediaItem, instName, subjectId)
 		if err != nil {
@@ -288,6 +336,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 		ModificationDate: ctrlData.ModificationDate,
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
+		Status:           payload.Status,
 	}
 	err = db.CreateSchemaItem(schemaItem, instName, subjectId)
 	if err != nil {
@@ -322,6 +371,7 @@ func CreateSchemaItems(args ...any) (any, error) {
 			ModificationDate: ctrlData.ModificationDate,
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
+			Status:           item.Status,
 		}
 		err = db.CreateSchemaItem(schemaItem, instName, subjectId)
 		if err != nil {
@@ -334,10 +384,46 @@ func CreateSchemaItems(args ...any) (any, error) {
 	return RES, nil
 }
 
-/* dynamic */
-func CreateDynamicItem(args ...any) (any, error) {
-	return DATA_FAIL, nil
+/* instance */
+func CreateInstanceItem(args ...any) (any, error) {
+	id := fmt.Sprintf("%v", args[0])
+	instName := fmt.Sprintf("%v", args[2])
+	subjectId := fmt.Sprintf("%v", args[3])
+	r := args[1].(*http.Request)
+	ReqApi := fmt.Sprintf("%v", args[4])
+	var payload models.CreateInstanceRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+	ctrlData := CreateCtrlFields(id)
+	instanceItem := models.InstanceCollection{
+		Name:           payload.Name,
+		Versions:       []string{payload.Versions},
+		Owner:          subjectId,
+		Admin:          []string{subjectId},
+		Members:        []string{subjectId},
+		MediaFilesList: []models.DataEntryIdentity{},
+		EndpointsList:  []models.DataEntryIdentity{},
+		SchemasList:    []models.DataEntryIdentity{},
+		TextFilesList:  []models.DataEntryIdentity{},
+		NodesFilesList: []models.DataEntryIdentity{},
+		Sys: models.SysData{
+			CreationDate:     ctrlData.CreationDate,
+			ModificationDate: ctrlData.ModificationDate,
+			ModifiedBy:       ctrlData.ModifiedBy,
+			CreatedBy:        ctrlData.CreatedBy,
+			Status:           payload.Status,
+		},
+	}
+	err = db.CreateInstanceItem(instanceItem, instName, subjectId, ReqApi)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+	R := DATA_SUCC
+	R["item"] = ctrlData.Uuid
+	return R, nil
 }
-func CreateDynamicItems(args ...any) (any, error) {
+func CreateInstanceItems(args ...any) (any, error) {
 	return DATA_FAIL, nil
 }

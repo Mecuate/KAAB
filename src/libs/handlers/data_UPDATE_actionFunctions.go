@@ -5,30 +5,55 @@ import (
 	"kaab/src/libs/db"
 	"kaab/src/models"
 	"net/http"
-	// "kaab/src/models"
 )
 
 var AllowedDataUpdateActions = AllowedDataFunc{
 	"nodes": {
 		"item":  UpdateNodeItem,
-		"items": UpdateNodeItems,
+		"items": UpdateFailed,
 	},
-	"dynamic": {
-		"item":  UpdateDynamicItem,
-		"items": UpdateDynamicItems,
+	"instance": {
+		"item":  UpdateInstanceItem,
+		"items": UpdateFailed,
 	},
 	"content": {
 		"item":  UpdateContentItem,
-		"items": UpdateContentItems,
+		"items": UpdateFailed,
 	},
 	"media": {
 		"item":  UpdateMediaItem,
-		"items": UpdateMediaItems,
+		"items": UpdateFailed,
 	},
 	"schemas": {
 		"item":  UpdateSchemaItem,
-		"items": UpdateSchemaItems,
+		"items": UpdateFailed,
 	},
+	"endpoint": {
+		"item":  UpdateEndpointItem,
+		"items": UpdateFailed,
+	},
+}
+
+func UpdateFailed(args ...any) any {
+	return DATA_FAIL
+}
+
+func UpdateEndpointItem(args ...any) any {
+	r := args[0].(*http.Request)
+	instanceName := fmt.Sprintf("%v", args[1])
+	subjectId := fmt.Sprintf("%v", args[2])
+	itemId := fmt.Sprintf("%v", args[3])
+
+	var payload models.CreateEndpointRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL
+	}
+	R, err := db.UpdateEndpointItem(payload, instanceName, subjectId, itemId)
+	if err != nil {
+		return DATA_FAIL
+	}
+	return R
 }
 
 /* nodes */
@@ -49,47 +74,80 @@ func UpdateNodeItem(args ...any) any {
 	}
 	return R
 }
-func UpdateNodeItems(args ...any) any {
-	fmt.Println("UpdateNodeItems", args[0], args[1])
-	return EMPTY_ARRAY
-}
 
 /* content */
 func UpdateContentItem(args ...any) any {
-	fmt.Println("UpdateContentItem", args[0], args[1])
-	return EMPTY_OBJECT
-}
-func UpdateContentItems(args ...any) any {
-	fmt.Println("UpdateContentItems", args[0], args[1])
-	return EMPTY_ARRAY
-}
+	r := args[0].(*http.Request)
+	instanceName := fmt.Sprintf("%v", args[1])
+	subjectId := fmt.Sprintf("%v", args[2])
+	itemId := fmt.Sprintf("%v", args[3])
 
-/* dynamic */
-func UpdateDynamicItem(args ...any) any {
-	fmt.Println("UpdateDynamicItem", args[0], args[1])
-	return EMPTY_OBJECT
-}
-func UpdateDynamicItems(args ...any) any {
-	fmt.Println("UpdateDynamicItems", args[0], args[1])
-	return EMPTY_ARRAY
+	var payload models.CreateContentRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL
+	}
+	R, err := db.UpdateContentItem(payload, instanceName, subjectId, itemId)
+	if err != nil {
+		return DATA_FAIL
+	}
+	return R
 }
 
 /* media */
 func UpdateMediaItem(args ...any) any {
-	fmt.Println("UpdateMediaItem", args[0], args[1])
-	return EMPTY_OBJECT
-}
-func UpdateMediaItems(args ...any) any {
-	fmt.Println("UpdateMediaItems", args[0], args[1])
-	return EMPTY_ARRAY
+	r := args[0].(*http.Request)
+	instanceName := fmt.Sprintf("%v", args[1])
+	subjectId := fmt.Sprintf("%v", args[2])
+	itemId := fmt.Sprintf("%v", args[3])
+
+	var payload models.CreateMediaRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL
+	}
+	R, err := db.UpdateMediaItem(payload, instanceName, subjectId, itemId)
+	if err != nil {
+		return DATA_FAIL
+	}
+	return R
 }
 
 /* schemas */
 func UpdateSchemaItem(args ...any) any {
-	fmt.Println("UpdateSchemaItem", args[0], args[1])
-	return EMPTY_OBJECT
+	r := args[0].(*http.Request)
+	instanceName := fmt.Sprintf("%v", args[1])
+	subjectId := fmt.Sprintf("%v", args[2])
+	itemId := fmt.Sprintf("%v", args[3])
+
+	var payload models.CreateSchemaRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL
+	}
+	R, err := db.UpdateSchemaItem(payload, instanceName, subjectId, itemId)
+	if err != nil {
+		return DATA_FAIL
+	}
+	return R
 }
-func UpdateSchemaItems(args ...any) any {
-	fmt.Println("UpdateSchemaItems", args[0], args[1])
-	return EMPTY_ARRAY
+
+/* instance */
+func UpdateInstanceItem(args ...any) any {
+	r := args[0].(*http.Request)
+	instanceName := fmt.Sprintf("%v", args[1])
+	subjectId := fmt.Sprintf("%v", args[2])
+	itemId := fmt.Sprintf("%v", args[3])
+	reqApi := fmt.Sprintf("%v", args[4])
+
+	var payload models.CreateInstanceRequest
+	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL
+	}
+	R, err := db.UpdateInstanceItem(payload, instanceName, subjectId, itemId, reqApi)
+	if err != nil {
+		return DATA_FAIL
+	}
+	return R
 }

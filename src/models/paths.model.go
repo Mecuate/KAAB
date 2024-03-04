@@ -1,12 +1,12 @@
 package models
 
-type DynamicPaths struct {
+type InstancePaths struct {
 	EMULATED_API string
 	USER         string
 	DATA_ACTION  string
 }
 
-type DynamicPathsParams struct {
+type InstancePathsParams struct {
 	EMULATED_API []string
 	USER         []string
 	DATA_ACTION  []string

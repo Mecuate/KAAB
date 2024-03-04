@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/models"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -41,7 +42,7 @@ func CreateNodeItem(data models.NodeFileItem, instName string, subjectId string)
 		Status: "active",
 		RefId:  data.RefId,
 	}
-	err = UpdateNodeList(instName, subjectId, newRecord)
+	err = AddNewNodeToList(instName, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
 	}
@@ -94,15 +95,45 @@ func UpdateNodeItem(data models.CreateNodeRequest, instName string, subjectId st
 	if val := data.Schema; val != "" {
 		update["$set"].(bson.M)["schema_ref"] = val
 	}
+	if val := data.Status; val != "" {
+		update["$set"].(bson.M)["status"] = val
+	}
 	if val := data.Value; len(val) > 0 {
 		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
 	}
-	bump := data.Bump
-	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, bump)
-
+	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
+	timeStamp := fmt.Sprintf("%v", time.Now().Unix())
+	update["$set"].(bson.M)["modified_by"] = AppendModificationRecord(recordDocument.ModifiedBy, subjectId, timeStamp)
+	update["$set"].(bson.M)["modification_date"] = timeStamp
 	updateRes, err := Db.coll.UpdateOne(ctx, identify, update)
 	if err != nil {
 		return R, err
 	}
+	newRecord := models.DataEntryIdentity{
+		Id: itemId,
+		Name: func() string {
+			if val := data.Name; val != "" {
+				return val
+			}
+			return recordDocument.Name
+		}(),
+		Status: func() string {
+			if val := data.Status; val != "" {
+				return val
+			}
+			return recordDocument.Status
+		}(),
+		RefId: func() string {
+			if val := data.RefId; val != "" {
+				return val
+			}
+			return recordDocument.RefId
+		}(),
+	}
+	err = UpdateNodeListItem(instName, subjectId, newRecord)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
+	}
+
 	return updateRes, nil
 }

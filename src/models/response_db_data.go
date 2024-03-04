@@ -1,5 +1,10 @@
 package models
 
+type KeyValue struct {
+	Key   string      `bson:"Key"`
+	Value interface{} `bson:"Value"`
+}
+
 type InternalCtrlFields struct {
 	Uuid             string               `json:"uuid" bson:"uuid"`
 	Size             int16                `json:"size" bson:"size"`
@@ -19,13 +24,11 @@ type NodeItemResponse struct {
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+	Status      string        `json:"status" bson:"status"`
 }
 
 type ManyNodeItemResponse = []NodeItemResponse
-type KeyValue struct {
-	Key   string      `bson:"Key"`
-	Value interface{} `bson:"Value"`
-}
+
 type ContentItemResponse struct {
 	Uuid        string        `json:"uuid" bson:"uuid"`
 	Name        string        `json:"name" bson:"name"`
@@ -35,6 +38,7 @@ type ContentItemResponse struct {
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+	Status      string        `json:"status" bson:"status"`
 }
 
 type ManyContentItemResponse = []ContentItemResponse
@@ -46,6 +50,7 @@ type SchemaItemResponse struct {
 	Size        int16         `json:"size" bson:"size"`
 	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{} `json:"value" bson:"value"`
+	Status      string        `json:"status" bson:"status"`
 }
 
 type ManySchemaItemResponse = []SchemaItemResponse
@@ -66,9 +71,22 @@ type MediaItemResponse struct {
 	Url         string         `json:"url" bson:"url"`
 	UriAddress  string         `json:"uri" bson:"uri"`
 	File        string         `json:"file_data" bson:"file_data"`
+	Status      string         `json:"status" bson:"status"`
 }
 
 type ManyMediaItemResponse = []MediaItemResponse
+
+type EndpointItemResponse struct {
+	Uuid        string        `json:"uuid" bson:"uuid"`
+	Name        string        `json:"name" bson:"name"`
+	Description string        `json:"description" bson:"description"`
+	Size        int16         `json:"size" bson:"size"`
+	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
+	Value       []interface{} `json:"value" bson:"value"`
+	RefId       string        `json:"ref_id" bson:"ref_id"`
+	MemFile     string        `json:"mem_file" bson:"mem_file"`
+	Status      string        `json:"status" bson:"status"`
+}
 
 type CreateNodeRequest struct {
 	Name        string        `json:"name" bson:"name"`
@@ -77,6 +95,7 @@ type CreateNodeRequest struct {
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
 	Bump        bool          `json:"bump" bson:"bump"`
+	Status      string        `json:"status" bson:"status"`
 }
 
 type CreateContentRequest struct {
@@ -86,13 +105,26 @@ type CreateContentRequest struct {
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
 	Bump        bool          `json:"bump" bson:"bump"`
+	Status      string        `json:"status" bson:"status"`
+}
+
+type CreateEndpointRequest struct {
+	Name        string        `json:"name" bson:"name"`
+	Description string        `json:"description" bson:"description"`
+	Value       []interface{} `json:"value" bson:"value"`
+	RefId       string        `json:"ref_id" bson:"ref_id"`
+	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+	Bump        bool          `json:"bump" bson:"bump"`
+	Status      string        `json:"status" bson:"status"`
 }
 
 type CreateSchemaRequest struct {
 	Name        string        `json:"name" bson:"name"`
 	Description string        `json:"description" bson:"description"`
 	Value       []interface{} `json:"value" bson:"value"`
+	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Bump        bool          `json:"bump" bson:"bump"`
+	Status      string        `json:"status" bson:"status"`
 }
 
 type CreateMediaRequest struct {
@@ -106,6 +138,17 @@ type CreateMediaRequest struct {
 	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
 	Service     string         `json:"service" bson:"service"`
 	Bump        bool           `json:"bump" bson:"bump"`
+	Status      string         `json:"status" bson:"status"`
+}
+
+type CreateInstanceRequest struct {
+	Name     string   `json:"name" bson:"name"`
+	Versions string   `json:"versions" bson:"versions"`
+	Owner    string   `json:"owner" bson:"owner"`
+	Admin    []string `json:"admin" bson:"admin"`
+	Members  []string `json:"members" bson:"members"`
+	Status   string   `json:"status" bson:"status"`
+	Bump     bool     `json:"bump" bson:"bump"`
 }
 
 type InternalMediaCtrlFields struct {
