@@ -301,3 +301,8 @@ func ModificationRecord(idnt string, ix int16) models.ModificationRecord {
 		Index:  ix,
 	}
 }
+
+func EmptyUserAction(args ...any) interface{} {
+	var Res interface{}
+	return Res
+}

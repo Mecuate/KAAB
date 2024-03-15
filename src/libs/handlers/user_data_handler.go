@@ -1,49 +1,19 @@
 package handlers
 
 import (
-	"kaab/src/libs/utils"
+	"fmt"
+	"kaab/src/libs/config"
+	"kaab/src/libs/db"
 	"kaab/src/models"
 	"net/http"
+	"strconv"
 	"time"
-
-	auth "github.com/Mecuate/auth_module"
 )
 
-func UserDataSimpleHandler(w http.ResponseWriter, r *http.Request) {
-	authorized, claims := auth.Authorized(w, r)
-	if authorized && claims.Realms.Read().Apis {
-		params, err := ExtractPathParams(r, Params.USER)
-		if err != nil {
-			FailReq(w, 4)
-			return
-		}
-		id, action := params["subject_id"], params["action"]
-		user_info, err := utils.PullUserData(id)
-		if err != nil {
-			FailReq(w, 5)
-			return
-		}
-
-		if IsReadAction(action) && user_info.Id == id {
-			resp := AllowedReadActions[action](user_info)
-			responseBody, err := JSON(resp)
-			if err != nil {
-				FailReq(w, 6)
-				return
-			}
-			Response(w, responseBody)
-		} else {
-			FailReq(w, 99)
-		}
-	} else {
-		RequestAuth(w)
-	}
-}
-
 var read_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
-var create_actions = NewStringArray{[]string{"account"}}
-var update_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
-var delete_actions = NewStringArray{[]string{"account"}}
+var create_actions = NewStringArray{[]string{"profile", "report"}}
+var update_actions = NewStringArray{[]string{"account", "profile", "permissions"}}
+var delete_actions = NewStringArray{[]string{"account", "profile"}}
 
 func IsReadAction(t string) bool {
 	return read_actions.Contains(t)
@@ -59,7 +29,7 @@ func IsDeleteAction(t string) bool {
 }
 
 type MUD = models.UserData
-type AllowedFunc map[string]func(any MUD) interface{}
+type AllowedFunc map[string]func(args ...any) interface{}
 
 var AllowedReadActions = AllowedFunc{
 	"account":     GetAccount,
@@ -69,7 +39,8 @@ var AllowedReadActions = AllowedFunc{
 	"security":    GetSecurity,
 }
 
-func GetProfile(user_info MUD) interface{} {
+func GetProfile(args ...any) interface{} {
+	user_info := args[0].(MUD)
 	return models.ProfileConform{
 		Name:                 user_info.Name,
 		LastName:             user_info.LastName,
@@ -81,10 +52,12 @@ func GetProfile(user_info MUD) interface{} {
 		PictureUrl:           user_info.Account.PictureUrl,
 		PicModification_date: user_info.Account.Modification_date,
 		ExpirationDate:       user_info.Account.ExpirationDate,
+		Uuid:                 user_info.Uuid,
 	}
 }
 
-func GetPermissions(user_info MUD) interface{} {
+func GetPermissions(args ...any) interface{} {
+	user_info := args[0].(MUD)
 	return models.PermissionsConform{
 		Permissions: user_info.Realm,
 		UserRol:     user_info.UserRol,
@@ -92,28 +65,95 @@ func GetPermissions(user_info MUD) interface{} {
 	}
 }
 
-func GetReport(user_info MUD) interface{} {
-	// TODO: [` pull data from db to map trace user activity `]-{2023-11-06}
+func GetReport(args ...any) interface{} {
 	return models.ReportConform{
-		ReportFrame: "2023.01.15-2023.11.06",
+		ReportFrame: fmt.Sprintf("%v", time.Now().Unix()),
 	}
 }
 
-func GetSecurity(user_info MUD) interface{} {
-	exp := time.Unix(user_info.Account.ExpirationDate, 0)
+func GetSecurity(args ...any) interface{} {
+	user_info := args[0].(MUD)
+	expirationDate, _ := strconv.ParseInt(user_info.Account.ExpirationDate, 10, 64)
+	exp := time.Unix(expirationDate, 0)
 	lifetime := time.Until(exp)
 	return models.SecurityConform{
 		Password:  lifetime.String(),
 		Monitored: user_info.Monitored,
 		KnownHost: user_info.KnownHost,
+		Uuid:      user_info.Uuid,
 	}
 }
 
-func GetAccount(user_info MUD) interface{} {
+func GetAccount(args ...any) interface{} {
+	user_info := args[0].(MUD)
 	return models.AccountConform{
 		Account:     user_info.Account,
 		Email:       user_info.Email,
-		Id:          user_info.Id,
 		AccessToken: user_info.AccessToken,
+		Uuid:        user_info.Uuid,
 	}
+}
+
+var AllowedCreateActions = AllowedFunc{
+	"profile": CreateProfile,
+	"report":  CreateReport,
+}
+
+func CreateProfile(args ...any) interface{} {
+	var Res interface{}
+
+	user_info := args[0].(MUD)
+	r := args[1].(*http.Request)
+	var payload models.CreateUserRequestBody
+	err := GetBody(r, &payload)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error to GetBody: %v", err))
+		return DATA_FAIL
+	}
+	Res, err = db.CreateUser(user_info, payload)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error creating user: %v", err))
+		return DATA_FAIL
+	}
+	return Res
+}
+
+func CreateReport(args ...any) interface{} {
+	var Res interface{}
+	return Res
+}
+
+var AllowedUpdateActions = AllowedFunc{
+	"account":     UpdateUserAccount,
+	"profile":     UpdateUserProfile,
+	"permissions": UpdateUserPermissions,
+}
+
+func UpdateUserAccount(args ...any) interface{} {
+	var Res interface{}
+	return Res
+}
+
+func UpdateUserProfile(args ...any) interface{} {
+	var Res interface{}
+
+	user_info := args[0].(MUD)
+	r := args[1].(*http.Request)
+	var payload models.UpdateProfileRequestBody
+	err := GetBody(r, &payload)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error to GetBody: %v", err))
+		return DATA_FAIL
+	}
+	Res, err = db.UpdateUserProfile(user_info, payload)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error updating profile: %v", err))
+		return DATA_FAIL
+	}
+	return Res
+}
+
+func UpdateUserPermissions(args ...any) interface{} {
+	var Res interface{}
+	return Res
 }

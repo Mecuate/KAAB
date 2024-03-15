@@ -2,9 +2,12 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/models"
+	"time"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -25,8 +28,112 @@ func PullUserData(userId string, instanceId string) (models.UserData, error) {
 	return res, nil
 }
 
-/*
-73a18b3f-c0de-45fb-b8f4-3d5e5cb5b74f AAAAmJiSY2qbmJdayZKYmVpoZcmVWpudmGRaY5yalmeWl26ZamnH
-cb538194-8fa1-4dad-8ff7-cbbceb6c42f8 AAAAxMdmZWpqnmVansiVZVpolMSXWnHLmGdak5rHlJeVa5xrZZuZ
-c675b18b-3057-4ce5-b653-58b9e55bc673 AAAAxJtoZ5RqnZNamZJpa1pok8hoWpubZ2NaZXDHapdoapuaaWyU
-*/
+func CreateUser(userData models.UserData, payload models.CreateUserRequestBody) (interface{}, error) {
+	var F interface{}
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, USERS)
+	if err != nil {
+		return F, err
+	}
+	ctx := context.Background()
+	userUUID := uuid.New().String()
+	currentTime := fmt.Sprintf("%v", time.Now().Unix())
+	ctrlFields := CreateCtrlFields(userData.Uuid)
+	userAccount := models.AccountType{
+		ApprovedBy:        payload.ApprovedBy,
+		ApproverOf:        payload.ApproverOf,
+		ExpirationDate:    payload.ExpirationDate,
+		Picture:           payload.Picture,
+		PictureUrl:        payload.PictureUrl,
+		CreationDate:      ctrlFields.CreationDate,
+		Modification_date: ctrlFields.ModificationDate,
+		ModifiedBy:        ctrlFields.ModifiedBy,
+		CreatedBy:         ctrlFields.CreatedBy,
+	}
+	RealmData := models.RealmT{
+		Apis:    payload.Apis,
+		Media:   payload.Media,
+		Mecuate: payload.Mecuate,
+	}
+	newUser := models.UserData{
+		AccessToken:       userData.AccessToken,
+		Account:           userAccount,
+		Email:             payload.Email,
+		Uuid:              userUUID,
+		KnownHost:         payload.KnownHost,
+		LastLogin:         currentTime,
+		Monitored:         payload.Monitored,
+		Name:              payload.Name,
+		LastName:          payload.LastName,
+		Nick:              payload.Nick,
+		Password:          payload.Password,
+		Realm:             RealmData,
+		Token:             userData.Token,
+		UserRol:           payload.UserRol,
+		CreationDate:      ctrlFields.CreationDate,
+		Modification_date: ctrlFields.ModificationDate,
+		ModifiedBy:        ctrlFields.ModifiedBy,
+		CreatedBy:         ctrlFields.CreatedBy,
+	}
+
+	F, err = Db.coll.InsertOne(ctx, newUser)
+	if err != nil {
+		return F, err
+	}
+
+	return F, nil
+}
+
+func UpdateUserProfile(userData models.UserData, payload models.UpdateProfileRequestBody) (interface{}, error) {
+	var F interface{}
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, USERS)
+	if err != nil {
+		return F, err
+	}
+	ctx := context.Background()
+	userUUID := uuid.New().String()
+	currentTime := fmt.Sprintf("%v", time.Now().Unix())
+	ctrlFields := CreateCtrlFields(userData.Uuid)
+	userAccount := models.AccountType{
+		ApprovedBy:        payload.ApprovedBy,
+		ApproverOf:        payload.ApproverOf,
+		ExpirationDate:    payload.ExpirationDate,
+		Picture:           payload.Picture,
+		PictureUrl:        payload.PictureUrl,
+		CreationDate:      ctrlFields.CreationDate,
+		Modification_date: ctrlFields.ModificationDate,
+		ModifiedBy:        ctrlFields.ModifiedBy,
+		CreatedBy:         ctrlFields.CreatedBy,
+	}
+	RealmData := models.RealmT{
+		Apis:    payload.Apis,
+		Media:   payload.Media,
+		Mecuate: payload.Mecuate,
+	}
+	newUser := models.UserData{
+		AccessToken:       userData.AccessToken,
+		Account:           userAccount,
+		Email:             payload.Email,
+		Uuid:              userUUID,
+		KnownHost:         payload.KnownHost,
+		LastLogin:         currentTime,
+		Monitored:         payload.Monitored,
+		Name:              payload.Name,
+		LastName:          payload.LastName,
+		Nick:              payload.Nick,
+		Password:          payload.Password,
+		Realm:             RealmData,
+		Token:             userData.Token,
+		UserRol:           payload.UserRol,
+		CreationDate:      ctrlFields.CreationDate,
+		Modification_date: ctrlFields.ModificationDate,
+		ModifiedBy:        ctrlFields.ModifiedBy,
+		CreatedBy:         ctrlFields.CreatedBy,
+	}
+
+	F, err = Db.coll.InsertOne(ctx, newUser)
+	if err != nil {
+		return F, err
+	}
+
+	return F, nil
+}

@@ -22,8 +22,7 @@ func InitializeRoutes(r models.MuxRouter) {
 	var vers = strings.Split(config.WEBENV.ApiVersions, ",")
 	for i := 0; i < len(vers); i++ {
 		var api_version = APIVersion{vers[i]}
-
-		// TODO: [` deprecation notice "UserDataSimpleHandler" `]-{2024-02-13}
+		/* CRUD */
 		UserDataCRUD(typedRouter.Router, api_version.userPath())
 		DataEntryCRUD(typedRouter.Router, api_version.dataEntryPath())
 		/* single handler */

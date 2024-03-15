@@ -174,7 +174,6 @@ type EndpointFile struct {
 type AccountConform struct {
 	Account     AccountType `json:"account" bson:"account"`
 	Email       string      `json:"email" bson:"email"`
-	Id          string      `json:"id" bson:"id"`
 	AccessToken string      `json:"access_token" bson:"access_token"`
 	Uuid        string      `json:"uuid" bson:"uuid"`
 }
@@ -199,12 +198,12 @@ type ProfileConform struct {
 	LastName             string `json:"last_name" bson:"last_name"`
 	Nick                 string `json:"nick" bson:"nick"`
 	UserRol              string `json:"user_rol" bson:"user_rol"`
-	LastLogin            int64  `json:"last_login" bson:"last_login"`
-	Modification_date    int64  `json:"modification_date" bson:"modification_date"`
+	LastLogin            string `json:"last_login" bson:"last_login"`
+	Modification_date    string `json:"modification_date" bson:"modification_date"`
 	Picture              string `json:"picture" bson:"picture" default:""`
 	PictureUrl           string `json:"picture_url" bson:"picture_url" default:""`
-	PicModification_date int64  `json:"pic_modification_date" bson:"pic_modification_date" default:""`
-	ExpirationDate       int64  `json:"expiration_date" bson:"expiration_date"`
+	PicModification_date string `json:"pic_modification_date" bson:"pic_modification_date" default:""`
+	ExpirationDate       string `json:"expiration_date" bson:"expiration_date"`
 }
 
 type ReportConform struct {

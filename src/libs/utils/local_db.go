@@ -14,7 +14,7 @@ func PullUserData(user_id string) (models.UserData, error) {
 	userFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, "users.json"), &users_list}
 	userFile.parseJSON()
 	for _, usr := range users_list {
-		if usr.Id == user_id {
+		if usr.Uuid == user_id {
 			return usr, nil
 		}
 	}

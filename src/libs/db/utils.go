@@ -6,6 +6,9 @@ import (
 	"kaab/src/models"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 func EncodeSignature(instId string, usrId string) string {
@@ -81,4 +84,29 @@ func AppendValue(values []interface{}, newValue []interface{}) []interface{} {
 		}
 	}
 	return values
+}
+
+func CreateCtrlFields(idnt string) models.InternalCtrlFields {
+	t := fmt.Sprintf("%v", time.Now().Unix())
+	list := []string{"1.0"}
+
+	res := models.InternalCtrlFields{
+		Uuid:             uuid.New().String(),
+		Size:             0,
+		Versions:         list,
+		CreationDate:     t,
+		ModificationDate: t,
+		ModifiedBy:       models.ModificationList{ModificationRecord(idnt, 0)},
+		CreatedBy:        idnt,
+	}
+	return res
+}
+
+func ModificationRecord(idnt string, ix int16) models.ModificationRecord {
+	t := fmt.Sprintf("%v", time.Now().Unix())
+	return models.ModificationRecord{
+		Person: idnt,
+		Date:   t,
+		Index:  ix,
+	}
 }

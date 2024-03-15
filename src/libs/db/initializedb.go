@@ -93,11 +93,6 @@ func InitialDataBaseBuild(databaseName string, apisNames []string) []error {
 		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Instance: %v", err))
 		errReport = append(errReport, err)
 	}
-	err = Xetup_Accounts(databaseName)
-	if err != nil {
-		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Accounts: %v", err))
-		errReport = append(errReport, err)
-	}
 	err = Xetup_Media(databaseName)
 	if err != nil {
 		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Media: %v", err))
@@ -130,6 +125,11 @@ func InitialDataBaseBuild(databaseName string, apisNames []string) []error {
 	}
 
 	/* ----- TEMP DISABLED
+	err = Xetup_Accounts(databaseName)
+	if err != nil {
+		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_Accounts: %v", err))
+		errReport = append(errReport, err)
+	}
 	err = Xetup_DataEntryEvents(databaseName)
 	if err != nil {
 		config.Err(fmt.Sprintf("[DB_FAILED].Xetup_DataEntryEvents: %v", err))
