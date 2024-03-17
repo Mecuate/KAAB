@@ -1,6 +1,7 @@
 package db
 
 import (
+	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
 	"kaab/src/models"
@@ -109,4 +110,44 @@ func ModificationRecord(idnt string, ix int16) models.ModificationRecord {
 		Date:   t,
 		Index:  ix,
 	}
+}
+
+type NewStringArray struct {
+	elements []string
+}
+
+/* funcs */
+func (s NewStringArray) Contains(target string) bool {
+	for _, elem := range s.elements {
+		if elem == target {
+			return true
+		}
+	}
+	return false
+}
+
+func (s NewStringArray) ContainsKey(target string) (string, bool) {
+	for _, elem := range s.elements {
+		if elem == target {
+			return elem, true
+		}
+	}
+	return "", false
+}
+
+func (s NewStringArray) Join(targets []string) {
+	for _, elem := range targets {
+		if !s.Contains(elem) {
+			s.elements = append(s.elements, elem)
+		}
+	}
+}
+
+func MakeSHA1Hash(data string) string {
+	bv := []byte(data)
+	hasher := sha1.New()
+	hasher.Write(bv)
+	sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+
+	return sha
 }

@@ -13,7 +13,7 @@ import (
 var read_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
 var create_actions = NewStringArray{[]string{"profile", "report"}}
 var update_actions = NewStringArray{[]string{"account", "profile", "permissions"}}
-var delete_actions = NewStringArray{[]string{"account", "profile"}}
+var delete_actions = NewStringArray{[]string{"profile"}}
 
 func IsReadAction(t string) bool {
 	return read_actions.Contains(t)
@@ -124,14 +124,9 @@ func CreateReport(args ...any) interface{} {
 }
 
 var AllowedUpdateActions = AllowedFunc{
-	"account":     UpdateUserAccount,
+	"account":     UpdateUserProfile,
 	"profile":     UpdateUserProfile,
-	"permissions": UpdateUserPermissions,
-}
-
-func UpdateUserAccount(args ...any) interface{} {
-	var Res interface{}
-	return Res
+	"permissions": UpdateUserProfile,
 }
 
 func UpdateUserProfile(args ...any) interface{} {
@@ -139,13 +134,14 @@ func UpdateUserProfile(args ...any) interface{} {
 
 	user_info := args[0].(MUD)
 	r := args[1].(*http.Request)
+	subject := fmt.Sprintf("%v", args[2])
 	var payload models.UpdateProfileRequestBody
 	err := GetBody(r, &payload)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error to GetBody: %v", err))
 		return DATA_FAIL
 	}
-	Res, err = db.UpdateUserProfile(user_info, payload)
+	Res, err = db.UpdateUser(user_info, payload, subject)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating profile: %v", err))
 		return DATA_FAIL
@@ -153,7 +149,20 @@ func UpdateUserProfile(args ...any) interface{} {
 	return Res
 }
 
-func UpdateUserPermissions(args ...any) interface{} {
+var AllowedDeleteActions = AllowedFunc{
+	"profile": DeleteUserProfile,
+}
+
+func DeleteUserProfile(args ...any) interface{} {
 	var Res interface{}
+
+	user_info := args[0].(MUD)
+	subject := fmt.Sprintf("%v", args[2])
+
+	Res, err := db.DeleteUser(user_info, subject)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error deleting profile: %v", err))
+		return DATA_FAIL
+	}
 	return Res
 }

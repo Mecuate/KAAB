@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/libs/db"
-	"kaab/src/libs/utils"
 	"net/http"
 
 	auth "github.com/Mecuate/auth_module"
@@ -116,13 +115,13 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authorized, claims := auth.Authorized(w, r)
-		if authorized && claims.Realms.Create().Apis {
+		if authorized && claims.Realms.Update().Apis {
 			params, err := ExtractPathParams(r, Params.USER)
 			if err != nil {
 				FailReq(w, 4)
 				return
 			}
-			instanceId, action := params["instance_id"], params["action"]
+			instanceId, action, subject := params["instance_id"], params["action"], params["subject_id"]
 			ReqApi, rerr := getReqApi(r)
 			if rerr != nil {
 				FailReq(w, 7)
@@ -142,7 +141,7 @@ func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 					return
 				}
 
-				resp := AllowedUpdateActions[action](user_info)
+				resp := AllowedUpdateActions[action](user_info, r, subject)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
@@ -167,15 +166,27 @@ func UserDataHandler_DELETE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["subject_id"], params["action"]
-			user_info, err := utils.PullUserData(id)
+			instanceId, action, subject := params["instance_id"], params["action"], params["subject_id"]
+			ReqApi, rerr := getReqApi(r)
+			if rerr != nil {
+				FailReq(w, 7)
+				return
+			}
+			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
+				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
 				return
 			}
 
-			if IsReadAction(action) && user_info.Uuid == id {
-				resp := AllowedReadActions[action](user_info)
+			if IsUpdateAction(action) {
+				user_info, err := db.PullUserData(instanceId, instanceInternalId)
+				if err != nil {
+					FailReq(w, 5)
+					return
+				}
+
+				resp := AllowedDeleteActions[action](user_info, r, subject)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
