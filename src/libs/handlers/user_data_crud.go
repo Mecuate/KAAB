@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/libs/db"
+	"kaab/src/models"
 	"net/http"
 
 	auth "github.com/Mecuate/auth_module"
@@ -83,18 +84,18 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 				FailReq(w, 7)
 				return
 			}
-			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
-			if err != nil {
-				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
-				FailReq(w, 5)
-				return
-			}
+			instanceInternalId, _ := db.VerifyInstanceExist(instanceId, ReqApi)
 
 			if IsCreateAction(action) {
-				user_info, err := db.PullUserData(instanceId, instanceInternalId)
-				if err != nil {
-					FailReq(w, 5)
-					return
+				var user_info = models.UserData{}
+				if instanceId == ReqApi {
+					user_info.Uuid = "00a00a0a-a0aa-00aa-a0a0-0a0a0aa0a00a"
+				} else {
+					user_info, err = db.PullUserData(instanceId, instanceInternalId)
+					if err != nil {
+						FailReq(w, 5)
+						return
+					}
 				}
 				resp := AllowedCreateActions[action](user_info, r)
 				responseBody, err := JSON(resp)

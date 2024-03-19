@@ -82,7 +82,7 @@ func GetAccount(args ...any) interface{} {
 	return models.AccountConform{
 		Account:     user_info.Account,
 		Email:       user_info.Email,
-		AccessToken: user_info.AccessToken,
+		AccessToken: user_info.Token,
 		Uuid:        user_info.Uuid,
 	}
 }

@@ -55,7 +55,6 @@ func CreateUser(userData models.UserData, payload models.CreateUserRequestBody) 
 		Mecuate: payload.Mecuate,
 	}
 	newUser := models.UserData{
-		AccessToken:       userData.AccessToken,
 		Account:           userAccount,
 		Email:             payload.Email,
 		Uuid:              userUUID,
@@ -67,7 +66,7 @@ func CreateUser(userData models.UserData, payload models.CreateUserRequestBody) 
 		Nick:              payload.Nick,
 		Password:          payload.Password,
 		Realm:             RealmData,
-		Token:             userData.Token,
+		Token:             payload.Token,
 		UserRol:           payload.UserRol,
 		CreationDate:      ctrlFields.CreationDate,
 		Modification_date: ctrlFields.ModificationDate,

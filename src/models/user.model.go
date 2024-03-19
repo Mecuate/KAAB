@@ -7,7 +7,6 @@ type RealmT struct {
 }
 
 type UserData struct {
-	AccessToken       string           `json:"access_token" bson:"access_token"`
 	Account           AccountType      `json:"account" bson:"account"`
 	Email             string           `json:"email" bson:"email"`
 	Uuid              string           `json:"uuid" bson:"uuid"`
