@@ -21,7 +21,6 @@ type DBConnection struct {
 }
 
 func InitMongoDB(dbname string, collname string) (DB, error) {
-	fmt.Println("MongoDB client initializing...", dbname, collname)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
 	defer cancel()
 	dbconn := make(chan DBConnection)

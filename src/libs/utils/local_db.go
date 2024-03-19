@@ -1,42 +1,43 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"kaab/src/libs/config"
+	"kaab/src/libs/db"
 	"kaab/src/models"
 	"regexp"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-func PullUserData(user_id string) (models.UserData, error) {
-	users_list := models.UserDataDB{}
-	userFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, "users.json"), &users_list}
-	userFile.parseJSON()
-	for _, usr := range users_list {
-		if usr.Uuid == user_id {
-			return usr, nil
-		}
-	}
-	return models.UserData{}, errors.New("not found")
-}
-
-func PullEndpoint(endpoint_name string, instance_data models.InstanceCollection) (models.EndpointInstance, error) {
+func PullEndpoint(endpointName string, instance_data models.InstanceCollection) (models.EndpointInstance, error) {
 	endpointData := models.EndpointInstance{}
 	selectedEndpoint := models.DataEntryIdentity{}
 	for _, endp := range instance_data.EndpointsList {
-		if endp.Name == endpoint_name {
+		if endp.Name == endpointName {
 			selectedEndpoint = endp
 			break
 		}
 	}
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, db.ENDPOINTS)
+	if err != nil {
+		return endpointData, err
+	}
 	endpointFile := models.EndpointFile{}
-	dataFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, selectedEndpoint.RefId), &endpointFile}
-	dataFile.parseJSON()
-
+	ctx := context.Background()
+	identify := bson.M{"name": selectedEndpoint.Name, "uuid": selectedEndpoint.Id}
+	err = Db.coll.FindOne(ctx, identify).Decode(&endpointFile)
+	if err != nil {
+		return endpointData, err
+	}
 	if endpointFile.Value[0].Get != "" || endpointFile.Value[0].Post != "" || endpointFile.Value[0].Delete != "" {
 		endpointData.EndpointCode = endpointFile.Value[0]
-		endpointData.Context = GatherContext(instance_data, endpointFile.Value[0])
+		dataContext := GatherContext(instance_data, endpointFile.Value[0])
+		endpointData.Context = dataContext
+		fmt.Println(":dataContext:", dataContext)
 		return endpointData, nil
 	}
 	return endpointData, errors.New("instance does not exist")
@@ -44,7 +45,7 @@ func PullEndpoint(endpoint_name string, instance_data models.InstanceCollection)
 
 func GatherContext(instance_data models.InstanceCollection, code models.EndpointCode) string {
 	selection := NewStringArray{}
-	rex := regexp.MustCompile(`useContext\(["'](.*)["']\)`)
+	rex := regexp.MustCompile(`useContext\([\s]["'](.*)["'][\s]\)`)
 	allItems := rex.FindAllString(code.Get, -1)
 	for i := 0; i < len(allItems); i++ {
 		match := rex.FindStringSubmatch(allItems[i])
@@ -52,18 +53,26 @@ func GatherContext(instance_data models.InstanceCollection, code models.Endpoint
 			selection.elements = append(selection.elements, match[1])
 		}
 	}
-	ctx := map[string]any{}
+	internalCTX := map[string]any{}
+
+	ctx := context.Background()
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, db.FILES)
+	if err != nil {
+		return ""
+	}
 	for ii := 0; ii < len(instance_data.TextFilesList); ii++ {
 		cur := instance_data.TextFilesList[ii]
-
 		if key, ok := selection.ContainsKey(cur.RefId); ok {
-			currSelFile := models.DBstorageFile{}
-			activeFile := OpenFILE{fmt.Sprintf("%s/%s", config.APPENV.DbDir, cur.RefId), &currSelFile}
-			activeFile.parseJSON()
-			ctx[key] = currSelFile.Value
+			currSelFile := models.TextFileItem{}
+			identify := bson.M{"name": cur.Name, "uuid": cur.Id}
+			err = Db.coll.FindOne(ctx, identify).Decode(&currSelFile)
+			if err != nil {
+				return ""
+			}
+			internalCTX[key] = currSelFile.Value[0]
 		}
 	}
-	res, err := json.Marshal(ctx)
+	res, err := json.Marshal(internalCTX)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error utils.JSON.Marshal: %v", err))
 		return "{\"error\": true}"
@@ -72,26 +81,9 @@ func GatherContext(instance_data models.InstanceCollection, code models.Endpoint
 }
 
 func PullInstanceCollection(instance_id string) (models.InstanceCollection, error) {
-	dataInstance := models.InstanceCollection{}
-	fileName := fmt.Sprintf("%s/%s.json", config.APPENV.DbDir, instance_id)
-	currentInstance := OpenFILE{fileName, &dataInstance}
-	currentInstance.parseJSON()
-
-	if dataInstance.Name == instance_id {
-		return dataInstance, nil
-	}
-	return dataInstance, errors.New("instance does not exist")
-}
-
-func VerifyInstanceExist(instance_id string, user_id string) (bool, error) {
-	instance, err := PullInstanceCollection(instance_id)
+	dataInstance, err := db.GetInstanceInfo(instance_id, "")
 	if err != nil {
-		return false, err
+		return models.InstanceCollection{}, err
 	}
-	members := NewStringArray{instance.Members}
-	allow := members.Contains(user_id)
-	if !allow {
-		return false, errors.New("user not allowed")
-	}
-	return true, nil
+	return dataInstance, err
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"kaab/src/libs/db"
 	"kaab/src/libs/utils"
 	"kaab/src/models"
 	"net/http"
@@ -14,17 +15,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func LoadEndpointData(instance_id string, endpoint_name string) (models.EndpointInstance, error) {
-	instanceId, err := utils.PullInstanceCollection(instance_id)
+func LoadEndpointData(instance_id string, endpoint_id string) (models.EndpointInstance, error) {
+	instanceColl, err := db.PullInstanceInfo(instance_id)
 	if err != nil {
 		return models.EndpointInstance{}, err
 	}
 
-	endpointInstance, err := utils.PullEndpoint(endpoint_name, instanceId)
+	endpointInstance, err := utils.PullEndpoint(endpoint_id, instanceColl)
 	if err != nil {
 		return models.EndpointInstance{}, err
 	}
-
 	return endpointInstance, nil
 }
 

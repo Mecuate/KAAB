@@ -107,6 +107,21 @@ func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceColl
 	return res, nil
 }
 
+func PullInstanceInfo(instanceName string) (models.InstanceCollection, error) {
+	var res models.InstanceCollection
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return res, err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName}
+	err = Db.coll.FindOne(ctx, identify).Decode(&res)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
 func AddNewNodeToList(instanceName string, subjectId string, data models.DataEntryIdentity) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
