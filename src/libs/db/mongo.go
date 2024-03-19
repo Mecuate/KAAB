@@ -58,12 +58,6 @@ func createClient(ctx context.Context) (*mongo.Client, error) {
 		log.Fatal(err)
 	}
 	return client, err
-	/*
-			 tM := reflect.TypeOf(bson.M{})
-		    reg := bson.NewRegistryBuilder().RegisterTypeMapEntry(bsontype.EmbeddedDocument, tM).Build()
-		    clientOpts := options.Client().ApplyURI(SOMEURI).SetAuth(authVal).SetRegistry(reg)
-		    client, err := mongo.Connect(ctx, clientOpts)
-	*/
 }
 
 func (db DB) InsertOne(payload interface{}) error {

@@ -11,7 +11,7 @@ import (
 )
 
 var read_actions = NewStringArray{[]string{"account", "profile", "permissions", "report", "security"}}
-var create_actions = NewStringArray{[]string{"profile", "report"}}
+var create_actions = NewStringArray{[]string{"profile"}}
 var update_actions = NewStringArray{[]string{"account", "profile", "permissions"}}
 var delete_actions = NewStringArray{[]string{"profile"}}
 
@@ -35,7 +35,6 @@ var AllowedReadActions = AllowedFunc{
 	"account":     GetAccount,
 	"profile":     GetProfile,
 	"permissions": GetPermissions,
-	"report":      GetReport,
 	"security":    GetSecurity,
 }
 
@@ -65,12 +64,6 @@ func GetPermissions(args ...any) interface{} {
 	}
 }
 
-func GetReport(args ...any) interface{} {
-	return models.ReportConform{
-		ReportFrame: fmt.Sprintf("%v", time.Now().Unix()),
-	}
-}
-
 func GetSecurity(args ...any) interface{} {
 	user_info := args[0].(MUD)
 	expirationDate, _ := strconv.ParseInt(user_info.Account.ExpirationDate, 10, 64)
@@ -96,7 +89,6 @@ func GetAccount(args ...any) interface{} {
 
 var AllowedCreateActions = AllowedFunc{
 	"profile": CreateProfile,
-	"report":  CreateReport,
 }
 
 func CreateProfile(args ...any) interface{} {
@@ -115,11 +107,6 @@ func CreateProfile(args ...any) interface{} {
 		config.Err(fmt.Sprintf("Error creating user: %v", err))
 		return DATA_FAIL
 	}
-	return Res
-}
-
-func CreateReport(args ...any) interface{} {
-	var Res interface{}
 	return Res
 }
 

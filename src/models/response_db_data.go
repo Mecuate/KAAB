@@ -142,13 +142,12 @@ type CreateMediaRequest struct {
 }
 
 type CreateInstanceRequest struct {
-	Name     string   `json:"name" bson:"name"`
-	Versions string   `json:"versions" bson:"versions"`
-	Owner    string   `json:"owner" bson:"owner"`
-	Admin    []string `json:"admin" bson:"admin"`
-	Members  []string `json:"members" bson:"members"`
-	Status   string   `json:"status" bson:"status"`
-	Bump     bool     `json:"bump" bson:"bump"`
+	Name    string   `json:"name" bson:"name"`
+	Owner   string   `json:"owner" bson:"owner"`
+	Admin   []string `json:"admin" bson:"admin"`
+	Members []string `json:"members" bson:"members"`
+	Status  string   `json:"status" bson:"status"`
+	Bump    bool     `json:"bump" bson:"bump"`
 }
 
 type InternalMediaCtrlFields struct {

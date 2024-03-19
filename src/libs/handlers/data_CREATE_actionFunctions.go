@@ -391,6 +391,7 @@ func CreateInstanceItem(args ...any) (any, error) {
 	subjectId := fmt.Sprintf("%v", args[3])
 	r := args[1].(*http.Request)
 	ReqApi := fmt.Sprintf("%v", args[4])
+	RefId := args[5].(bool)
 	var payload models.CreateInstanceRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -399,7 +400,7 @@ func CreateInstanceItem(args ...any) (any, error) {
 	ctrlData := CreateCtrlFields(id)
 	instanceItem := models.InstanceCollection{
 		Name:           payload.Name,
-		Versions:       []string{payload.Versions},
+		Versions:       ctrlData.Versions,
 		Owner:          subjectId,
 		Admin:          []string{subjectId},
 		Members:        []string{subjectId},
@@ -416,7 +417,11 @@ func CreateInstanceItem(args ...any) (any, error) {
 			Status:           payload.Status,
 		},
 	}
-	err = db.CreateInstanceItem(instanceItem, instName, subjectId, ReqApi)
+	if RefId {
+		err = db.CreateInstanceItem(instanceItem, payload.Name, subjectId, ReqApi)
+	} else {
+		err = db.CreateInstanceItem(instanceItem, instName, subjectId, ReqApi)
+	}
 	if err != nil {
 		return DATA_FAIL, err
 	}

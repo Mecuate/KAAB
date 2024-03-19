@@ -206,9 +206,6 @@ type ProfileConform struct {
 	ExpirationDate       string `json:"expiration_date" bson:"expiration_date"`
 }
 
-type ReportConform struct {
-	ReportFrame string `json:"report_frame" bson:"report_frame"`
-}
 type DataEntryIdentity struct {
 	Name   string `json:"name" bson:"name"`
 	Id     string `json:"id" bson:"id"`

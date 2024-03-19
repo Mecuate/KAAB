@@ -96,16 +96,23 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			instanceId, section, action, _ := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			_, err = db.VerifyInstanceExist(instanceId, ReqApi)
-			// TODO: [` add double check for permissions:: internalInstanceID `]-{2024-02-23}
-			if err != nil {
-				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
-				FailReq(w, 5)
-				return
+			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
+			fmt.Println("--:", instanceId, section, action, ref_id)
+			if ref_id == "new" && instanceId == ReqApi {
+				fmt.Println("@@@")
+				// 	// resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi)
+				// 	Response(w, "responseBody")
+				// 	return
+			} else {
+				_, err = db.VerifyInstanceExist(instanceId, ReqApi)
+				if err != nil {
+					config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
+					FailReq(w, 5)
+					return
+				}
 			}
 			if validDataAction(action, r.Method, section) {
-				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi)
+				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi, ref_id == "new" && instanceId == ReqApi)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error getting body: %v", err))
 					FailReq(w, 4)

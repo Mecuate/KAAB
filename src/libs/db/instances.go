@@ -19,11 +19,8 @@ func CreateInstanceItem(data models.InstanceCollection, instanceName string, sub
 		config.Err(fmt.Sprintf("Error initializing bd conn [%s] err: %v", instanceName, err))
 		return err
 	}
-	existingId, err := VerifyInstanceExist(data.Name, apiName)
-	if err != nil {
-		config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
-		return err
-	}
+	existingId, _ := VerifyInstanceExist(data.Name, apiName)
+
 	if existingId != "" {
 		config.Err(fmt.Sprintf("Error Instance already Exist: %s", existingId))
 		return fmt.Errorf("error Instance already Exist: %s", existingId)
