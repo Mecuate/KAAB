@@ -23,16 +23,16 @@ type OpenFILE struct {
 	DataModel interface{}
 }
 
-func (f *OpenFILE) parseJSON() {
-	data, err := os.ReadFile(f.Filename)
-	if err != nil {
-		config.Err(fmt.Sprintf("Error utils.JSON.ReadFile: %v", err))
-	}
-	err = ParseJSON(data, &f.DataModel)
-	if err != nil {
-		config.Err(fmt.Sprintf("Error utils.JSON.ParseJSON: %v", err))
-	}
-}
+// func (f *OpenFILE) parseJSON() {
+// 	data, err := os.ReadFile(f.Filename)
+// 	if err != nil {
+// 		config.Err(fmt.Sprintf("Error utils.JSON.ReadFile: %v", err))
+// 	}
+// 	err = ParseJSON(data, &f.DataModel)
+// 	if err != nil {
+// 		config.Err(fmt.Sprintf("Error utils.JSON.ParseJSON: %v", err))
+// 	}
+// }
 
 func JSON(t interface{}) string {
 	res, err := json.Marshal(t)

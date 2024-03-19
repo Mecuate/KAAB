@@ -11,6 +11,7 @@ func FailReq(w http.ResponseWriter, num int8) {
 		4:  "Params cannot be extracted.",
 		5:  "User info cannot be pulled.",
 		6:  "Response payload cannot be parsed.",
+		7:  "Unknown url",
 		99: `{"error": "not possible"}`,
 	}
 	codes := map[int8]int{
@@ -21,6 +22,7 @@ func FailReq(w http.ResponseWriter, num int8) {
 		4:  http.StatusBadRequest,
 		5:  http.StatusNotFound,
 		6:  http.StatusInternalServerError,
+		7:  http.StatusInternalServerError,
 		99: http.StatusNoContent,
 	}
 

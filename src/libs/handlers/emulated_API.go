@@ -23,14 +23,12 @@ func EmulatedAPISimpleHandler(w http.ResponseWriter, r *http.Request) {
 		emptyResponse(w)
 		return
 	}
-
 	endpoint, err := utils.ComposeEndpointJS(instEndpointObject, r)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error utils.ComposeEndpointJS: %v", err))
 		emptyResponse(w)
 		return
 	}
-
 	vm := otto.New()
 	vm.Run(endpoint)
 

@@ -18,14 +18,16 @@ func NewRouter() models.MuxRouter {
 }
 
 func InitializeRoutes(r models.MuxRouter) {
-	var vers = strings.Split(config.WEBENV.ApiVersions, ",")
-	var v1 = APIVersion{vers[0]}
 	typedRouter := StabilizeRouter(r.Router)
-
-	// crud.CreateSingleHandlerCRUD(typedRouter, v1.userPath(), UserDataSimpleHandler)
-	UserDataCRUD(typedRouter.Router, v1.userPath())
-	crud.CreateSingleHandlerCRUD(typedRouter, v1.emulatedAPIPath(), EmulatedAPISimpleHandler)
-	crud.CreateSingleHandlerCRUD(typedRouter, v1.dataEntryPath(), DataEntryHandler)
+	var vers = strings.Split(config.WEBENV.ApiVersions, ",")
+	for i := 0; i < len(vers); i++ {
+		var api_version = APIVersion{vers[i]}
+		/* CRUD */
+		UserDataCRUD(typedRouter.Router, api_version.userPath())
+		DataEntryCRUD(typedRouter.Router, api_version.dataEntryPath())
+		/* single handler */
+		crud.CreateSingleHandlerCRUD(typedRouter, api_version.emulatedAPIPath(), EmulatedAPISimpleHandler)
+	}
 }
 
 func NR(r *mux.Router) crud.MuxRouter {

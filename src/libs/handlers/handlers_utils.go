@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"kaab/src/libs/db"
 	"kaab/src/libs/utils"
 	"kaab/src/models"
 	"net/http"
@@ -14,17 +15,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func LoadEndpointData(instance_id string, endpoint_name string) (models.EndpointInstance, error) {
-	instanceId, err := utils.PullInstanceCollection(instance_id)
+func LoadEndpointData(instance_id string, endpoint_id string) (models.EndpointInstance, error) {
+	instanceColl, err := db.PullInstanceInfo(instance_id)
 	if err != nil {
 		return models.EndpointInstance{}, err
 	}
 
-	endpointInstance, err := utils.PullEndpoint(endpoint_name, instanceId)
+	endpointInstance, err := utils.PullEndpoint(endpoint_id, instanceColl)
 	if err != nil {
 		return models.EndpointInstance{}, err
 	}
-
 	return endpointInstance, nil
 }
 
@@ -53,7 +53,7 @@ func ExtractPathParams(r *http.Request, params []string) (map[string]string, err
 	vars := mux.Vars(r)
 	newParams := make(map[string]string)
 	for _, v := range params {
-		rex := regexp.MustCompile(`[^A-Za-z0-9-]`)
+		rex := regexp.MustCompile(`[^&A-Za-z0-9-]`)
 		query := rex.ReplaceAllString(vars[v], ``)
 		if query == "" {
 			return nil, errors.New("empty query")

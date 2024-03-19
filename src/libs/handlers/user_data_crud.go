@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"kaab/src/libs/utils"
+	"kaab/src/libs/config"
+	"kaab/src/libs/db"
+	"kaab/src/models"
 	"net/http"
 
 	auth "github.com/Mecuate/auth_module"
@@ -23,26 +25,34 @@ func UserDataCRUD(r *mux.Router, path string) {
 func UserDataHandler_READ(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authorized, claims := auth.Authorized(w, r)
-		fmt.Println("auth", authorized)
-		fmt.Println("claims", claims)
 
 		if authorized && claims.Realms.Read().Apis {
+			id := claims.Id
 			params, err := ExtractPathParams(r, Params.USER)
 			if err != nil {
 				FailReq(w, 4)
 				return
 			}
-			instance_id, id, action := params["instance_id"], params["subject_id"], params["action"]
-			fmt.Println("instance_id", instance_id)
-			validInstance, err := utils.VerifyServerInstance(instance_id, id)
-			fmt.Println("validInstance", validInstance)
-			user_info, err := utils.PullUserData(id)
+			instanceId, action := params["instance_id"], params["action"]
+			ReqApi, rerr := getReqApi(r)
+			if rerr != nil {
+				FailReq(w, 7)
+				return
+			}
+			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
+				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
 				return
 			}
 
-			if IsReadAction(action) && user_info.Id == id {
+			if IsReadAction(action) {
+				user_info, err := db.PullUserData(id, instanceInternalId)
+				if err != nil {
+					FailReq(w, 5)
+					return
+				}
+				fmt.Println("user_info: ", user_info)
 				resp := AllowedReadActions[action](user_info)
 				responseBody, err := JSON(resp)
 				if err != nil {
@@ -68,21 +78,32 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["subject_id"], params["action"]
-			user_info, err := utils.PullUserData(id)
-			if err != nil {
-				FailReq(w, 5)
+			instanceId, action := params["instance_id"], params["action"]
+			ReqApi, rerr := getReqApi(r)
+			if rerr != nil {
+				FailReq(w, 7)
 				return
 			}
+			instanceInternalId, _ := db.VerifyInstanceExist(instanceId, ReqApi)
 
-			if IsReadAction(action) && user_info.Id == id {
-				resp := AllowedReadActions[action](user_info)
+			if IsCreateAction(action) {
+				var user_info = models.UserData{}
+				if instanceId == ReqApi {
+					user_info.Uuid = fmt.Sprintf("g-%s", claims.Id)
+				} else {
+					user_info, err = db.PullUserData(instanceId, instanceInternalId)
+					if err != nil {
+						FailReq(w, 5)
+						return
+					}
+				}
+				resp := AllowedCreateActions[action](user_info, r)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
 					return
 				}
-				Response(w, fmt.Sprintf(`{"create": %s}`, responseBody))
+				Response(w, fmt.Sprintf(`{"CREATE": %s}`, responseBody))
 			} else {
 				FailReq(w, 99)
 			}
@@ -101,15 +122,27 @@ func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["subject_id"], params["action"]
-			user_info, err := utils.PullUserData(id)
+			instanceId, action, subject := params["instance_id"], params["action"], params["subject_id"]
+			ReqApi, rerr := getReqApi(r)
+			if rerr != nil {
+				FailReq(w, 7)
+				return
+			}
+			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
+				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
 				return
 			}
 
-			if IsReadAction(action) && user_info.Id == id {
-				resp := AllowedReadActions[action](user_info)
+			if IsUpdateAction(action) {
+				user_info, err := db.PullUserData(instanceId, instanceInternalId)
+				if err != nil {
+					FailReq(w, 5)
+					return
+				}
+
+				resp := AllowedUpdateActions[action](user_info, r, subject)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
@@ -134,15 +167,27 @@ func UserDataHandler_DELETE(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			id, action := params["subject_id"], params["action"]
-			user_info, err := utils.PullUserData(id)
+			instanceId, action, subject := params["instance_id"], params["action"], params["subject_id"]
+			ReqApi, rerr := getReqApi(r)
+			if rerr != nil {
+				FailReq(w, 7)
+				return
+			}
+			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
+				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
 				return
 			}
 
-			if IsReadAction(action) && user_info.Id == id {
-				resp := AllowedReadActions[action](user_info)
+			if IsUpdateAction(action) {
+				user_info, err := db.PullUserData(instanceId, instanceInternalId)
+				if err != nil {
+					FailReq(w, 5)
+					return
+				}
+
+				resp := AllowedDeleteActions[action](user_info, r, subject)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
