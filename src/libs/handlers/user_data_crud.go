@@ -89,7 +89,7 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 			if IsCreateAction(action) {
 				var user_info = models.UserData{}
 				if instanceId == ReqApi {
-					user_info.Uuid = "00a00a0a-a0aa-00aa-a0a0-0a0a0aa0a00a"
+					user_info.Uuid = fmt.Sprintf("g-%s", claims.Id)
 				} else {
 					user_info, err = db.PullUserData(instanceId, instanceInternalId)
 					if err != nil {
