@@ -23,7 +23,7 @@ func CreateInstanceItem(data models.InstanceCollection, instanceName string, sub
 
 	if existingId != "" {
 		config.Err(fmt.Sprintf("Error Instance already Exist: %s", existingId))
-		return fmt.Errorf("error Instance already Exist: %s", existingId)
+		return fmt.Errorf("instance name in use: %s", data.Name)
 	}
 
 	err = DB.InsertOne(data)

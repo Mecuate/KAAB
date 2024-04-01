@@ -97,12 +97,8 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 				return
 			}
 			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			fmt.Println("--:", instanceId, section, action, ref_id)
 			if ref_id == "new" && instanceId == ReqApi {
-				fmt.Println("@@@")
-				// 	// resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi)
-				// 	Response(w, "responseBody")
-				// 	return
+				config.Log(fmt.Sprintf("Creating new instance: %s", instanceId))
 			} else {
 				_, err = db.VerifyInstanceExist(instanceId, ReqApi)
 				if err != nil {
@@ -115,7 +111,7 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi, ref_id == "new" && instanceId == ReqApi)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error getting body: %v", err))
-					FailReq(w, 4)
+					FailReq(w, 101, err)
 					return
 				}
 				responseBody, err := JSON(resp)

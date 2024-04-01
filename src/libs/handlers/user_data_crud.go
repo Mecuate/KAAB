@@ -52,7 +52,6 @@ func UserDataHandler_READ(path string) crud.HandleFunc {
 					FailReq(w, 5)
 					return
 				}
-				fmt.Println("user_info: ", user_info)
 				resp := AllowedReadActions[action](user_info)
 				responseBody, err := JSON(resp)
 				if err != nil {

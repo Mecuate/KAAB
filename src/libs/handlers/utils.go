@@ -64,8 +64,8 @@ func MapToStringSlice(m map[string]string) []string {
 
 func RequestAuth(w http.ResponseWriter) {
 	http.Header.Add(w.Header(), "WWW-Authenticate", `JWT realm="Restricted"`)
-	http.Header.Add(w.Header(), "User-Token", `SESSION`)
-	http.Error(w, "88", http.StatusUnauthorized)
+	http.Header.Add(w.Header(), "User-Token", `token`)
+	http.Error(w, "", http.StatusUnauthorized)
 }
 
 func getReqApi(r *http.Request) (string, error) {

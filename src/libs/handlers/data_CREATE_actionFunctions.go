@@ -397,6 +397,9 @@ func CreateInstanceItem(args ...any) (any, error) {
 	if err != nil {
 		return DATA_FAIL, err
 	}
+	if payload.Name == "" {
+		return DATA_FAIL, fmt.Errorf("cannot create instance without a name")
+	}
 	ctrlData := CreateCtrlFields(id)
 	instanceItem := models.InstanceCollection{
 		Name:           payload.Name,
@@ -422,6 +425,7 @@ func CreateInstanceItem(args ...any) (any, error) {
 	} else {
 		err = db.CreateInstanceItem(instanceItem, instName, subjectId, ReqApi)
 	}
+
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -429,6 +433,7 @@ func CreateInstanceItem(args ...any) (any, error) {
 	R["item"] = ctrlData.Uuid
 	return R, nil
 }
+
 func CreateInstanceItems(args ...any) (any, error) {
 	return DATA_FAIL, nil
 }

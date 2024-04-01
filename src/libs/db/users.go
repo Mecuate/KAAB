@@ -13,13 +13,12 @@ import (
 
 func PullUserData(userId string, instanceId string) (models.UserData, error) {
 	var res models.UserData
-	signature := EncodeSignature(instanceId, userId)
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, USERS)
 	if err != nil {
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"id": userId, "access_token": signature}
+	identify := bson.M{"id": userId}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err
@@ -34,8 +33,9 @@ func CreateUser(userData models.UserData, payload models.CreateUserRequestBody) 
 	if err != nil {
 		return F, err
 	}
+	newUuid := uuid.New().String()
 	ctx := context.Background()
-	userUUID := uuid.New().String()
+	userUUID := newUuid
 	currentTime := fmt.Sprintf("%v", time.Now().Unix())
 	ctrlFields := CreateCtrlFields(userData.Uuid)
 	userAccount := models.AccountType{
@@ -64,7 +64,7 @@ func CreateUser(userData models.UserData, payload models.CreateUserRequestBody) 
 		Name:              payload.Name,
 		LastName:          payload.LastName,
 		Nick:              payload.Nick,
-		Password:          payload.Password,
+		Password:          MakeSHA1Hash(payload.Password),
 		Realm:             RealmData,
 		Token:             payload.Token,
 		UserRol:           payload.UserRol,
@@ -79,7 +79,7 @@ func CreateUser(userData models.UserData, payload models.CreateUserRequestBody) 
 		return F, err
 	}
 
-	return F, nil
+	return newUuid, nil
 }
 
 func UpdateUser(userData models.UserData, payload models.UpdateProfileRequestBody, subject string) (interface{}, error) {

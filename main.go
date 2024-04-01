@@ -10,7 +10,6 @@ func main() {
 	config.LoadLogger()
 	err := server.RunServer()
 	if err != nil {
-
 		fmt.Println("kaab server application error")
 		fmt.Println(err)
 	}

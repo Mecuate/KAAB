@@ -79,11 +79,3 @@ func GatherContext(instance_data models.InstanceCollection, code models.Endpoint
 	}
 	return string(res)
 }
-
-func PullInstanceCollection(instance_id string) (models.InstanceCollection, error) {
-	dataInstance, err := db.GetInstanceInfo(instance_id, "")
-	if err != nil {
-		return models.InstanceCollection{}, err
-	}
-	return dataInstance, err
-}
