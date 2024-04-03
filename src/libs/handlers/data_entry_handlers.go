@@ -18,6 +18,13 @@ var data_action_create = NewStringArray{[]string{"item", "items"}}
 var data_action_update = NewStringArray{[]string{"item", "items"}}
 var data_action_delete = NewStringArray{[]string{"item", "items"}}
 
+func PublicDataCRUD(r *mux.Router, path string) {
+	var DataHandlersCollection = crud.IndividualCRUDHandlers{
+		crud.READ: DataHandler_READ(path),
+	}
+	crud.CreateMultiHandlerCRUD(NR(r), path, DataHandlersCollection)
+}
+
 func DataEntryCRUD(r *mux.Router, path string) {
 	var DataHandlersCollection = crud.IndividualCRUDHandlers{
 		crud.READ:   DataHandler_READ(path),
@@ -53,14 +60,13 @@ func DataHandler_READ(path string) crud.HandleFunc {
 				return
 			}
 
-			_, err = db.VerifyInstanceExist(instanceId, ReqApi)
-			if err != nil {
-				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
-				FailReq(w, 5)
-				return
-			}
-
 			if validDataAction(action, r.Method, section) {
+				_, err = db.VerifyInstanceExist(instanceId, ReqApi)
+				if err != nil {
+					config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
+					FailReq(w, 5)
+					return
+				}
 				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, ReqSearch)
 				responseBody, err := JSON(resp)
 				if err != nil {
@@ -108,7 +114,7 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 				}
 			}
 			if validDataAction(action, r.Method, section) {
-				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi, ref_id == "new" && instanceId == ReqApi)
+				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi, ref_id == "new" && instanceId == ReqApi, KAAB_VERSION[ReqApi].Publish)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error getting body: %v", err))
 					FailReq(w, 101, err)

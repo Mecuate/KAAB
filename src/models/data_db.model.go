@@ -125,6 +125,7 @@ type NodesFilesCollectionList []DataEntryIdentity
 
 type InstanceCollection struct {
 	Name           string                   `json:"name" bson:"name"`
+	RefId          string                   `json:"ref" bson:"ref"`
 	Versions       []string                 `json:"versions" bson:"versions" default:"[]"`
 	Owner          string                   `json:"owner" bson:"owner"`
 	Admin          []string                 `json:"admin" bson:"admin"`
@@ -135,6 +136,16 @@ type InstanceCollection struct {
 	TextFilesList  TextFilesCollectionList  `json:"files_collection_list" bson:"files_collection_list"`
 	NodesFilesList NodesFilesCollectionList `json:"nodes_collection_list" bson:"nodes_collection_list"`
 	Sys            SysData                  `json:"sys" bson:"sys"`
+}
+
+type ShallowInstanceCollection struct {
+	Name     string   `json:"name" bson:"name"`
+	RefId    string   `json:"reference" bson:"reference"`
+	Versions []string `json:"versions" bson:"versions" default:"[]"`
+	Owner    string   `json:"owner" bson:"owner"`
+	Admin    []string `json:"admin" bson:"admin"`
+	Members  []string `json:"members" bson:"members"`
+	Sys      SysData  `json:"metadata" bson:"metadata"`
 }
 
 type SysData struct {

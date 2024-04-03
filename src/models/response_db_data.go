@@ -77,15 +77,15 @@ type MediaItemResponse struct {
 type ManyMediaItemResponse = []MediaItemResponse
 
 type EndpointItemResponse struct {
-	Uuid        string        `json:"uuid" bson:"uuid"`
-	Name        string        `json:"name" bson:"name"`
-	Description string        `json:"description" bson:"description"`
-	Size        int16         `json:"size" bson:"size"`
-	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
-	Value       []interface{} `json:"value" bson:"value"`
-	RefId       string        `json:"ref_id" bson:"ref_id"`
-	MemFile     string        `json:"mem_file" bson:"mem_file"`
-	Status      string        `json:"status" bson:"status"`
+	Uuid        string      `json:"uuid" bson:"uuid"`
+	Name        string      `json:"name" bson:"name"`
+	Description string      `json:"description" bson:"description"`
+	Size        int16       `json:"size" bson:"size"`
+	Versions    []string    `json:"versions" bson:"versions" default:"1.0"`
+	Value       interface{} `json:"value" bson:"value"`
+	RefId       string      `json:"ref_id" bson:"ref_id"`
+	MemFile     string      `json:"mem_file" bson:"mem_file"`
+	Status      string      `json:"status" bson:"status"`
 }
 
 type CreateNodeRequest struct {

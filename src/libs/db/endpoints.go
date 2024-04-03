@@ -39,7 +39,7 @@ func CreateEndpointItem(data models.EndpointItem, instName string, subjectId str
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: "active",
+		Status: data.Status,
 		RefId:  data.RefId,
 	}
 	err = AddNewEndpointToList(instName, subjectId, newRecord)

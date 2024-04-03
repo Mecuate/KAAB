@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/libs/db"
@@ -64,13 +63,14 @@ func GetEndpointItem(args ...any) any {
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
+	valuesList := AssortData(endpointItem.Value, ReqSearch, endpointItem.Versions)
 	return models.EndpointItemResponse{
 		Uuid:        endpointItem.Uuid,
 		Name:        endpointItem.Name,
 		Description: endpointItem.Description,
 		Size:        endpointItem.Size,
-		Versions:    endpointItem.Versions,
-		Value:       AssortData(endpointItem.Value, ReqSearch, endpointItem.Versions),
+		Versions:    valuesList.version(),
+		Value:       valuesList.data()[0],
 		RefId:       endpointItem.RefId,
 		MemFile:     endpointItem.MemFile,
 		Status:      endpointItem.Status,
@@ -95,13 +95,14 @@ func GetNodeItem(args ...any) any {
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
+	node := AssortData(nodeItem.Value, ReqSearch, nodeItem.Versions)
 	return models.NodeItemResponse{
 		Uuid:        nodeItem.Uuid,
 		Name:        nodeItem.Name,
 		Description: nodeItem.Description,
 		Size:        nodeItem.Size,
-		Versions:    nodeItem.Versions,
-		Value:       AssortData(nodeItem.Value, ReqSearch, nodeItem.Versions),
+		Versions:    node.version(),
+		Value:       node.data(),
 		RefId:       nodeItem.RefId,
 		Schema:      nodeItem.Schema,
 		Status:      nodeItem.Status,
@@ -151,13 +152,14 @@ func GetContentItem(args ...any) any {
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
+	content := AssortData(contentItem.Value, ReqSearch, contentItem.Versions)
 	return models.ContentItemResponse{
 		Uuid:        contentItem.Uuid,
 		Name:        contentItem.Name,
 		Description: contentItem.Description,
 		Size:        contentItem.Size,
-		Versions:    contentItem.Versions,
-		Value:       AssortData(contentItem.Value, ReqSearch, contentItem.Versions),
+		Versions:    content.version(),
+		Value:       content.data(),
 		RefId:       contentItem.RefId,
 		Schema:      contentItem.Schema,
 		Status:      contentItem.Status,
@@ -207,13 +209,14 @@ func GetMediaItem(args ...any) any {
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
+	mediaF := AssortData(mediaItem.Value, ReqSearch, mediaItem.Versions)
 	return models.MediaItemResponse{
 		Uuid:        mediaItem.Uuid,
 		Name:        mediaItem.Name,
 		Description: mediaItem.Description,
 		Size:        mediaItem.Size,
-		Versions:    mediaItem.Versions,
-		Value:       AssortData(mediaItem.Value, ReqSearch, mediaItem.Versions),
+		Versions:    mediaF.version(),
+		Value:       mediaF.data(),
 		RefId:       mediaItem.RefId,
 		Ttype:       mediaItem.Ttype,
 		Duration:    mediaItem.Duration,
@@ -259,13 +262,14 @@ func GetSchemaItem(args ...any) any {
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
+	schema := AssortData(schemaItem.Value, ReqSearch, schemaItem.Versions)
 	return models.SchemaItemResponse{
 		Uuid:        schemaItem.Uuid,
 		Name:        schemaItem.Name,
 		Description: schemaItem.Description,
 		Size:        schemaItem.Size,
-		Versions:    schemaItem.Versions,
-		Value:       AssortData(schemaItem.Value, ReqSearch, schemaItem.Versions),
+		Versions:    schema.version(),
+		Value:       schema.data(),
 		Status:      schemaItem.Status,
 	}
 }
@@ -305,34 +309,37 @@ func GetInstanceList(args ...any) any {
 }
 
 func GetInstanceItem(args ...any) any {
-	selected := fmt.Sprintf("%v", args[2])
-	instance := GetInstanceList(args[0], args[1])
-	if instance == nil {
-		config.Err(fmt.Sprintf("Error getting instance info: %v", args[0]))
+	instanceName, subjectId, selected := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1]), fmt.Sprintf("%v", args[2])
+	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY
 	}
-	res, err := json.Marshal(instance)
-	if err != nil {
-		return DATA_FAIL
-	}
-	resp := models.SysData{}
-	err = json.Unmarshal(res, &resp)
-	if err != nil {
-		return DATA_FAIL
-	}
 	switch selected {
-	case "creation_date":
-		return resp.CreationDate
-	case "modification_date":
-		return resp.ModificationDate
-	case "created_by":
-		return resp.CreatedBy
-	case "modified_by":
-		return resp.ModifiedBy
+	case "creation":
+		return instance.Sys.CreationDate
+	case "modification":
+		return instance.Sys.ModificationDate
+	case "createdby":
+		return instance.Sys.CreatedBy
+	case "modifiedby":
+		return instance.Sys.ModifiedBy
 	case "status":
-		return resp.Status
+		return instance.Sys.Status
+	case "refid":
+		return instance.RefId
+	case "instance":
+		return models.ShallowInstanceCollection{
+			RefId:    instance.RefId,
+			Name:     instance.Name,
+			Sys:      instance.Sys,
+			Admin:    instance.Admin,
+			Members:  instance.Members,
+			Owner:    instance.Owner,
+			Versions: instance.Versions,
+		}
 	}
-	return DATA_FAIL
+	return DATA_SUCC
 }
 
 func GetInstanceItems(args ...any) any {

@@ -1,13 +1,14 @@
 package models
 
 type WebConfigs struct {
-	Port        string `required:"true" split_words:"true" default:"11112"`
-	CorsEnabled string `required:"true" split_words:"true" default:"true"`
-	Environment string `required:"true" split_words:"true"`
-	ApiVersions string `required:"true" split_words:"true"`
-	PubDbName   string `required:"true" split_words:"true"`
-	IntDbName   string `required:"true" split_words:"true"`
-	Mongodburi  string `required:"true" split_words:"true"`
+	Port                 string `required:"true" split_words:"true" default:"11112"`
+	CorsEnabled          string `required:"true" split_words:"true" default:"true"`
+	Environment          string `required:"true" split_words:"true"`
+	ApiVersions          string `required:"true" split_words:"true"`
+	ApiPublishedVersions string `required:"true" split_words:"true"`
+	PubDbName            string `required:"true" split_words:"true"`
+	IntDbName            string `required:"true" split_words:"true"`
+	Mongodburi           string `required:"true" split_words:"true"`
 }
 
 type LoggingConfig struct {

@@ -77,8 +77,10 @@ func CORSServer(config *models.EnvConfigs, server *models.Server) {
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"OPTIONS", "GET", "READ", "POST", "CREATE", "UPDATE", "DELETE"},
 	})
-
-	db.DatabaseSetup(serverConfig.PubDbName, strings.Split(serverConfig.ApiVersions, ","))
+	sources := strings.Split(serverConfig.ApiVersions, ",")
+	pulishers := strings.Split(serverConfig.ApiPublishedVersions, ",")
+	apisCollections := append(sources, pulishers...)
+	db.DatabaseSetup(serverConfig.PubDbName, apisCollections)
 	cf.Log(fmt.Sprintf("DB initialization completed:[%s]", serverConfig.PubDbName))
 	cf.Log(fmt.Sprintf("CORS server will run on port: %s", serverConfig.Port))
 

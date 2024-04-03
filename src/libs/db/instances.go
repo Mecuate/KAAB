@@ -7,13 +7,57 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/models"
+	mrand "math/rand"
 	"time"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func CreateInstanceItem(data models.InstanceCollection, instanceName string, subjectId string, apiName string) error {
+func CreateInstanceItem(data models.InstanceCollection, instanceName string, subjectId string, apiName string, publishTarget string, bump bool) (any, error) {
+	refID, err := randomRefID()
+	if err != nil {
+		refID = fmt.Sprintf("dev-%s", data.Name)
+	}
+	data.RefId = refID
+	err = CreatePublisedInstanceItem(data, instanceName, subjectId, publishTarget, refID, bump)
+	if err != nil {
+		config.Err(fmt.Sprintf("-Error saving Published Instance [%s] Initial Data: %v", instanceName, err))
+		return "", err
+	}
+
+	DB, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		config.Err(fmt.Sprintf("Error initializing bd conn [%s] err: %v", instanceName, err))
+		return "", err
+	}
+	existingId, _ := VerifyInstanceExist(data.Name, apiName)
+
+	if existingId != "" {
+		config.Err(fmt.Sprintf("Error Instance already Exist: %s", existingId))
+		return "", fmt.Errorf("instance name in use: %s", data.Name)
+	}
+	RefId := data.Name
+	Name := data.RefId
+	data.Name = Name
+	data.RefId = RefId
+
+	err = DB.InsertOne(data)
+	if err != nil {
+		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
+		return "", err
+	}
+	newID, err := AppendInstanceToRegistry(data, apiName, instanceName)
+	if err != nil {
+		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
+		return "", err
+	}
+
+	config.Log(fmt.Sprintf("Instance origin: [%s] Initial Data Saved: %v", instanceName, newID))
+	return refID, nil
+}
+
+func CreatePublisedInstanceItem(data models.InstanceCollection, instanceName string, subjectId string, apiName string, refID string, bump bool) error {
 	DB, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error initializing bd conn [%s] err: %v", instanceName, err))
@@ -31,7 +75,7 @@ func CreateInstanceItem(data models.InstanceCollection, instanceName string, sub
 		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
 		return err
 	}
-	newID, err := AppendInstanceToRegistry(data.Name, apiName)
+	newID, err := AppendInstanceToRegistry(data, apiName, refID)
 	if err != nil {
 		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
 		return err
@@ -40,14 +84,20 @@ func CreateInstanceItem(data models.InstanceCollection, instanceName string, sub
 	return nil
 }
 
-func AppendInstanceToRegistry(instanceName string, apiName string) (string, error) {
+func AppendInstanceToRegistry(data models.InstanceCollection, apiName string, FKrefId string) (string, error) {
+	instanceName := data.Name
 	Db, err := InitMongoDB(config.WEBENV.IntDbName, apiName)
 	if err != nil {
 		return "", err
 	}
-	refID, err := randomRefID()
-	if err != nil {
-		return "", err
+	var refID string
+	if FKrefId != "" {
+		refID = FKrefId
+	} else {
+		refID, err = randomRefID()
+		if err != nil {
+			return "", err
+		}
 	}
 	ctx := context.Background()
 	item := models.DataEntryIdentity{
@@ -64,14 +114,26 @@ func AppendInstanceToRegistry(instanceName string, apiName string) (string, erro
 }
 
 func randomRefID() (string, error) {
-	numBytes := (12 * 3) / 4
+	numBytes := (12 * 4) / 2
 	randomBytes := make([]byte, numBytes)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
 		return "", err
 	}
 	res := base64.URLEncoding.EncodeToString(randomBytes)
-	return res[:12], nil
+	return cleanString(res[:16]), nil
+}
+
+func cleanString(input string) string {
+	mrand.Seed(time.Now().UnixNano())
+	result := []rune(input)
+	for i, char := range result {
+		if char == '-' || char == '_' {
+			randomChar := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")[mrand.Intn(62)]
+			result[i] = randomChar
+		}
+	}
+	return string(result)
 }
 
 func VerifyInstanceExist(instanceName string, apiName string) (string, error) {
@@ -95,6 +157,7 @@ func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceColl
 	if err != nil {
 		return res, err
 	}
+	fmt.Println("DB", Db)
 	ctx := context.Background()
 	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)

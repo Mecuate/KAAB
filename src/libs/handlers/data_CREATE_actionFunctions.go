@@ -391,7 +391,8 @@ func CreateInstanceItem(args ...any) (any, error) {
 	subjectId := fmt.Sprintf("%v", args[3])
 	r := args[1].(*http.Request)
 	ReqApi := fmt.Sprintf("%v", args[4])
-	RefId := args[5].(bool)
+	instanceCreation := args[5].(bool)
+	publishTarget := args[6].(string)
 	var payload models.CreateInstanceRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -420,17 +421,25 @@ func CreateInstanceItem(args ...any) (any, error) {
 			Status:           payload.Status,
 		},
 	}
-	if RefId {
-		err = db.CreateInstanceItem(instanceItem, payload.Name, subjectId, ReqApi)
+	refID := ""
+	if instanceCreation {
+		rawRefID, err := db.CreateInstanceItem(instanceItem, payload.Name, subjectId, ReqApi, publishTarget, payload.Bump)
+		refID = rawRefID.(string)
+		if err != nil {
+			return DATA_FAIL, err
+		}
 	} else {
-		err = db.CreateInstanceItem(instanceItem, instName, subjectId, ReqApi)
+		rawRefID, err := db.CreateInstanceItem(instanceItem, instName, subjectId, ReqApi, publishTarget, payload.Bump)
+		refID = rawRefID.(string)
+		if err != nil {
+			return DATA_FAIL, err
+		}
 	}
 
-	if err != nil {
-		return DATA_FAIL, err
-	}
 	R := DATA_SUCC
-	R["item"] = ctrlData.Uuid
+	R["instance_id"] = ctrlData.Uuid
+	R["instance_name"] = payload.Name
+	R["instance_dev"] = refID
 	return R, nil
 }
 

@@ -69,7 +69,9 @@ func RequestAuth(w http.ResponseWriter) {
 }
 
 func getReqApi(r *http.Request) (string, error) {
-	availApis := NewStringArray{strings.Split(config.WEBENV.ApiVersions, ",")}
+	internal := strings.Split(config.WEBENV.ApiVersions, ",")
+	pub := strings.Split(config.WEBENV.ApiPublishedVersions, ",")
+	availApis := NewStringArray{append(internal, pub...)}
 	curr := strings.Split(r.RequestURI, "/")[1]
 
 	if availApis.Contains(curr) {
@@ -190,7 +192,18 @@ func SortData(itemValues []KV, sortVal string) []map[string]interface{} {
 	return itemValues
 }
 
-func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams, versions []string) []interface{} {
+type AssortedData struct {
+	DataSelected    []interface{}
+	VersionSelected string
+}
+
+func (A *AssortedData) data() []interface{} {
+	return A.DataSelected
+}
+func (A *AssortedData) version() []string {
+	return []string{A.VersionSelected}
+}
+func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams, versions []string) AssortedData {
 	var Res []interface{}
 	var Result []interface{}
 	var selItem int
@@ -203,7 +216,6 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 		selItem = 0
 		Res = append(Res, itemValues[selItem])
 	}
-
 	var selectedItem []map[string]interface{}
 	res, _ := json.Marshal(Res[0])
 	json.Unmarshal(res, &selectedItem)
@@ -243,7 +255,10 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 		Result = append(Result, selectedItem)
 	}
 
-	return Result
+	return AssortedData{
+		DataSelected:    Result,
+		VersionSelected: versions[selItem],
+	}
 }
 
 func IndexOf(slice []string, item string) int {
