@@ -37,7 +37,6 @@ func PullEndpoint(endpointName string, instance_data models.InstanceCollection) 
 		endpointData.EndpointCode = endpointFile.Value[0]
 		dataContext := GatherContext(instance_data, endpointFile.Value[0])
 		endpointData.Context = dataContext
-		fmt.Println(":dataContext:", dataContext)
 		return endpointData, nil
 	}
 	return endpointData, errors.New("instance does not exist")

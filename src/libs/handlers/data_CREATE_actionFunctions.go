@@ -39,9 +39,8 @@ func CreateFailed(args ...any) (any, error) {
 }
 
 func CreateEndpointItem(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload models.CreateEndpointRequest
 	err := GetBody(r, &payload)
@@ -49,11 +48,23 @@ func CreateEndpointItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
+	newReferenceID := db.RandomRefID()
+	instData := func() models.DataEntryIdentity {
+		if args[2] == nil {
+			return models.DataEntryIdentity{
+				Name:   payload.Name,
+				RefId:  newReferenceID,
+				Status: payload.Status,
+				Id:     ctrlData.Uuid,
+			}
+		}
+		return args[2].(models.DataEntryIdentity)
+	}()
 	endpointItem := models.EndpointItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
 		Value:            payload.Value,
-		RefId:            payload.RefId,
+		RefId:            newReferenceID,
 		Uuid:             ctrlData.Uuid,
 		Size:             int16(len(fmt.Sprintf("%v", payload.Value))),
 		Versions:         ctrlData.Versions,
@@ -63,7 +74,7 @@ func CreateEndpointItem(args ...any) (any, error) {
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
 	}
-	err = db.CreateEndpointItem(endpointItem, instName, subjectId)
+	err = db.CreateEndpointItem(endpointItem, instData, subjectId)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -74,9 +85,8 @@ func CreateEndpointItem(args ...any) (any, error) {
 
 /* nodes */
 func CreateNodeItem(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload models.CreateNodeRequest
 	err := GetBody(r, &payload)
@@ -84,6 +94,17 @@ func CreateNodeItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
+	instData := func() models.DataEntryIdentity {
+		if args[2] == nil {
+			return models.DataEntryIdentity{
+				Name:   payload.Name,
+				RefId:  payload.RefId,
+				Status: payload.Status,
+				Id:     ctrlData.Uuid,
+			}
+		}
+		return args[2].(models.DataEntryIdentity)
+	}()
 	nodeItem := models.NodeFileItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
@@ -99,7 +120,7 @@ func CreateNodeItem(args ...any) (any, error) {
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
 	}
-	err = db.CreateNodeItem(nodeItem, instName, subjectId)
+	err = db.CreateNodeItem(nodeItem, instData, subjectId)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -109,9 +130,8 @@ func CreateNodeItem(args ...any) (any, error) {
 }
 
 func CreateNodeItems(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload []models.CreateNodeRequest
 	err := GetBody(r, &payload)
@@ -121,6 +141,17 @@ func CreateNodeItems(args ...any) (any, error) {
 	RES := []any{}
 	for _, item := range payload {
 		ctrlData := CreateCtrlFields(id)
+		instData := func() models.DataEntryIdentity {
+			if args[2] == nil {
+				return models.DataEntryIdentity{
+					Name:   item.Name,
+					RefId:  item.RefId,
+					Status: item.Status,
+					Id:     ctrlData.Uuid,
+				}
+			}
+			return args[2].(models.DataEntryIdentity)
+		}()
 		nodeItem := models.NodeFileItem{
 			Name:             item.Name,
 			Description:      item.Description,
@@ -136,7 +167,7 @@ func CreateNodeItems(args ...any) (any, error) {
 			CreatedBy:        ctrlData.CreatedBy,
 			Status:           item.Status,
 		}
-		err = db.CreateNodeItem(nodeItem, instName, subjectId)
+		err = db.CreateNodeItem(nodeItem, instData, subjectId)
 		if err != nil {
 			return DATA_FAIL, err
 		}
@@ -149,9 +180,8 @@ func CreateNodeItems(args ...any) (any, error) {
 
 /* content */
 func CreateContentItem(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload models.CreateContentRequest
 	err := GetBody(r, &payload)
@@ -159,6 +189,17 @@ func CreateContentItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
+	instData := func() models.DataEntryIdentity {
+		if args[2] == nil {
+			return models.DataEntryIdentity{
+				Name:   payload.Name,
+				RefId:  payload.RefId,
+				Status: payload.Status,
+				Id:     ctrlData.Uuid,
+			}
+		}
+		return args[2].(models.DataEntryIdentity)
+	}()
 	contentItem := models.TextFileItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
@@ -174,7 +215,7 @@ func CreateContentItem(args ...any) (any, error) {
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
 	}
-	err = db.CreateContentItem(contentItem, instName, subjectId)
+	err = db.CreateContentItem(contentItem, instData, subjectId)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -184,9 +225,8 @@ func CreateContentItem(args ...any) (any, error) {
 }
 
 func CreateContentItems(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload []models.CreateContentRequest
 	err := GetBody(r, &payload)
@@ -196,6 +236,17 @@ func CreateContentItems(args ...any) (any, error) {
 	RES := []any{}
 	for _, item := range payload {
 		ctrlData := CreateCtrlFields(id)
+		instData := func() models.DataEntryIdentity {
+			if args[2] == nil {
+				return models.DataEntryIdentity{
+					Name:   item.Name,
+					RefId:  item.RefId,
+					Status: item.Status,
+					Id:     ctrlData.Uuid,
+				}
+			}
+			return args[2].(models.DataEntryIdentity)
+		}()
 		nodeItem := models.TextFileItem{
 			Name:             item.Name,
 			Description:      item.Description,
@@ -211,7 +262,7 @@ func CreateContentItems(args ...any) (any, error) {
 			CreatedBy:        ctrlData.CreatedBy,
 			Status:           item.Status,
 		}
-		err = db.CreateContentItem(nodeItem, instName, subjectId)
+		err = db.CreateContentItem(nodeItem, instData, subjectId)
 		if err != nil {
 			return DATA_FAIL, err
 		}
@@ -224,9 +275,8 @@ func CreateContentItems(args ...any) (any, error) {
 
 /* media */
 func CreateMediaItem(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload models.CreateMediaRequest
 	err := GetBody(r, &payload)
@@ -234,6 +284,17 @@ func CreateMediaItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
+	instData := func() models.DataEntryIdentity {
+		if args[2] == nil {
+			return models.DataEntryIdentity{
+				Name:   payload.Name,
+				RefId:  payload.RefId,
+				Status: payload.Status,
+				Id:     ctrlData.Uuid,
+			}
+		}
+		return args[2].(models.DataEntryIdentity)
+	}()
 	mediaAddress := CreateMediaCtrlFields(payload.RefId)
 	mediaItem := models.MediaFileItem{
 		Uuid:             ctrlData.Uuid,
@@ -257,7 +318,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		File:             mediaAddress.File,
 		Status:           payload.Status,
 	}
-	err = db.CreateMediaItem(mediaItem, instName, subjectId)
+	err = db.CreateMediaItem(mediaItem, instData, subjectId)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -267,9 +328,8 @@ func CreateMediaItem(args ...any) (any, error) {
 }
 
 func CreateMediaItems(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload []models.CreateMediaRequest
 	err := GetBody(r, &payload)
@@ -279,6 +339,17 @@ func CreateMediaItems(args ...any) (any, error) {
 	RES := []any{}
 	for _, item := range payload {
 		ctrlData := CreateCtrlFields(id)
+		instData := func() models.DataEntryIdentity {
+			if args[2] == nil {
+				return models.DataEntryIdentity{
+					Name:   item.Name,
+					RefId:  item.RefId,
+					Status: item.Status,
+					Id:     ctrlData.Uuid,
+				}
+			}
+			return args[2].(models.DataEntryIdentity)
+		}()
 		mediaAddress := CreateMediaCtrlFields(item.RefId)
 		mediaItem := models.MediaFileItem{
 			Uuid:             ctrlData.Uuid,
@@ -302,7 +373,7 @@ func CreateMediaItems(args ...any) (any, error) {
 			File:             mediaAddress.File,
 			Status:           item.Status,
 		}
-		err = db.CreateMediaItem(mediaItem, instName, subjectId)
+		err = db.CreateMediaItem(mediaItem, instData, subjectId)
 		if err != nil {
 			return DATA_FAIL, err
 		}
@@ -315,9 +386,8 @@ func CreateMediaItems(args ...any) (any, error) {
 
 /* schemas */
 func CreateSchemaItem(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload models.CreateSchemaRequest
 	err := GetBody(r, &payload)
@@ -325,6 +395,17 @@ func CreateSchemaItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
+	instData := func() models.DataEntryIdentity {
+		if args[2] == nil {
+			return models.DataEntryIdentity{
+				Name:   payload.Name,
+				RefId:  payload.RefId,
+				Status: payload.Status,
+				Id:     ctrlData.Uuid,
+			}
+		}
+		return args[2].(models.DataEntryIdentity)
+	}()
 	schemaItem := models.SchemaItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
@@ -338,7 +419,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
 	}
-	err = db.CreateSchemaItem(schemaItem, instName, subjectId)
+	err = db.CreateSchemaItem(schemaItem, instData, subjectId)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -348,9 +429,8 @@ func CreateSchemaItem(args ...any) (any, error) {
 }
 
 func CreateSchemaItems(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
 	var payload []models.CreateSchemaRequest
 	err := GetBody(r, &payload)
@@ -360,6 +440,17 @@ func CreateSchemaItems(args ...any) (any, error) {
 	RES := []any{}
 	for _, item := range payload {
 		ctrlData := CreateCtrlFields(id)
+		instData := func() models.DataEntryIdentity {
+			if args[2] == nil {
+				return models.DataEntryIdentity{
+					Name:   item.Name,
+					RefId:  item.RefId,
+					Status: item.Status,
+					Id:     ctrlData.Uuid,
+				}
+			}
+			return args[2].(models.DataEntryIdentity)
+		}()
 		schemaItem := models.SchemaItem{
 			Name:             item.Name,
 			Description:      item.Description,
@@ -373,7 +464,7 @@ func CreateSchemaItems(args ...any) (any, error) {
 			CreatedBy:        ctrlData.CreatedBy,
 			Status:           item.Status,
 		}
-		err = db.CreateSchemaItem(schemaItem, instName, subjectId)
+		err = db.CreateSchemaItem(schemaItem, instData, subjectId)
 		if err != nil {
 			return DATA_FAIL, err
 		}
@@ -386,11 +477,10 @@ func CreateSchemaItems(args ...any) (any, error) {
 
 /* instance */
 func CreateInstanceItem(args ...any) (any, error) {
-	id := fmt.Sprintf("%v", args[0])
-	instName := fmt.Sprintf("%v", args[2])
-	subjectId := fmt.Sprintf("%v", args[3])
+	id := args[0].(string)
+	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
-	ReqApi := fmt.Sprintf("%v", args[4])
+	ReqApi := args[4].(string)
 	instanceCreation := args[5].(bool)
 	publishTarget := args[6].(string)
 	var payload models.CreateInstanceRequest
@@ -402,6 +492,18 @@ func CreateInstanceItem(args ...any) (any, error) {
 		return DATA_FAIL, fmt.Errorf("cannot create instance without a name")
 	}
 	ctrlData := CreateCtrlFields(id)
+	newRefID := db.RandomRefID()
+	instData := func() models.DataEntryIdentity {
+		if args[2] == nil {
+			return models.DataEntryIdentity{
+				Name:   payload.Name,
+				RefId:  newRefID,
+				Status: payload.Status,
+				Id:     ctrlData.Uuid,
+			}
+		}
+		return args[2].(models.DataEntryIdentity)
+	}()
 	instanceItem := models.InstanceCollection{
 		Name:           payload.Name,
 		Versions:       ctrlData.Versions,
@@ -423,13 +525,13 @@ func CreateInstanceItem(args ...any) (any, error) {
 	}
 	refID := ""
 	if instanceCreation {
-		rawRefID, err := db.CreateInstanceItem(instanceItem, payload.Name, subjectId, ReqApi, publishTarget, payload.Bump)
+		rawRefID, err := db.CreateInstanceItem(instanceItem, models.DataEntryIdentity{Name: payload.Name}, subjectId, ReqApi, publishTarget, payload.Bump)
 		refID = rawRefID.(string)
 		if err != nil {
 			return DATA_FAIL, err
 		}
 	} else {
-		rawRefID, err := db.CreateInstanceItem(instanceItem, instName, subjectId, ReqApi, publishTarget, payload.Bump)
+		rawRefID, err := db.CreateInstanceItem(instanceItem, instData, subjectId, ReqApi, publishTarget, payload.Bump)
 		refID = rawRefID.(string)
 		if err != nil {
 			return DATA_FAIL, err

@@ -65,15 +65,16 @@ func GetEndpointItem(args ...any) any {
 	ReqSearch := args[3].(models.URLFilterSearchParams)
 	valuesList := AssortData(endpointItem.Value, ReqSearch, endpointItem.Versions)
 	return models.EndpointItemResponse{
-		Uuid:        endpointItem.Uuid,
-		Name:        endpointItem.Name,
-		Description: endpointItem.Description,
-		Size:        endpointItem.Size,
-		Versions:    valuesList.version(),
-		Value:       valuesList.data()[0],
-		RefId:       endpointItem.RefId,
-		MemFile:     endpointItem.MemFile,
-		Status:      endpointItem.Status,
+		Uuid:           endpointItem.Uuid,
+		Name:           endpointItem.Name,
+		Description:    endpointItem.Description,
+		Size:           endpointItem.Size,
+		Versions:       endpointItem.Versions,
+		CurrentVersion: valuesList.version(),
+		Value:          valuesList.data()[0],
+		RefId:          endpointItem.RefId,
+		MemFile:        endpointItem.MemFile,
+		Status:         endpointItem.Status,
 	}
 }
 

@@ -53,7 +53,7 @@ func UpdateVersions(versions []string, bump interface{}) []string {
 	var isBump = bump.(bool)
 
 	if len(versions) == 0 || versions == nil || versions[0] == "" {
-		return []string{"1.0"}
+		return []string{"0.0"}
 	} else {
 		o := strings.Split(versions[0], ".")
 		var xVal string
@@ -89,7 +89,7 @@ func AppendValue(values []interface{}, newValue []interface{}) []interface{} {
 
 func CreateCtrlFields(idnt string) models.InternalCtrlFields {
 	t := fmt.Sprintf("%v", time.Now().Unix())
-	list := []string{"1.0"}
+	list := []string{"0.0"}
 
 	res := models.InternalCtrlFields{
 		Uuid:             uuid.New().String(),

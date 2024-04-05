@@ -25,7 +25,7 @@ func GetSchemaItem(ref_id string) (models.SchemaItemResponse, error) {
 	return res, nil
 }
 
-func CreateSchemaItem(data models.SchemaItem, instName string, subjectId string) error {
+func CreateSchemaItem(data models.SchemaItem, instData models.DataEntryIdentity, subjectId string) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
 	if err != nil {
 		return err
@@ -39,10 +39,10 @@ func CreateSchemaItem(data models.SchemaItem, instName string, subjectId string)
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: "active",
+		Status: data.Status,
 		RefId:  "",
 	}
-	err = AddNewSchemasList(instName, subjectId, newRecord)
+	err = AddNewSchemasList(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Schema List: %v", err))
 	}
@@ -66,7 +66,7 @@ func DeleteSchemaItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateSchemaItem(data models.CreateSchemaRequest, instName string, subjectId string, itemId string) (interface{}, error) {
+func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.SchemaItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
@@ -127,7 +127,7 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instName string, subjectI
 			return recordDocument.RefId
 		}(),
 	}
-	err = UpdateSchemaListItem(instName, subjectId, newRecord)
+	err = UpdateSchemaListItem(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
 	}

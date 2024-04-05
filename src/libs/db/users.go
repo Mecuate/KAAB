@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func PullUserData(userId string, instanceId string) (models.UserData, error) {
+func PullUserData(userId string, instanceId models.DataEntryIdentity) (models.UserData, error) {
 	var res models.UserData
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, USERS)
 	if err != nil {

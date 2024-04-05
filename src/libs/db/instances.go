@@ -14,26 +14,23 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func CreateInstanceItem(data models.InstanceCollection, instanceName string, subjectId string, apiName string, publishTarget string, bump bool) (any, error) {
-	refID, err := randomRefID()
-	if err != nil {
-		refID = fmt.Sprintf("dev-%s", data.Name)
-	}
+func CreateInstanceItem(data models.InstanceCollection, instanceData models.DataEntryIdentity, subjectId string, apiName string, publishTarget string, bump bool) (any, error) {
+	refID := RandomRefID()
 	data.RefId = refID
-	err = CreatePublisedInstanceItem(data, instanceName, subjectId, publishTarget, refID, bump)
+	err := CreatePublisedInstanceItem(data, instanceData, subjectId, publishTarget, refID, bump)
 	if err != nil {
-		config.Err(fmt.Sprintf("-Error saving Published Instance [%s] Initial Data: %v", instanceName, err))
+		config.Err(fmt.Sprintf("-Error saving Published Instance [%s] Initial Data: %v", instanceData.Name, err))
 		return "", err
 	}
 
 	DB, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
-		config.Err(fmt.Sprintf("Error initializing bd conn [%s] err: %v", instanceName, err))
+		config.Err(fmt.Sprintf("Error initializing bd conn [%s] err: %v", instanceData.Name, err))
 		return "", err
 	}
 	existingId, _ := VerifyInstanceExist(data.Name, apiName)
 
-	if existingId != "" {
+	if existingId.Id != "" {
 		config.Err(fmt.Sprintf("Error Instance already Exist: %s", existingId))
 		return "", fmt.Errorf("instance name in use: %s", data.Name)
 	}
@@ -44,43 +41,43 @@ func CreateInstanceItem(data models.InstanceCollection, instanceName string, sub
 
 	err = DB.InsertOne(data)
 	if err != nil {
-		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
+		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceData.Name, err))
 		return "", err
 	}
-	newID, err := AppendInstanceToRegistry(data, apiName, instanceName)
+	newID, err := AppendInstanceToRegistry(data, apiName, instanceData.Name)
 	if err != nil {
-		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
+		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceData.Name, err))
 		return "", err
 	}
 
-	config.Log(fmt.Sprintf("Instance origin: [%s] Initial Data Saved: %v", instanceName, newID))
+	config.Log(fmt.Sprintf("Instance origin: [%s] Initial Data Saved: %v", instanceData.Name, newID))
 	return refID, nil
 }
 
-func CreatePublisedInstanceItem(data models.InstanceCollection, instanceName string, subjectId string, apiName string, refID string, bump bool) error {
+func CreatePublisedInstanceItem(data models.InstanceCollection, instanceData models.DataEntryIdentity, subjectId string, apiName string, refID string, bump bool) error {
 	DB, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
-		config.Err(fmt.Sprintf("Error initializing bd conn [%s] err: %v", instanceName, err))
+		config.Err(fmt.Sprintf("Error initializing bd conn [%s] err: %v", instanceData.Name, err))
 		return err
 	}
 	existingId, _ := VerifyInstanceExist(data.Name, apiName)
 
-	if existingId != "" {
+	if existingId.Id != "" {
 		config.Err(fmt.Sprintf("Error Instance already Exist: %s", existingId))
 		return fmt.Errorf("instance name in use: %s", data.Name)
 	}
 
 	err = DB.InsertOne(data)
 	if err != nil {
-		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
+		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceData.Name, err))
 		return err
 	}
 	newID, err := AppendInstanceToRegistry(data, apiName, refID)
 	if err != nil {
-		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceName, err))
+		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceData.Name, err))
 		return err
 	}
-	config.Log(fmt.Sprintf("Instance origin: [%s] Initial Data Saved: %v", instanceName, newID))
+	config.Log(fmt.Sprintf("Instance origin: [%s] Initial Data Saved: %v", instanceData.Name, newID))
 	return nil
 }
 
@@ -94,10 +91,7 @@ func AppendInstanceToRegistry(data models.InstanceCollection, apiName string, FK
 	if FKrefId != "" {
 		refID = FKrefId
 	} else {
-		refID, err = randomRefID()
-		if err != nil {
-			return "", err
-		}
+		refID = RandomRefID()
 	}
 	ctx := context.Background()
 	item := models.DataEntryIdentity{
@@ -113,15 +107,15 @@ func AppendInstanceToRegistry(data models.InstanceCollection, apiName string, FK
 	return item.Id, nil
 }
 
-func randomRefID() (string, error) {
+func RandomRefID() string {
 	numBytes := (12 * 4) / 2
 	randomBytes := make([]byte, numBytes)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
-		return "", err
+		return cleanString("f---------------")
 	}
 	res := base64.URLEncoding.EncodeToString(randomBytes)
-	return cleanString(res[:16]), nil
+	return cleanString(res[:16])
 }
 
 func cleanString(input string) string {
@@ -129,26 +123,26 @@ func cleanString(input string) string {
 	result := []rune(input)
 	for i, char := range result {
 		if char == '-' || char == '_' {
-			randomChar := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")[mrand.Intn(62)]
+			randomChar := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdeghijklmnopqrstuvwxyz0123456789")[mrand.Intn(61)]
 			result[i] = randomChar
 		}
 	}
 	return string(result)
 }
 
-func VerifyInstanceExist(instanceName string, apiName string) (string, error) {
+func VerifyInstanceExist(instanceName string, apiName string) (models.DataEntryIdentity, error) {
+	var res models.DataEntryIdentity
 	Db, err := InitMongoDB(config.WEBENV.IntDbName, apiName)
 	if err != nil {
-		return "", err
+		return res, err
 	}
 	ctx := context.Background()
 	identify := bson.M{"name": instanceName}
-	var res models.DataEntryIdentity
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
-		return "", err
+		return res, err
 	}
-	return res.Id, nil
+	return res, nil
 }
 
 func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceCollection, error) {
@@ -157,7 +151,6 @@ func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceColl
 	if err != nil {
 		return res, err
 	}
-	fmt.Println("DB", Db)
 	ctx := context.Background()
 	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
@@ -494,7 +487,7 @@ func AddNewEndpointToList(instanceName string, subjectId string, data models.Dat
 	return nil
 }
 
-func UpdateInstanceItem(data models.CreateInstanceRequest, instName string, subjectId string, itemId string, apiName string) (interface{}, error) {
+func UpdateInstanceItem(data models.CreateInstanceRequest, instData models.DataEntryIdentity, subjectId string, itemId string, apiName string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.InstanceCollection
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
@@ -502,7 +495,7 @@ func UpdateInstanceItem(data models.CreateInstanceRequest, instName string, subj
 		return R, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"name": instName}
+	identify := bson.M{"name": instData.Name}
 	err = Db.coll.FindOne(ctx, identify).Decode(&recordDocument)
 	if err != nil {
 		return R, err
@@ -535,7 +528,7 @@ func UpdateInstanceItem(data models.CreateInstanceRequest, instName string, subj
 		update["$set"].(bson.M)["sys"] = sysData
 		newRecord := models.DataEntryIdentity{
 			Id:   itemId,
-			Name: instName,
+			Name: instData.Name,
 			Status: func() string {
 				if val := data.Status; val != "" {
 					return val
@@ -543,7 +536,7 @@ func UpdateInstanceItem(data models.CreateInstanceRequest, instName string, subj
 				return recordDocument.Sys.Status
 			}(),
 		}
-		UpdateInstanceInRegistry(newRecord, instName, apiName)
+		UpdateInstanceInRegistry(newRecord, instData.Name, apiName)
 	}
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 

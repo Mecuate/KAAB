@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/libs/db"
+	"kaab/src/models"
 	"net/http"
 
 	auth "github.com/Mecuate/auth_module"
@@ -53,14 +54,14 @@ func DataHandler_READ(path string) crud.HandleFunc {
 				return
 			}
 			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			ReqSearch, err := GetRequestFSS(r.RequestURI)
-			if err != nil {
-				config.Err(fmt.Sprintf("Bad URL: %v [%s]", err, r.RequestURI))
-				FailReq(w, 5)
-				return
-			}
 
 			if validDataAction(action, r.Method, section) {
+				ReqSearch, err := GetRequestFSS(r.RequestURI)
+				if err != nil {
+					config.Err(fmt.Sprintf("Bad URL: %v [%s]", err, r.RequestURI))
+					FailReq(w, 5)
+					return
+				}
 				_, err = db.VerifyInstanceExist(instanceId, ReqApi)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
@@ -103,18 +104,20 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 				return
 			}
 			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			if ref_id == "new" && instanceId == ReqApi {
-				config.Log(fmt.Sprintf("Creating new instance: %s", instanceId))
-			} else {
-				_, err = db.VerifyInstanceExist(instanceId, ReqApi)
-				if err != nil {
-					config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
-					FailReq(w, 5)
-					return
-				}
-			}
+
 			if validDataAction(action, r.Method, section) {
-				resp, err := AllowedDataCreateActions[section][action](userId, r, instanceId, userId, ReqApi, ref_id == "new" && instanceId == ReqApi, KAAB_VERSION[ReqApi].Publish)
+				var instData models.DataEntryIdentity
+				if ref_id == "new" && instanceId == ReqApi {
+					config.Log(fmt.Sprintf("Creating new instance: %s", instanceId))
+				} else {
+					instData, err = db.VerifyInstanceExist(instanceId, ReqApi)
+					if err != nil {
+						config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
+						FailReq(w, 5)
+						return
+					}
+				}
+				resp, err := AllowedDataCreateActions[section][action](userId, r, instData, userId, ReqApi, ref_id == "new" && instanceId == ReqApi, KAAB_VERSION[ReqApi].Publish)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error getting body: %v", err))
 					FailReq(w, 101, err)
@@ -154,15 +157,15 @@ func DataHandler_UPDATE(path string) crud.HandleFunc {
 				return
 			}
 			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			internalInstanceID, err := db.VerifyInstanceExist(instanceId, ReqApi)
-			if err != nil {
-				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
-				FailReq(w, 5)
-				return
-			}
 
 			if validDataAction(action, r.Method, section) {
-				resp := AllowedDataUpdateActions[section][action](r, instanceId, userId, ref_id, internalInstanceID)
+				internalInstanceData, err := db.VerifyInstanceExist(instanceId, ReqApi)
+				if err != nil {
+					config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
+					FailReq(w, 5)
+					return
+				}
+				resp := AllowedDataUpdateActions[section][action](r, internalInstanceData, userId, ref_id)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))
@@ -197,15 +200,15 @@ func DataHandler_DELETE(path string) crud.HandleFunc {
 				return
 			}
 			instanceId, section, action, ref_id := params["instance_id"], params["section"], params["action"], params["ref_id"]
-			internalInstanceID, err := db.VerifyInstanceExist(instanceId, ReqApi)
-			if err != nil {
-				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
-				FailReq(w, 5)
-				return
-			}
 
 			if validDataAction(action, r.Method, section) {
-				resp := AllowedDataDeleteActions[section][action](ref_id, userId, instanceId, internalInstanceID)
+				internalInstanceData, err := db.VerifyInstanceExist(instanceId, ReqApi)
+				if err != nil {
+					config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
+					FailReq(w, 5)
+					return
+				}
+				resp := AllowedDataDeleteActions[section][action](ref_id, userId, instanceId, internalInstanceData)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))

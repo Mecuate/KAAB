@@ -27,7 +27,7 @@ func GetMediaItem(ref_id string) (models.MediaFileItem, error) {
 	return res, nil
 }
 
-func CreateMediaItem(data models.MediaFileItem, instName string, subjectId string) error {
+func CreateMediaItem(data models.MediaFileItem, instData models.DataEntryIdentity, subjectId string) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
 	if err != nil {
 		return err
@@ -41,10 +41,10 @@ func CreateMediaItem(data models.MediaFileItem, instName string, subjectId strin
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: "active",
+		Status: data.Status,
 		RefId:  data.Thumb,
 	}
-	err = AddNewMediaList(instName, subjectId, newRecord)
+	err = AddNewMediaList(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Media List: %v", err))
 	}
@@ -68,7 +68,7 @@ func DeleteMediaItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateMediaItem(data models.CreateMediaRequest, instName string, subjectId string, itemId string) (interface{}, error) {
+func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.MediaFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
@@ -144,7 +144,7 @@ func UpdateMediaItem(data models.CreateMediaRequest, instName string, subjectId 
 			return recordDocument.RefId
 		}(),
 	}
-	err = UpdateMediaListItem(instName, subjectId, newRecord)
+	err = UpdateMediaListItem(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Media List: %v", err))
 	}

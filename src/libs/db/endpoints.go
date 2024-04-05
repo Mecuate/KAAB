@@ -25,12 +25,21 @@ func GetEndpointItem(ref_id string) (models.EndpointItem, error) {
 	return res, nil
 }
 
-func CreateEndpointItem(data models.EndpointItem, instName string, subjectId string) error {
+func CreateEndpointItem(data models.EndpointItem, instData models.DataEntryIdentity, subjectId string) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
+
+	var objectExist models.EndpointItem
+	_ = Db.coll.FindOne(ctx, bson.M{"name": data.Name}).Decode(&objectExist)
+	if objectExist.Name != "" {
+		return fmt.Errorf("endpoint already in use")
+	}
+
+	newReferenceID := RandomRefID()
+	data.RefId = newReferenceID
 	res, err := Db.coll.InsertOne(ctx, data)
 	if err != nil {
 		return err
@@ -40,9 +49,9 @@ func CreateEndpointItem(data models.EndpointItem, instName string, subjectId str
 		Name:   data.Name,
 		Id:     data.Uuid,
 		Status: data.Status,
-		RefId:  data.RefId,
+		RefId:  newReferenceID,
 	}
-	err = AddNewEndpointToList(instName, subjectId, newRecord)
+	err = AddNewEndpointToList(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
 	}
@@ -66,7 +75,7 @@ func DeleteEndpointItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateEndpointItem(data models.CreateEndpointRequest, instName string, subjectId string, itemId string) (interface{}, error) {
+func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.EndpointItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
@@ -83,14 +92,8 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instName string, subj
 	update := bson.M{
 		"$set": bson.M{},
 	}
-	if val := data.Name; val != "" {
-		update["$set"].(bson.M)["name"] = val
-	}
 	if val := data.Description; val != "" {
 		update["$set"].(bson.M)["description"] = val
-	}
-	if val := data.RefId; val != "" {
-		update["$set"].(bson.M)["ref_id"] = val
 	}
 	if val := data.Schema; val != "" {
 		update["$set"].(bson.M)["schema_ref"] = val
@@ -100,6 +103,8 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instName string, subj
 	}
 	if val := data.Value; len(val) > 0 {
 		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
+		update["$set"].(bson.M)["size"] = int16(len(fmt.Sprintf("%v", data.Value)))
+
 	}
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())
@@ -123,17 +128,25 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instName string, subj
 			}
 			return recordDocument.Status
 		}(),
-		RefId: func() string {
-			if val := data.RefId; val != "" {
-				return val
-			}
-			return recordDocument.RefId
-		}(),
+		RefId: recordDocument.RefId,
 	}
-	err = UpdateEndpointListItem(instName, subjectId, newRecord)
+	err = UpdateEndpointListItem(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
 	}
+	var respublish interface{}
+	if data.Bump {
+		respublish, err = PublishTarget(ENDPOINTS, instData, recordDocument.Name, recordDocument.RefId, subjectId, newRecord)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
+			return nil, fmt.Errorf("error publishing")
+		}
+	}
 
-	return updateRes, nil
+	return map[string]interface{}{
+		"ref":       recordDocument.RefId,
+		"id":        itemId,
+		"operation": updateRes != nil,
+		"published": respublish != nil,
+	}, nil
 }

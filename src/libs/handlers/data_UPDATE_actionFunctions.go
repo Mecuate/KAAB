@@ -40,16 +40,15 @@ func UpdateFailed(args ...any) any {
 
 func UpdateEndpointItem(args ...any) any {
 	r := args[0].(*http.Request)
-	instanceName := fmt.Sprintf("%v", args[1])
+	instanceData := args[1].(models.DataEntryIdentity)
 	subjectId := fmt.Sprintf("%v", args[2])
 	itemId := fmt.Sprintf("%v", args[3])
-
 	var payload models.CreateEndpointRequest
 	err := GetBody(r, &payload)
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateEndpointItem(payload, instanceName, subjectId, itemId)
+	R, err := db.UpdateEndpointItem(payload, instanceData, subjectId, itemId)
 	if err != nil {
 		return DATA_FAIL
 	}
@@ -59,7 +58,7 @@ func UpdateEndpointItem(args ...any) any {
 /* nodes */
 func UpdateNodeItem(args ...any) any {
 	r := args[0].(*http.Request)
-	instanceName := fmt.Sprintf("%v", args[1])
+	instanceData := args[1].(models.DataEntryIdentity)
 	subjectId := fmt.Sprintf("%v", args[2])
 	itemId := fmt.Sprintf("%v", args[3])
 
@@ -68,7 +67,7 @@ func UpdateNodeItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateNodeItem(payload, instanceName, subjectId, itemId)
+	R, err := db.UpdateNodeItem(payload, instanceData, subjectId, itemId)
 	if err != nil {
 		return DATA_FAIL
 	}
@@ -78,7 +77,7 @@ func UpdateNodeItem(args ...any) any {
 /* content */
 func UpdateContentItem(args ...any) any {
 	r := args[0].(*http.Request)
-	instanceName := fmt.Sprintf("%v", args[1])
+	instanceData := args[1].(models.DataEntryIdentity)
 	subjectId := fmt.Sprintf("%v", args[2])
 	itemId := fmt.Sprintf("%v", args[3])
 
@@ -87,7 +86,7 @@ func UpdateContentItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateContentItem(payload, instanceName, subjectId, itemId)
+	R, err := db.UpdateContentItem(payload, instanceData, subjectId, itemId)
 	if err != nil {
 		return DATA_FAIL
 	}
@@ -97,7 +96,7 @@ func UpdateContentItem(args ...any) any {
 /* media */
 func UpdateMediaItem(args ...any) any {
 	r := args[0].(*http.Request)
-	instanceName := fmt.Sprintf("%v", args[1])
+	instanceData := args[1].(models.DataEntryIdentity)
 	subjectId := fmt.Sprintf("%v", args[2])
 	itemId := fmt.Sprintf("%v", args[3])
 
@@ -106,7 +105,7 @@ func UpdateMediaItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateMediaItem(payload, instanceName, subjectId, itemId)
+	R, err := db.UpdateMediaItem(payload, instanceData, subjectId, itemId)
 	if err != nil {
 		return DATA_FAIL
 	}
@@ -116,7 +115,7 @@ func UpdateMediaItem(args ...any) any {
 /* schemas */
 func UpdateSchemaItem(args ...any) any {
 	r := args[0].(*http.Request)
-	instanceName := fmt.Sprintf("%v", args[1])
+	instanceData := args[1].(models.DataEntryIdentity)
 	subjectId := fmt.Sprintf("%v", args[2])
 	itemId := fmt.Sprintf("%v", args[3])
 
@@ -125,7 +124,7 @@ func UpdateSchemaItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateSchemaItem(payload, instanceName, subjectId, itemId)
+	R, err := db.UpdateSchemaItem(payload, instanceData, subjectId, itemId)
 	if err != nil {
 		return DATA_FAIL
 	}
@@ -135,7 +134,7 @@ func UpdateSchemaItem(args ...any) any {
 /* instance */
 func UpdateInstanceItem(args ...any) any {
 	r := args[0].(*http.Request)
-	instanceName := fmt.Sprintf("%v", args[1])
+	instanceData := args[1].(models.DataEntryIdentity)
 	subjectId := fmt.Sprintf("%v", args[2])
 	itemId := fmt.Sprintf("%v", args[3])
 	reqApi := fmt.Sprintf("%v", args[4])
@@ -145,7 +144,7 @@ func UpdateInstanceItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateInstanceItem(payload, instanceName, subjectId, itemId, reqApi)
+	R, err := db.UpdateInstanceItem(payload, instanceData, subjectId, itemId, reqApi)
 	if err != nil {
 		return DATA_FAIL
 	}

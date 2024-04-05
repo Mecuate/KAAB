@@ -272,7 +272,7 @@ func IndexOf(slice []string, item string) int {
 
 func CreateCtrlFields(idnt string) models.InternalCtrlFields {
 	t := fmt.Sprintf("%v", time.Now().Unix())
-	list := []string{"1.0"}
+	list := []string{"0.0"}
 
 	res := models.InternalCtrlFields{
 		Uuid:             uuid.New().String(),

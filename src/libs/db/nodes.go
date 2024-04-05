@@ -25,7 +25,8 @@ func GetNodeItem(ref_id string) (models.NodeFileItem, error) {
 	return res, nil
 }
 
-func CreateNodeItem(data models.NodeFileItem, instName string, subjectId string) error {
+func CreateNodeItem(data models.NodeFileItem, instData models.DataEntryIdentity, subjectId string) error {
+	instName := instData.Name
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, NODES)
 	if err != nil {
 		return err
@@ -39,7 +40,7 @@ func CreateNodeItem(data models.NodeFileItem, instName string, subjectId string)
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: "active",
+		Status: data.Status,
 		RefId:  data.RefId,
 	}
 	err = AddNewNodeToList(instName, subjectId, newRecord)
@@ -66,7 +67,7 @@ func DeleteNodeItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateNodeItem(data models.CreateNodeRequest, instName string, subjectId string, itemId string) (interface{}, error) {
+func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.NodeFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, NODES)
@@ -130,7 +131,7 @@ func UpdateNodeItem(data models.CreateNodeRequest, instName string, subjectId st
 			return recordDocument.RefId
 		}(),
 	}
-	err = UpdateNodeListItem(instName, subjectId, newRecord)
+	err = UpdateNodeListItem(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
 	}

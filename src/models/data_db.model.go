@@ -41,6 +41,7 @@ type EndpointItem struct {
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	MemFile          string           `json:"mem_file" bson:"mem_file"`
 	Status           string           `json:"status" bson:"status"`
+	TargetId         string           `json:"target_id" bson:"target_id"`
 }
 
 type SchemaItem struct {

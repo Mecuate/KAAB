@@ -30,7 +30,7 @@ func GetContentItem(ref_id string) (models.ContentItemResponse, error) {
 	return res, nil
 }
 
-func CreateContentItem(data models.TextFileItem, instName string, subjectId string) error {
+func CreateContentItem(data models.TextFileItem, instData models.DataEntryIdentity, subjectId string) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
 	if err != nil {
 		return err
@@ -44,17 +44,17 @@ func CreateContentItem(data models.TextFileItem, instName string, subjectId stri
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: "active",
+		Status: data.Status,
 		RefId:  data.RefId,
 	}
-	err = AddNewContentList(instName, subjectId, newRecord)
+	err = AddNewContentList(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Content List: %v", err))
 	}
 	return nil
 }
 
-func UpdateContentItem(data models.CreateContentRequest, instName string, subjectId string, itemId string) (interface{}, error) {
+func UpdateContentItem(data models.CreateContentRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.TextFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
@@ -118,7 +118,7 @@ func UpdateContentItem(data models.CreateContentRequest, instName string, subjec
 			return recordDocument.RefId
 		}(),
 	}
-	err = UpdateContentListItem(instName, subjectId, newRecord)
+	err = UpdateContentListItem(instData.Name, subjectId, newRecord)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Content List: %v", err))
 	}
