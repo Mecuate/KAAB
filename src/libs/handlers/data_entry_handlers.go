@@ -68,7 +68,7 @@ func DataHandler_READ(path string) crud.HandleFunc {
 					FailReq(w, 5)
 					return
 				}
-				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, ReqSearch)
+				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, ReqSearch, ReqApi)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))
@@ -117,7 +117,7 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 						return
 					}
 				}
-				resp, err := AllowedDataCreateActions[section][action](userId, r, instData, userId, ReqApi, ref_id == "new" && instanceId == ReqApi, KAAB_VERSION[ReqApi].Publish)
+				resp, err := AllowedDataCreateActions[section][action](userId, r, instData, userId, ReqApi, ref_id == "new" && instanceId == ReqApi)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error getting body: %v", err))
 					FailReq(w, 101, err)
@@ -165,7 +165,7 @@ func DataHandler_UPDATE(path string) crud.HandleFunc {
 					FailReq(w, 5)
 					return
 				}
-				resp := AllowedDataUpdateActions[section][action](r, internalInstanceData, userId, ref_id)
+				resp := AllowedDataUpdateActions[section][action](r, internalInstanceData, userId, ref_id, ReqApi, KAAB_VERSION[ReqApi].Publish)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))

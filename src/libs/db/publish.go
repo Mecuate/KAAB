@@ -19,16 +19,15 @@ var CollectionType = map[string]interface{}{
 	"endpoints": models.EndpointItem{},
 }
 
-var FailedPublishing = map[string]string{
-	"status": "failed",
+var FailedPublishing = models.InjectResponse{
+	Status: "failed",
 }
 
-var SuccessfulPublishing = map[string]string{
-	"status": "failed",
+var SuccessfulPublishing = models.InjectResponse{
+	Status: "failed",
 }
 
 func PublishTarget(args ...any) (interface{}, error) {
-	/* parameters collection , istance:name.refid.status.id , current.refId, current.id*/
 	COLLECTION := args[0].(string)
 	INST_DATA := args[1].(models.DataEntryIdentity)
 	refid := args[2].(string)
@@ -37,15 +36,37 @@ func PublishTarget(args ...any) (interface{}, error) {
 	// newRecord := args[5].(models.DataEntryIdentity)
 
 	if _, ok := CollectionType[COLLECTION]; ok {
-		// fmt.Println("subject_id: ", subjectId, "newRecord", newRecord)
 		target, err := InjectTarget(COLLECTION, name, refid)
 		if err != nil {
 			return FailedPublishing, err
 		}
+		data := target.Meta.(models.EndpointItem)
+		/* newRecord := models.DataEntryIdentity{
+			Id: fmt.Sprintf("%v", target.TargetID),
+			Name: func() string {
+				if val := data.Name; val != "" {
+					return val
+				}
+				return INST_DATA.Name
+			}(),
+			Status: func() string {
+				if val := data.Status; val != "" {
+					return val
+				}
+				return INST_DATA.Status
+			}(),
+			RefId: data.RefId,
+		} */
+		fmt.Println("@@@", data.Name, data.RefId)
+		// err = UpdateEndpointListItem(data.Name, subjectId, newRecord)
+		// if err != nil {
+		// 	config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
+		// }
 
-		return map[string]any{
-			"meta":   SuccessfulPublishing,
-			"target": target,
+		return models.PublishResponse{
+			Meta:     SuccessfulPublishing,
+			TargetID: data.Uuid,
+			Status:   data.Status,
 		}, nil
 	}
 	return FailedPublishing, fmt.Errorf("publishing Target: %v:%v", COLLECTION, INST_DATA.Name)
@@ -69,7 +90,7 @@ func PullSource(COLLECTION string, name string, refid string) (any, error) {
 	return FailedPublishing, fmt.Errorf("pulling Source: %v:%v", COLLECTION, refid)
 }
 
-func InjectTarget(COLLECTION string, refid string, name string) (any, error) {
+func InjectTarget(COLLECTION string, refid string, name string) (models.InjectResponse, error) {
 	if _, ok := CollectionType[COLLECTION]; ok {
 		source, err := PullSource(COLLECTION, name, refid)
 		if err != nil {
@@ -89,9 +110,9 @@ func InjectTarget(COLLECTION string, refid string, name string) (any, error) {
 		if err != nil {
 			return FailedPublishing, err
 		}
-		return map[string]any{
-			"meta":   SuccessfulPublishing,
-			"target": updateResult.UpsertedID,
+		return models.InjectResponse{
+			Meta:     recordDocument,
+			TargetID: updateResult.UpsertedID,
 		}, nil
 	}
 	return SuccessfulPublishing, nil

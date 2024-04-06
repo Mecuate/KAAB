@@ -261,6 +261,32 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 	}
 }
 
+func AssortEndpointData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams, versions []string) AssortedData {
+	var Res []interface{}
+	var Result []interface{}
+	var selItem int
+	availVersions := NewStringArray{versions}
+	if ReqSearch.Version != "" && availVersions.Contains(ReqSearch.Version) {
+		if selItem > -1 && selItem < len(itemValues) {
+			selItem = IndexOf(versions, ReqSearch.Version)
+			Res = append(Res, itemValues[selItem])
+		}
+	} else {
+		selItem = 0
+		Res = append(Res, itemValues[selItem])
+	}
+	var selectedItem map[string]string
+	res, _ := json.Marshal(Res[0])
+	json.Unmarshal(res, &selectedItem)
+
+	Result = append(Result, selectedItem)
+
+	return AssortedData{
+		DataSelected:    Result,
+		VersionSelected: versions[selItem],
+	}
+}
+
 func IndexOf(slice []string, item string) int {
 	for i, v := range slice {
 		if v == item {

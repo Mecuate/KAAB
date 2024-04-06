@@ -113,3 +113,15 @@ type URLFilterSearchParams struct {
 	Pagination string `json:"pagination" bson:"pagination"`
 	Limit      string `json:"limit" bson:"limit"`
 }
+
+type InjectResponse struct {
+	Meta     any `json:"meta"`
+	TargetID any `json:"target_id"`
+	Status   any `json:"status"`
+}
+
+type PublishResponse struct {
+	Meta     any `json:"meta"`
+	TargetID any `json:"target_id"`
+	Status   any `json:"status"`
+}

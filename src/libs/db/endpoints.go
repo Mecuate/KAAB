@@ -10,14 +10,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetEndpointItem(ref_id string) (models.EndpointItem, error) {
+func GetEndpointItem(ref_id string, ReqApi string) (models.EndpointItem, error) {
 	var res models.EndpointItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"uuid": ref_id}
+	identify := bson.M{"uuid": ref_id, "api_base": ReqApi}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err
@@ -25,16 +25,16 @@ func GetEndpointItem(ref_id string) (models.EndpointItem, error) {
 	return res, nil
 }
 
-func CreateEndpointItem(data models.EndpointItem, instData models.DataEntryIdentity, subjectId string) error {
+func CreateEndpointItem(data models.EndpointItem, instData models.DataEntryIdentity, subjectId string, ReqApi string) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
 
-	var objectExist models.EndpointItem
-	_ = Db.coll.FindOne(ctx, bson.M{"name": data.Name}).Decode(&objectExist)
-	if objectExist.Name != "" {
+	var endpointFileExist models.EndpointItem
+	_ = Db.coll.FindOne(ctx, bson.M{"name": data.Name, "api_base": ReqApi}).Decode(&endpointFileExist)
+	if endpointFileExist.Name != "" {
 		return fmt.Errorf("endpoint already in use")
 	}
 
@@ -75,7 +75,7 @@ func DeleteEndpointItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
+func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, PublishApiTarget string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.EndpointItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
@@ -83,7 +83,7 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		return R, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"uuid": itemId}
+	identify := bson.M{"uuid": itemId, "api_base": ReqApi}
 	err = Db.coll.FindOne(ctx, identify).Decode(&recordDocument)
 	if err != nil {
 		return R, err
@@ -101,13 +101,9 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 	if val := data.Status; val != "" {
 		update["$set"].(bson.M)["status"] = val
 	}
-
-	type xc = models.EndpointCode
 	if val := data.Value; val.Get != "" || val.Post != "" || val.Delete != "" {
 		values := make([]interface{}, len(recordDocument.Value))
-		for i, v := range recordDocument.Value {
-			values[i] = v
-		}
+		copy(values, recordDocument.Value)
 		value := []interface{}{models.EndpointCode{Get: val.Get, Post: val.Post, Delete: val.Delete}}
 		update["$set"].(bson.M)["value"] = AppendValue(values, value)
 		update["$set"].(bson.M)["size"] = int16(len(fmt.Sprintf("%v", data.Value)))

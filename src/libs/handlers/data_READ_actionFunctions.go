@@ -57,13 +57,15 @@ func GetEndpointList(args ...any) any {
 }
 
 func GetEndpointItem(args ...any) any {
-	endpointItem, err := db.GetEndpointItem(fmt.Sprintf("%v", args[2]))
+	ref_id := args[2].(string)
+	ReqApi := args[4].(string)
+	endpointItem, err := db.GetEndpointItem(ref_id, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting endpointItem: %v", err))
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
-	valuesList := AssortData(endpointItem.Value, ReqSearch, endpointItem.Versions)
+	valuesList := AssortEndpointData(endpointItem.Value, ReqSearch, endpointItem.Versions)
 	return models.EndpointItemResponse{
 		Uuid:           endpointItem.Uuid,
 		Name:           endpointItem.Name,
@@ -71,7 +73,7 @@ func GetEndpointItem(args ...any) any {
 		Size:           endpointItem.Size,
 		Versions:       endpointItem.Versions,
 		CurrentVersion: valuesList.version(),
-		Value:          valuesList.data()[0],
+		Value:          valuesList.data(),
 		RefId:          endpointItem.RefId,
 		MemFile:        endpointItem.MemFile,
 		Status:         endpointItem.Status,

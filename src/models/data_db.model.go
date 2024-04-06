@@ -28,6 +28,7 @@ type DBstorageFile struct {
 
 /* SPECIFIC TYPES */
 type EndpointItem struct {
+	ApiBase          string           `json:"api_base" bson:"api_base"`
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
@@ -45,6 +46,7 @@ type EndpointItem struct {
 }
 
 type SchemaItem struct {
+	ApiBase          string           `json:"api_base" bson:"api_base"`
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
@@ -60,6 +62,7 @@ type SchemaItem struct {
 }
 
 type TextFileItem struct {
+	ApiBase          string           `json:"api_base" bson:"api_base"`
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
@@ -76,6 +79,7 @@ type TextFileItem struct {
 }
 
 type NodeFileItem struct {
+	ApiBase          string           `json:"api_base" bson:"api_base"`
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
@@ -92,6 +96,7 @@ type NodeFileItem struct {
 }
 
 type MediaFileItem struct {
+	ApiBase          string           `json:"api_base" bson:"api_base"`
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
@@ -125,6 +130,7 @@ type TextFilesCollectionList []DataEntryIdentity
 type NodesFilesCollectionList []DataEntryIdentity
 
 type InstanceCollection struct {
+	ApiBase        string                   `json:"api_base" bson:"api_base"`
 	Name           string                   `json:"name" bson:"name"`
 	RefId          string                   `json:"ref" bson:"ref"`
 	Versions       []string                 `json:"versions" bson:"versions" default:"[]"`
@@ -180,8 +186,6 @@ type EndpointFile struct {
 	CreatedBy        string           `json:"created_by" bson:"created_by"`
 	Value            []EndpointCode   `json:"value" bson:"value"`
 }
-
-// response for conformation files
 
 type AccountConform struct {
 	Account     AccountType `json:"account" bson:"account"`

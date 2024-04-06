@@ -40,8 +40,10 @@ func CreateFailed(args ...any) (any, error) {
 
 func CreateEndpointItem(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
+
 	var payload models.CreateEndpointRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -73,8 +75,9 @@ func CreateEndpointItem(args ...any) (any, error) {
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
+		ApiBase:          ReqApi,
 	}
-	err = db.CreateEndpointItem(endpointItem, instData, subjectId)
+	err = db.CreateEndpointItem(endpointItem, instData, subjectId, ReqApi)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -86,8 +89,9 @@ func CreateEndpointItem(args ...any) (any, error) {
 /* nodes */
 func CreateNodeItem(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload models.CreateNodeRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -119,6 +123,7 @@ func CreateNodeItem(args ...any) (any, error) {
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
+		ApiBase:          ReqApi,
 	}
 	err = db.CreateNodeItem(nodeItem, instData, subjectId)
 	if err != nil {
@@ -131,8 +136,9 @@ func CreateNodeItem(args ...any) (any, error) {
 
 func CreateNodeItems(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload []models.CreateNodeRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -166,6 +172,7 @@ func CreateNodeItems(args ...any) (any, error) {
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
 			Status:           item.Status,
+			ApiBase:          ReqApi,
 		}
 		err = db.CreateNodeItem(nodeItem, instData, subjectId)
 		if err != nil {
@@ -181,8 +188,9 @@ func CreateNodeItems(args ...any) (any, error) {
 /* content */
 func CreateContentItem(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload models.CreateContentRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -214,6 +222,7 @@ func CreateContentItem(args ...any) (any, error) {
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
+		ApiBase:          ReqApi,
 	}
 	err = db.CreateContentItem(contentItem, instData, subjectId)
 	if err != nil {
@@ -226,8 +235,9 @@ func CreateContentItem(args ...any) (any, error) {
 
 func CreateContentItems(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload []models.CreateContentRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -261,6 +271,7 @@ func CreateContentItems(args ...any) (any, error) {
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
 			Status:           item.Status,
+			ApiBase:          ReqApi,
 		}
 		err = db.CreateContentItem(nodeItem, instData, subjectId)
 		if err != nil {
@@ -276,8 +287,9 @@ func CreateContentItems(args ...any) (any, error) {
 /* media */
 func CreateMediaItem(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload models.CreateMediaRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -317,6 +329,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		UriAddress:       mediaAddress.UriAddress,
 		File:             mediaAddress.File,
 		Status:           payload.Status,
+		ApiBase:          ReqApi,
 	}
 	err = db.CreateMediaItem(mediaItem, instData, subjectId)
 	if err != nil {
@@ -329,8 +342,9 @@ func CreateMediaItem(args ...any) (any, error) {
 
 func CreateMediaItems(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload []models.CreateMediaRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -372,6 +386,7 @@ func CreateMediaItems(args ...any) (any, error) {
 			UriAddress:       mediaAddress.UriAddress,
 			File:             mediaAddress.File,
 			Status:           item.Status,
+			ApiBase:          ReqApi,
 		}
 		err = db.CreateMediaItem(mediaItem, instData, subjectId)
 		if err != nil {
@@ -387,8 +402,9 @@ func CreateMediaItems(args ...any) (any, error) {
 /* schemas */
 func CreateSchemaItem(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload models.CreateSchemaRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -418,6 +434,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           payload.Status,
+		ApiBase:          ReqApi,
 	}
 	err = db.CreateSchemaItem(schemaItem, instData, subjectId)
 	if err != nil {
@@ -430,8 +447,9 @@ func CreateSchemaItem(args ...any) (any, error) {
 
 func CreateSchemaItems(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
+	ReqApi := args[4].(string)
 	var payload []models.CreateSchemaRequest
 	err := GetBody(r, &payload)
 	if err != nil {
@@ -463,6 +481,7 @@ func CreateSchemaItems(args ...any) (any, error) {
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
 			Status:           item.Status,
+			ApiBase:          ReqApi,
 		}
 		err = db.CreateSchemaItem(schemaItem, instData, subjectId)
 		if err != nil {
@@ -478,8 +497,8 @@ func CreateSchemaItems(args ...any) (any, error) {
 /* instance */
 func CreateInstanceItem(args ...any) (any, error) {
 	id := args[0].(string)
-	subjectId := args[3].(string)
 	r := args[1].(*http.Request)
+	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
 	instanceCreation := args[5].(bool)
 	publishTarget := args[6].(string)
@@ -505,6 +524,7 @@ func CreateInstanceItem(args ...any) (any, error) {
 		return args[2].(models.DataEntryIdentity)
 	}()
 	instanceItem := models.InstanceCollection{
+		ApiBase:        ReqApi,
 		Name:           payload.Name,
 		Versions:       ctrlData.Versions,
 		Owner:          subjectId,

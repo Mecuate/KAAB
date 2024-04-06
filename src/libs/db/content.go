@@ -54,7 +54,7 @@ func CreateContentItem(data models.TextFileItem, instData models.DataEntryIdenti
 	return nil
 }
 
-func UpdateContentItem(data models.CreateContentRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
+func UpdateContentItem(data models.CreateContentRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.TextFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)

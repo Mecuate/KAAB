@@ -66,7 +66,7 @@ func DeleteSchemaItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntryIdentity, subjectId string, itemId string) (interface{}, error) {
+func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.SchemaItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
