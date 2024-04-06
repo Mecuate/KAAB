@@ -101,10 +101,16 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 	if val := data.Status; val != "" {
 		update["$set"].(bson.M)["status"] = val
 	}
-	if val := data.Value; len(val) > 0 {
-		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
-		update["$set"].(bson.M)["size"] = int16(len(fmt.Sprintf("%v", data.Value)))
 
+	type xc = models.EndpointCode
+	if val := data.Value; val.Get != "" || val.Post != "" || val.Delete != "" {
+		values := make([]interface{}, len(recordDocument.Value))
+		for i, v := range recordDocument.Value {
+			values[i] = v
+		}
+		value := []interface{}{models.EndpointCode{Get: val.Get, Post: val.Post, Delete: val.Delete}}
+		update["$set"].(bson.M)["value"] = AppendValue(values, value)
+		update["$set"].(bson.M)["size"] = int16(len(fmt.Sprintf("%v", data.Value)))
 	}
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())

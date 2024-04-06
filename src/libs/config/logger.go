@@ -72,7 +72,6 @@ func appendToFile(fdir string, payload string) {
 }
 
 func LoadLogger() (err error) {
-	loadEnvFile("./config/config.log.env")
 	logConf := &models.LoggingConfig{}
 	err = envconfig.Process(logPrefix, logConf)
 	if err != nil {

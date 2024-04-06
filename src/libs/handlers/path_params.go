@@ -7,7 +7,7 @@ type APIVersion struct {
 }
 
 var InstancePath = models.InstancePaths{
-	EMULATED_API: "/open-service/web/{instance_id}/{file}.json",
+	EMULATED_API: "/open-service/web/{instance_id}/{file}",
 	USER:         "/user/{instance_id}/{action}/{subject_id}",
 	DATA_ACTION:  "/data/{instance_id}/{section}/{action}/{ref_id}",
 }

@@ -63,7 +63,7 @@ func CreateEndpointItem(args ...any) (any, error) {
 	endpointItem := models.EndpointItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
-		Value:            payload.Value,
+		Value:            []interface{}{payload.Value},
 		RefId:            newReferenceID,
 		Uuid:             ctrlData.Uuid,
 		Size:             int16(len(fmt.Sprintf("%v", payload.Value))),
