@@ -14,10 +14,16 @@ func EmulatedAPISimpleHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		config.Err(fmt.Sprintf("Error utils.instEndpointObject.extractParams: %v", err))
 		FailReq(w, 1)
+		return
+	}
+	ReqApi, rerr := getReqApi(r)
+	if rerr != nil {
+		FailReq(w, 7)
+		return
 	}
 
 	instance_id, endpoint_name := params["instance_id"], params["file"]
-	instEndpointObject, err := LoadEndpointData(instance_id, endpoint_name)
+	instEndpointObject, err := LoadEndpointData(instance_id, endpoint_name, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error utils.instEndpointObject.loadEndpointData: %v", err))
 		emptyResponse(w)

@@ -117,7 +117,7 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 						return
 					}
 				}
-				resp, err := AllowedDataCreateActions[section][action](userId, r, instData, userId, ReqApi, ref_id == "new" && instanceId == ReqApi)
+				resp, err := AllowedDataCreateActions[section][action](userId, r, instData, userId, ReqApi, ref_id == "new" && instanceId == ReqApi, KAAB_VERSION[ReqApi].Publish)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error getting body: %v", err))
 					FailReq(w, 101, err)

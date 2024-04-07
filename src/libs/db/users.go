@@ -11,14 +11,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func PullUserData(userId string, instanceId models.DataEntryIdentity) (models.UserData, error) {
+func PullUserData(userId string, instanceIntData models.DataEntryIdentity) (models.UserData, error) {
 	var res models.UserData
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, USERS)
 	if err != nil {
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"id": userId}
+	identify := bson.M{"uuid": userId}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err

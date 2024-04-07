@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func CreateInstanceItem(data models.InstanceCollection, instanceData models.DataEntryIdentity, subjectId string, apiName string, publishTarget string, bump bool) (any, error) {
@@ -66,7 +67,7 @@ func CreatePublisedInstanceItem(data models.InstanceCollection, instanceData mod
 		config.Err(fmt.Sprintf("Error Instance already Exist: %s", existingId))
 		return fmt.Errorf("instance name in use: %s", data.Name)
 	}
-
+	data.ApiBase = apiName
 	err = DB.InsertOne(data)
 	if err != nil {
 		config.Err(fmt.Sprintf("-Error saving Instance [%s] Initial Data: %v", instanceData.Name, err))
@@ -160,14 +161,14 @@ func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceColl
 	return res, nil
 }
 
-func PullInstanceInfo(instanceName string) (models.InstanceCollection, error) {
+func PullInstanceInfo(instanceName string, ReqApi string) (models.InstanceCollection, error) {
 	var res models.InstanceCollection
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"name": instanceName}
+	identify := bson.M{"name": instanceName, "api_base": ReqApi}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err
@@ -302,7 +303,34 @@ func AddNewEndpointsList(instanceName string, subjectId string, data models.Data
 	return nil
 }
 
-func UpdateEndpointListItem(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+func UpdateEndpointListItem(instanceName string, subjectId string, data models.DataEntryIdentity, publish bool) error {
+	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+
+	update := bson.M{"$set": bson.M{
+		"endpoints_collection_list.$.name":   data.Name,
+		"endpoints_collection_list.$.status": data.Status,
+		"endpoints_collection_list.$.ref_id": data.RefId,
+	}}
+	if publish {
+		update["$set"].(bson.M)["endpoints_collection_list.$.id"] = data.Id
+	} else {
+		identify["endpoints_collection_list.id"] = data.Id
+	}
+	res, err := Db.coll.UpdateOne(ctx, identify, update)
+	if err != nil {
+		config.Err(fmt.Sprintf("List of Endpoint Items UPDATE_ERROR: %v", err))
+		return err
+	}
+	config.Log(fmt.Sprintf("List of Endpoint Items UPDATED: %v", res))
+	return nil
+}
+
+func PublishEndpointListItem(instanceName string, subjectId string, data models.DataEntryIdentity) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		return err
@@ -313,8 +341,10 @@ func UpdateEndpointListItem(instanceName string, subjectId string, data models.D
 		"endpoints_collection_list.$.name":   data.Name,
 		"endpoints_collection_list.$.status": data.Status,
 		"endpoints_collection_list.$.ref_id": data.RefId,
+		"endpoints_collection_list.$.id":     data.Id,
 	}}
-	res, err := Db.coll.UpdateOne(ctx, identify, update)
+	opts := options.Update().SetUpsert(true)
+	res, err := Db.coll.UpdateOne(ctx, identify, update, opts)
 	if err != nil {
 		config.Err(fmt.Sprintf("List of Endpoint Items UPDATE_ERROR: %v", err))
 		return err

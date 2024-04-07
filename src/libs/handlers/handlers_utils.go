@@ -15,8 +15,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func LoadEndpointData(instance_id string, endpointName string) (models.EndpointInstance, error) {
-	instanceColl, err := db.PullInstanceInfo(instance_id)
+func LoadEndpointData(instanceId string, endpointName string, ReqApi string) (models.EndpointInstance, error) {
+	instanceColl, err := db.PullInstanceInfo(instanceId, ReqApi)
 	if err != nil {
 		return models.EndpointInstance{}, err
 	}

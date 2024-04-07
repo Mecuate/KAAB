@@ -33,13 +33,13 @@ func UserDataHandler_READ(path string) crud.HandleFunc {
 				FailReq(w, 4)
 				return
 			}
-			instanceId, action := params["instance_id"], params["action"]
+			instanceId, action, subjectId := params["instance_id"], params["action"], params["subject_id"]
 			ReqApi, rerr := getReqApi(r)
 			if rerr != nil {
 				FailReq(w, 7)
 				return
 			}
-			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
+			instanceInternalData, err := db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
 				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
@@ -47,12 +47,12 @@ func UserDataHandler_READ(path string) crud.HandleFunc {
 			}
 
 			if IsReadAction(action) {
-				user_info, err := db.PullUserData(id, instanceInternalId)
+				user_info, err := db.PullUserData(id, instanceInternalData)
 				if err != nil {
 					FailReq(w, 5)
 					return
 				}
-				resp := AllowedReadActions[action](user_info)
+				resp := AllowedReadUserDataActions[action](user_info, subjectId, instanceInternalData)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					FailReq(w, 6)
@@ -83,14 +83,14 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 				FailReq(w, 7)
 				return
 			}
-			instanceInternalId, _ := db.VerifyInstanceExist(instanceId, ReqApi)
+			instanceInternalData, _ := db.VerifyInstanceExist(instanceId, ReqApi)
 
 			if IsCreateAction(action) {
 				var user_info = models.UserData{}
 				if instanceId == ReqApi {
 					user_info.Uuid = fmt.Sprintf("g-%s", claims.Id)
 				} else {
-					user_info, err = db.PullUserData(instanceId, instanceInternalId)
+					user_info, err = db.PullUserData(instanceId, instanceInternalData)
 					if err != nil {
 						FailReq(w, 5)
 						return
@@ -127,7 +127,7 @@ func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 				FailReq(w, 7)
 				return
 			}
-			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
+			instanceInternalData, err := db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
 				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
@@ -135,7 +135,7 @@ func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 			}
 
 			if IsUpdateAction(action) {
-				user_info, err := db.PullUserData(instanceId, instanceInternalId)
+				user_info, err := db.PullUserData(instanceId, instanceInternalData)
 				if err != nil {
 					FailReq(w, 5)
 					return
@@ -172,7 +172,7 @@ func UserDataHandler_DELETE(path string) crud.HandleFunc {
 				FailReq(w, 7)
 				return
 			}
-			instanceInternalId, err := db.VerifyInstanceExist(instanceId, ReqApi)
+			instanceInternalData, err := db.VerifyInstanceExist(instanceId, ReqApi)
 			if err != nil {
 				config.Err(fmt.Sprintf("Error verifying Instance Exist: %v", err))
 				FailReq(w, 5)
@@ -180,7 +180,7 @@ func UserDataHandler_DELETE(path string) crud.HandleFunc {
 			}
 
 			if IsUpdateAction(action) {
-				user_info, err := db.PullUserData(instanceId, instanceInternalId)
+				user_info, err := db.PullUserData(instanceId, instanceInternalData)
 				if err != nil {
 					FailReq(w, 5)
 					return

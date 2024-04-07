@@ -82,7 +82,7 @@ type EndpointItemResponse struct {
 	Description    string      `json:"description" bson:"description"`
 	Size           int16       `json:"size" bson:"size"`
 	Versions       []string    `json:"versions" bson:"versions" default:"0.0"`
-	CurrentVersion []string    `json:"current_versions" bson:"current_versions" default:"0.0"`
+	CurrentVersion []string    `json:"current_version" bson:"current_version" default:"0.0"`
 	Value          interface{} `json:"value" bson:"value"`
 	RefId          string      `json:"ref_id" bson:"ref_id"`
 	MemFile        string      `json:"mem_file" bson:"mem_file"`
@@ -112,12 +112,6 @@ type URLFilterSearchParams struct {
 	Sorting    string `json:"sorting" bson:"sorting"`
 	Pagination string `json:"pagination" bson:"pagination"`
 	Limit      string `json:"limit" bson:"limit"`
-}
-
-type InjectResponse struct {
-	Meta     any `json:"meta"`
-	TargetID any `json:"target_id"`
-	Status   any `json:"status"`
 }
 
 type PublishResponse struct {

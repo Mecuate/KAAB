@@ -28,8 +28,8 @@ func PullEndpoint(endpointName string, instance_data models.InstanceCollection) 
 	}
 	endpointFile := models.EndpointFile{}
 	ctx := context.Background()
-	fmt.Println("Θ-Θ", "name", selectedEndpoint.Name, "uuid", selectedEndpoint.Id)
-	identify := bson.M{"name": selectedEndpoint.Name, "uuid": selectedEndpoint.Id}
+	fmt.Println("Θ-Θ", "name", selectedEndpoint.Name, "uuid", selectedEndpoint.Id, "api_base", instance_data.ApiBase)
+	identify := bson.M{"name": selectedEndpoint.Name, "uuid": selectedEndpoint.Id, "api_base": instance_data.ApiBase}
 	err = Db.coll.FindOne(ctx, identify).Decode(&endpointFile)
 	if err != nil {
 		fmt.Println("selectedEndpoint *** ", selectedEndpoint, err)

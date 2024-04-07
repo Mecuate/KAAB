@@ -75,7 +75,7 @@ func DeleteEndpointItem(ref_id string) (models.Delition, error) {
 	return R, nil
 }
 
-func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, PublishApiTarget string) (interface{}, error) {
+func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, publishApiTarget string) (interface{}, error) {
 	var R models.Delition
 	var recordDocument models.EndpointItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
@@ -117,13 +117,8 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id: itemId,
-		Name: func() string {
-			if val := data.Name; val != "" {
-				return val
-			}
-			return recordDocument.Name
-		}(),
+		Id:   itemId,
+		Name: recordDocument.Name,
 		Status: func() string {
 			if val := data.Status; val != "" {
 				return val
@@ -132,16 +127,30 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		}(),
 		RefId: recordDocument.RefId,
 	}
-	err = UpdateEndpointListItem(instData.Name, subjectId, newRecord)
+	err = UpdateEndpointListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
 	}
-	var respublish interface{}
+
 	if data.Bump {
-		respublish, err = PublishTarget(ENDPOINTS, instData, recordDocument.Name, recordDocument.RefId, subjectId, newRecord)
+		publishResponse, err := PublishTarget(ENDPOINTS, instData, recordDocument.Name, recordDocument.RefId, subjectId, newRecord, publishApiTarget)
 		if err != nil {
 			config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
 			return nil, fmt.Errorf("error publishing")
+		}
+
+		pubDocument := publishResponse.Meta.(models.EndpointItem)
+
+		updeateRecord := models.DataEntryIdentity{
+			Id:     pubDocument.Uuid,
+			Name:   pubDocument.Name,
+			Status: pubDocument.Status,
+			RefId:  pubDocument.RefId,
+		}
+		fmt.Println(instData.RefId, subjectId, updeateRecord)
+		err = UpdateEndpointListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Endpoint List for published item: %v", err))
 		}
 	}
 
@@ -149,6 +158,6 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		"ref":       recordDocument.RefId,
 		"id":        itemId,
 		"operation": updateRes != nil,
-		"published": respublish != nil,
+		"published": true,
 	}, nil
 }

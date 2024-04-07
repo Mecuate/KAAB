@@ -19,55 +19,28 @@ var CollectionType = map[string]interface{}{
 	"endpoints": models.EndpointItem{},
 }
 
-var FailedPublishing = models.InjectResponse{
+var FailedPublishing = models.PublishResponse{
 	Status: "failed",
 }
 
-var SuccessfulPublishing = models.InjectResponse{
+var SuccessfulPublishing = models.PublishResponse{
 	Status: "failed",
 }
 
-func PublishTarget(args ...any) (interface{}, error) {
+func PublishTarget(args ...any) (models.PublishResponse, error) {
 	COLLECTION := args[0].(string)
 	INST_DATA := args[1].(models.DataEntryIdentity)
 	refid := args[2].(string)
 	name := args[3].(string)
-	// subjectId := args[4].(string)
-	// newRecord := args[5].(models.DataEntryIdentity)
+	publishApiTarget := args[6].(string)
 
 	if _, ok := CollectionType[COLLECTION]; ok {
-		target, err := InjectTarget(COLLECTION, name, refid)
+		target, err := InjectTarget(COLLECTION, name, refid, publishApiTarget)
 		if err != nil {
 			return FailedPublishing, err
 		}
-		data := target.Meta.(models.EndpointItem)
-		/* newRecord := models.DataEntryIdentity{
-			Id: fmt.Sprintf("%v", target.TargetID),
-			Name: func() string {
-				if val := data.Name; val != "" {
-					return val
-				}
-				return INST_DATA.Name
-			}(),
-			Status: func() string {
-				if val := data.Status; val != "" {
-					return val
-				}
-				return INST_DATA.Status
-			}(),
-			RefId: data.RefId,
-		} */
-		fmt.Println("@@@", data.Name, data.RefId)
-		// err = UpdateEndpointListItem(data.Name, subjectId, newRecord)
-		// if err != nil {
-		// 	config.Err(fmt.Sprintf("Error updating Endpoint List: %v", err))
-		// }
 
-		return models.PublishResponse{
-			Meta:     SuccessfulPublishing,
-			TargetID: data.Uuid,
-			Status:   data.Status,
-		}, nil
+		return target, nil
 	}
 	return FailedPublishing, fmt.Errorf("publishing Target: %v:%v", COLLECTION, INST_DATA.Name)
 }
@@ -90,7 +63,7 @@ func PullSource(COLLECTION string, name string, refid string) (any, error) {
 	return FailedPublishing, fmt.Errorf("pulling Source: %v:%v", COLLECTION, refid)
 }
 
-func InjectTarget(COLLECTION string, refid string, name string) (models.InjectResponse, error) {
+func InjectTarget(COLLECTION string, refid string, name string, publishApiTarget string) (models.PublishResponse, error) {
 	if _, ok := CollectionType[COLLECTION]; ok {
 		source, err := PullSource(COLLECTION, name, refid)
 		if err != nil {
@@ -103,14 +76,14 @@ func InjectTarget(COLLECTION string, refid string, name string) (models.InjectRe
 		}
 		ctx := context.Background()
 		opts := options.Replace().SetUpsert(true)
-		identify := bson.M{"name": refid, "ref_id": name}
+		identify := bson.M{"name": name, "uuid": refid, "api_base": publishApiTarget}
 
-		var recordDocument = assignToType(source, COLLECTION, refid, name)
+		var recordDocument = assignToType(source, COLLECTION, refid, name, publishApiTarget)
 		updateResult, err := Db.coll.ReplaceOne(ctx, identify, recordDocument, opts)
 		if err != nil {
 			return FailedPublishing, err
 		}
-		return models.InjectResponse{
+		return models.PublishResponse{
 			Meta:     recordDocument,
 			TargetID: updateResult.UpsertedID,
 		}, nil
@@ -118,7 +91,7 @@ func InjectTarget(COLLECTION string, refid string, name string) (models.InjectRe
 	return SuccessfulPublishing, nil
 }
 
-func assignToType(source interface{}, COLLECTION string, refid string, name string) interface{} {
+func assignToType(source interface{}, COLLECTION string, refid string, name string, publishApiTarget string) interface{} {
 	switch COLLECTION {
 	case "nodes":
 		var customStruct models.NodeFileItem
@@ -132,6 +105,7 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		}
 		customStruct.Name = refid
 		customStruct.RefId = name
+		customStruct.ApiBase = publishApiTarget
 		return customStruct
 	case "schemas":
 		var customStruct models.SchemaItem
@@ -145,6 +119,7 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		}
 		customStruct.Name = refid
 		customStruct.RefId = name
+		customStruct.ApiBase = publishApiTarget
 		return customStruct
 	case "endpoints":
 		var customStruct models.EndpointItem
@@ -161,6 +136,7 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		customStruct.ModifiedBy = customStruct.ModifiedBy[0:1]
 		customStruct.RefId = customStruct.Uuid
 		customStruct.Uuid = refid
+		customStruct.ApiBase = publishApiTarget
 		return customStruct
 	case "content":
 		var customStruct models.TextFileItem
@@ -174,6 +150,7 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		}
 		customStruct.Name = refid
 		customStruct.RefId = name
+		customStruct.ApiBase = publishApiTarget
 		return customStruct
 	case "media":
 		var customStruct models.MediaFileItem
@@ -187,6 +164,7 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		}
 		customStruct.Name = refid
 		customStruct.RefId = name
+		customStruct.ApiBase = publishApiTarget
 		return customStruct
 	case "instance":
 		var customStruct models.InstanceCollection
@@ -200,6 +178,7 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		}
 		customStruct.Name = refid
 		customStruct.RefId = name
+		customStruct.ApiBase = publishApiTarget
 		return customStruct
 	}
 	return source

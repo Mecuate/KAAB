@@ -31,7 +31,7 @@ func IsDeleteAction(t string) bool {
 type MUD = models.UserData
 type AllowedFunc map[string]func(args ...any) interface{}
 
-var AllowedReadActions = AllowedFunc{
+var AllowedReadUserDataActions = AllowedFunc{
 	"account":     GetAccount,
 	"profile":     GetProfile,
 	"permissions": GetPermissions,
@@ -40,6 +40,28 @@ var AllowedReadActions = AllowedFunc{
 
 func GetProfile(args ...any) interface{} {
 	user_info := args[0].(MUD)
+	subjectId := args[1].(string)
+	instanceInternalData := args[2].(models.DataEntryIdentity)
+
+	if subjectId != user_info.Uuid {
+		targetInfo, err := db.PullUserData(subjectId, instanceInternalData)
+		if err != nil {
+			return models.ProfileConform{}
+		}
+		return models.ProfileConform{
+			Name:                 targetInfo.Name,
+			LastName:             targetInfo.LastName,
+			Nick:                 targetInfo.Nick,
+			UserRol:              targetInfo.UserRol,
+			LastLogin:            targetInfo.LastLogin,
+			Modification_date:    targetInfo.Modification_date,
+			Picture:              targetInfo.Account.Picture,
+			PictureUrl:           targetInfo.Account.PictureUrl,
+			PicModification_date: targetInfo.Account.Modification_date,
+			ExpirationDate:       targetInfo.Account.ExpirationDate,
+			Uuid:                 targetInfo.Uuid,
+		}
+	}
 	return models.ProfileConform{
 		Name:                 user_info.Name,
 		LastName:             user_info.LastName,
@@ -57,6 +79,20 @@ func GetProfile(args ...any) interface{} {
 
 func GetPermissions(args ...any) interface{} {
 	user_info := args[0].(MUD)
+	subjectId := args[1].(string)
+	instanceInternalData := args[2].(models.DataEntryIdentity)
+
+	if subjectId != user_info.Uuid {
+		targetInfo, err := db.PullUserData(subjectId, instanceInternalData)
+		if err != nil {
+			return models.PermissionsConform{}
+		}
+		return models.PermissionsConform{
+			Permissions: targetInfo.Realm,
+			UserRol:     targetInfo.UserRol,
+			Token:       targetInfo.Token,
+		}
+	}
 	return models.PermissionsConform{
 		Permissions: user_info.Realm,
 		UserRol:     user_info.UserRol,
@@ -66,6 +102,25 @@ func GetPermissions(args ...any) interface{} {
 
 func GetSecurity(args ...any) interface{} {
 	user_info := args[0].(MUD)
+	subjectId := args[1].(string)
+	instanceInternalData := args[2].(models.DataEntryIdentity)
+
+	if subjectId != user_info.Uuid {
+		targetInfo, err := db.PullUserData(subjectId, instanceInternalData)
+		if err != nil {
+			return models.SecurityConform{}
+		}
+		expirationDate, _ := strconv.ParseInt(targetInfo.Account.ExpirationDate, 10, 64)
+		exp := time.Unix(expirationDate, 0)
+		lifetime := time.Until(exp)
+		return models.SecurityConform{
+			Password:  lifetime.String(),
+			Monitored: targetInfo.Monitored,
+			KnownHost: targetInfo.KnownHost,
+			Uuid:      targetInfo.Uuid,
+		}
+	}
+
 	expirationDate, _ := strconv.ParseInt(user_info.Account.ExpirationDate, 10, 64)
 	exp := time.Unix(expirationDate, 0)
 	lifetime := time.Until(exp)
@@ -79,6 +134,22 @@ func GetSecurity(args ...any) interface{} {
 
 func GetAccount(args ...any) interface{} {
 	user_info := args[0].(MUD)
+	subjectId := args[1].(string)
+	instanceInternalData := args[2].(models.DataEntryIdentity)
+
+	if subjectId != user_info.Uuid {
+		targetInfo, err := db.PullUserData(subjectId, instanceInternalData)
+		if err != nil {
+			return models.AccountConform{}
+		}
+		return models.AccountConform{
+			Account:     targetInfo.Account,
+			Email:       targetInfo.Email,
+			AccessToken: targetInfo.Token,
+			Uuid:        targetInfo.Uuid,
+		}
+	}
+
 	return models.AccountConform{
 		Account:     user_info.Account,
 		Email:       user_info.Email,

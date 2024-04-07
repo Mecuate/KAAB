@@ -43,14 +43,14 @@ func UpdateEndpointItem(args ...any) any {
 	subjectId := args[2].(string)
 	itemId := args[3].(string)
 	ReqApi := args[4].(string)
-	PublishApiTarget := args[5].(string)
+	publishApiTarget := args[5].(string)
 
 	var payload models.CreateEndpointRequest
 	err := GetBody(r, &payload)
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateEndpointItem(payload, instanceData, subjectId, itemId, ReqApi, PublishApiTarget)
+	R, err := db.UpdateEndpointItem(payload, instanceData, subjectId, itemId, ReqApi, publishApiTarget)
 	if err != nil {
 		return DATA_FAIL
 	}
