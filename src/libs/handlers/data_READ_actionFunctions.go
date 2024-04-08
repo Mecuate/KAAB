@@ -196,7 +196,8 @@ func GetContentItems(args ...any) any {
 
 /* media */
 func GetMediaList(args ...any) any {
-	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
+	instanceName := args[0].(string)
+	subjectId := args[1].(string)
 	instance, err := db.GetInstanceInfo(instanceName, subjectId)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
@@ -206,7 +207,9 @@ func GetMediaList(args ...any) any {
 }
 
 func GetMediaItem(args ...any) any {
-	mediaItem, err := db.GetMediaItem(fmt.Sprintf("%v", args[2]))
+	ref_id := args[2].(string)
+	ReqApi := args[4].(string)
+	mediaItem, err := db.GetMediaItem(ref_id, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting mediaItem: %v", err))
 		return DATA_FAIL
@@ -220,24 +223,24 @@ func GetMediaItem(args ...any) any {
 		Size:        mediaItem.Size,
 		Versions:    mediaF.version(),
 		Value:       mediaF.data(),
-		RefId:       mediaItem.RefId,
 		Ttype:       mediaItem.Ttype,
 		Duration:    mediaItem.Duration,
 		Dimensions:  mediaItem.Dimensions,
 		Service:     mediaItem.Service,
 		Thumb:       mediaItem.Thumb,
 		Url:         mediaItem.Url,
-		UriAddress:  mediaItem.UriAddress,
 		File:        mediaItem.File,
 		Status:      mediaItem.Status,
+		RefId:       mediaItem.RefId,
 	}
 }
 
 func GetMediaItems(args ...any) any {
-	items := strings.Split(fmt.Sprintf("%v", args[2]), "&")
+	ref_id := args[2].(string)
+	items := strings.Split(ref_id, "&")
 	mediaItems := models.ManyMediaItemResponse{}
 	for _, item := range items {
-		result := GetMediaItem("", "", item, args[3])
+		result := GetMediaItem("", "", item, args[3], args[4])
 		if result == nil {
 			config.Err(fmt.Sprintf("Error getting mediaItem: %v", item))
 			return EMPTY_ARRAY

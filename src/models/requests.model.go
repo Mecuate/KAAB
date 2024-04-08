@@ -43,13 +43,13 @@ type CreateMediaRequest struct {
 	Description string         `json:"description" bson:"description"`
 	Size        int16          `json:"size" bson:"size"`
 	Value       []interface{}  `json:"value" bson:"value"`
-	RefId       string         `json:"ref_id" bson:"ref_id"`
 	Ttype       string         `json:"type" bson:"type"`
 	Duration    int16          `json:"duration" bson:"duration"`
 	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
 	Service     string         `json:"service" bson:"service"`
 	Bump        bool           `json:"bump" bson:"bump"`
 	Status      string         `json:"status" bson:"status"`
+	ChallengeID string         `json:"challenge" bson:"challenge"`
 }
 
 type CreateInstanceRequest struct {

@@ -9,6 +9,10 @@ type WebConfigs struct {
 	PubDbName            string `required:"true" split_words:"true"`
 	IntDbName            string `required:"true" split_words:"true"`
 	Mongodburi           string `required:"true" split_words:"true"`
+	UrlAddress           string `required:"true" split_words:"true"`
+	UriAddress           string `required:"true" split_words:"true"`
+	Thumbs               string `required:"true" split_words:"true"`
+	PhysicalName         string `required:"true" split_words:"true"`
 }
 
 type LoggingConfig struct {

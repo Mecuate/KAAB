@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetMediaItem(ref_id string) (models.MediaFileItem, error) {
+func GetMediaItem(ref_id string, apiBase string) (models.MediaFileItem, error) {
 	var res models.MediaFileItem
 	var dims models.DimentionsType
 	res.Dimensions = dims
@@ -19,7 +19,7 @@ func GetMediaItem(ref_id string) (models.MediaFileItem, error) {
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"uuid": ref_id}
+	identify := bson.M{"uuid": ref_id, "api_base": apiBase}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err
@@ -42,7 +42,8 @@ func CreateMediaItem(data models.MediaFileItem, instData models.DataEntryIdentit
 		Name:   data.Name,
 		Id:     data.Uuid,
 		Status: data.Status,
-		RefId:  data.Thumb,
+		RefId:  data.RefId,
+		Thumb:  data.Thumb,
 	}
 	err = AddNewMediaList(instData.Name, subjectId, newRecord)
 	if err != nil {
@@ -76,7 +77,7 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 		return R, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"uuid": itemId}
+	identify := bson.M{"uuid": itemId, "api_base": ReqApi}
 	err = Db.coll.FindOne(ctx, identify).Decode(&recordDocument)
 	if err != nil {
 		return R, err
@@ -102,9 +103,6 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 	}
 	if val := data.Service; val != "" {
 		update["$set"].(bson.M)["service"] = val
-	}
-	if val := data.RefId; val != "" {
-		update["$set"].(bson.M)["ref_id"] = val
 	}
 	if val := data.Status; val != "" {
 		update["$set"].(bson.M)["status"] = val
@@ -137,12 +135,7 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 			}
 			return recordDocument.Status
 		}(),
-		RefId: func() string {
-			if val := data.RefId; val != "" {
-				return val
-			}
-			return recordDocument.RefId
-		}(),
+		RefId: recordDocument.RefId,
 	}
 	err = UpdateMediaListItem(instData.Name, subjectId, newRecord)
 	if err != nil {

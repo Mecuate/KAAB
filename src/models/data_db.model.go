@@ -227,6 +227,7 @@ type DataEntryIdentity struct {
 	Id     string `json:"id" bson:"id"`
 	Status string `json:"status" bson:"status"`
 	RefId  string `json:"ref_id" bson:"ref_id"`
+	Thumb  string `json:"thumb" bson:"thumb"`
 }
 
 type APICollections struct {

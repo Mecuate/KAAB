@@ -207,6 +207,12 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 	var Res []interface{}
 	var Result []interface{}
 	var selItem int
+	if len(itemValues) <= 0 {
+		return AssortedData{
+			DataSelected:    itemValues,
+			VersionSelected: versions[selItem],
+		}
+	}
 	if ReqSearch.Version != "" {
 		selItem = IndexOf(versions, ReqSearch.Version)
 		if selItem > -1 {
@@ -312,25 +318,31 @@ func CreateCtrlFields(idnt string) models.InternalCtrlFields {
 	return res
 }
 
-func CreateMediaCtrlFields(ref_id string) models.InternalMediaCtrlFields {
-	sys := ObtainSystemMedia(ref_id)
+func CreateMediaCtrlFields(challengeID string) models.InternalMediaCtrlFields {
+	sys := ObtainSystemMedia(challengeID)
 	res := models.InternalMediaCtrlFields{
 		Thumb:      sys.ThumbAddres,
 		Url:        sys.UrlAddress,
 		UriAddress: sys.UriAddress,
-		File:       sys.PhysicalAddress,
+		File:       sys.PhysicalName,
 	}
 	return res
 }
 
-func ObtainSystemMedia(ref_id string) models.SystemMediaAddress {
-	res := models.SystemMediaAddress{
-		UrlAddress:      fmt.Sprintf("https://kaab.mecuate.org/film/%s", ref_id),
-		ThumbAddres:     fmt.Sprintf("https://kaab.mecuate.org/pub/%s/thumbs", ref_id),
-		UriAddress:      fmt.Sprintf("home/kaab/mecuate/org/%s", ref_id),
-		PhysicalAddress: fmt.Sprintf("ffmpeg-%s.m3u8", ref_id),
-	}
+func ObtainSystemMedia(challengeID string) models.SystemMediaAddress {
+	env := config.WEBENV.Environment
+	urlAddres := config.WEBENV.UrlAddress
+	thumbs := config.WEBENV.Thumbs
+	uriAddress := config.WEBENV.UriAddress
+	physicalName := config.WEBENV.PhysicalName
 
+	res := models.SystemMediaAddress{
+		UrlAddress:   fmt.Sprintf(urlAddres, challengeID),
+		ThumbAddres:  fmt.Sprintf(thumbs, challengeID),
+		UriAddress:   fmt.Sprintf(uriAddress, env, challengeID),
+		PhysicalName: fmt.Sprintf(physicalName, challengeID),
+	}
+	fmt.Println("++@@", res)
 	return res
 }
 

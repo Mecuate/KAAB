@@ -62,16 +62,15 @@ type MediaItemResponse struct {
 	Size        int16          `json:"size" bson:"size"`
 	Versions    []string       `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{}  `json:"value" bson:"value"`
-	RefId       string         `json:"ref_id" bson:"ref_id"`
 	Ttype       string         `json:"type" bson:"type"`
 	Duration    int16          `json:"duration" bson:"duration"`
 	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
 	Service     string         `json:"service" bson:"service"`
 	Thumb       string         `json:"thumb" bson:"thumb"`
 	Url         string         `json:"url" bson:"url"`
-	UriAddress  string         `json:"uri" bson:"uri"`
 	File        string         `json:"file_data" bson:"file_data"`
 	Status      string         `json:"status" bson:"status"`
+	RefId       string         `json:"ref_id" bson:"ref_id"`
 }
 
 type ManyMediaItemResponse = []MediaItemResponse
@@ -97,10 +96,10 @@ type InternalMediaCtrlFields struct {
 }
 
 type SystemMediaAddress struct {
-	UrlAddress      string
-	ThumbAddres     string
-	UriAddress      string
-	PhysicalAddress string
+	UrlAddress   string
+	ThumbAddres  string
+	UriAddress   string
+	PhysicalName string
 }
 
 type Delition struct {

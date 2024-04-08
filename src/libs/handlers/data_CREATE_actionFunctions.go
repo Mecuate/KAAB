@@ -295,19 +295,20 @@ func CreateMediaItem(args ...any) (any, error) {
 	if err != nil {
 		return DATA_FAIL, err
 	}
+	newRefID := db.RandomRefID()
 	ctrlData := CreateCtrlFields(id)
 	instData := func() models.DataEntryIdentity {
 		if args[2] == nil {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
-				RefId:  payload.RefId,
-				Status: payload.Status,
+				RefId:  newRefID,
+				Status: "active",
 				Id:     ctrlData.Uuid,
 			}
 		}
 		return args[2].(models.DataEntryIdentity)
 	}()
-	mediaAddress := CreateMediaCtrlFields(payload.RefId)
+	mediaAddress := CreateMediaCtrlFields(payload.ChallengeID)
 	mediaItem := models.MediaFileItem{
 		Uuid:             ctrlData.Uuid,
 		Versions:         ctrlData.Versions,
@@ -319,7 +320,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		Description:      payload.Description,
 		Size:             payload.Size,
 		Value:            payload.Value,
-		RefId:            payload.RefId,
+		RefId:            newRefID,
 		Ttype:            payload.Ttype,
 		Duration:         payload.Duration,
 		Dimensions:       payload.Dimensions,
@@ -328,7 +329,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		Url:              mediaAddress.Url,
 		UriAddress:       mediaAddress.UriAddress,
 		File:             mediaAddress.File,
-		Status:           payload.Status,
+		Status:           "active",
 		ApiBase:          ReqApi,
 	}
 	err = db.CreateMediaItem(mediaItem, instData, subjectId)
@@ -352,19 +353,20 @@ func CreateMediaItems(args ...any) (any, error) {
 	}
 	RES := []any{}
 	for _, item := range payload {
+		newRefID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
 		instData := func() models.DataEntryIdentity {
 			if args[2] == nil {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
-					RefId:  item.RefId,
+					RefId:  newRefID,
 					Status: item.Status,
 					Id:     ctrlData.Uuid,
 				}
 			}
 			return args[2].(models.DataEntryIdentity)
 		}()
-		mediaAddress := CreateMediaCtrlFields(item.RefId)
+		mediaAddress := CreateMediaCtrlFields(item.ChallengeID)
 		mediaItem := models.MediaFileItem{
 			Uuid:             ctrlData.Uuid,
 			Versions:         ctrlData.Versions,
@@ -375,8 +377,8 @@ func CreateMediaItems(args ...any) (any, error) {
 			Name:             item.Name,
 			Description:      item.Description,
 			Size:             item.Size,
-			Value:            item.Value,
-			RefId:            item.RefId,
+			Value:            append([]interface{}{mediaAddress}, item.Value...),
+			RefId:            newRefID,
 			Ttype:            item.Ttype,
 			Duration:         item.Duration,
 			Dimensions:       item.Dimensions,
