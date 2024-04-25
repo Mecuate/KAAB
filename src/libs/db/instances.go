@@ -146,14 +146,15 @@ func VerifyInstanceExist(instanceName string, apiName string) (models.DataEntryI
 	return res, nil
 }
 
-func GetInstanceInfo(instanceName string, subjectId string) (models.InstanceCollection, error) {
+func GetInstanceInfo(instanceName string, subjectId string, ReqApi string) (models.InstanceCollection, error) {
 	var res models.InstanceCollection
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
+	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@: ", "name", instanceName, "api_base", ReqApi, "members$in", subjectId)
+	identify := bson.M{"name": instanceName, "api_base": ReqApi, "members": bson.M{"$in": []string{subjectId}}}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err
@@ -247,18 +248,23 @@ func AddNewMediaList(instanceName string, subjectId string, data models.DataEntr
 	return nil
 }
 
-func UpdateMediaListItem(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+func UpdateMediaListItem(instanceName string, subjectId string, data models.DataEntryIdentity, publish bool) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
-	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}, "media_files_collection_list.id": data.Id}
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	update := bson.M{"$set": bson.M{
 		"media_files_collection_list.$.name":   data.Name,
 		"media_files_collection_list.$.status": data.Status,
 		"media_files_collection_list.$.ref_id": data.RefId,
 	}}
+	if publish {
+		update["$set"].(bson.M)["media_files_collection_list.$.id"] = data.Id
+	} else {
+		identify["media_files_collection_list.id"] = data.Id
+	}
 	res, err := Db.coll.UpdateOne(ctx, identify, update)
 	if err != nil {
 		config.Err(fmt.Sprintf("List of MEdia Items UPDATE_ERROR: %v", err))

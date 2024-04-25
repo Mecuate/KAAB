@@ -12,8 +12,26 @@ import (
 	"kaab/src/libs/utils"
 	"kaab/src/models"
 
+	auth "github.com/Mecuate/auth_module"
 	"github.com/rs/cors"
 )
+
+var ServerHeaders = []string{
+	"Cookie",
+	"Content-Length",
+	"Host",
+	"User-Agent",
+	"Accept",
+	"Accept-Encoding",
+	"Connection",
+	"X-Requested-Width",
+	"Content-Type",
+	"Origin",
+	"Access-Control-Allow-Origin",
+	"Access-Control-Allow-Headers",
+	"Access-Control-Allow-Methods",
+	"Access-Control-Allow-Credentials",
+}
 
 func NewServer(serverConfig *models.EnvConfigs) *models.Server {
 	server := &models.Server{
@@ -26,6 +44,10 @@ func NewServer(serverConfig *models.EnvConfigs) *models.Server {
 
 func RunServer() (err error) {
 	config, err := cf.FromEnv()
+	if err != nil {
+		return err
+	}
+	err = auth.SetUpAuthReader()
 	if err != nil {
 		return err
 	}
@@ -55,25 +77,10 @@ func NormalServer(config *models.EnvConfigs, server *models.Server) {
 func CORSServer(config *models.EnvConfigs, server *models.Server) {
 	serverConfig := config.WebServerConfig
 	cf.Log(fmt.Sprintf("KAAB --CORS server running: %s", os.Getenv("ENVIRONMENT")))
+	headers := append(auth.Headers(), ServerHeaders...)
 
 	c := cors.New(cors.Options{
-		AllowedHeaders: []string{
-			"Authorization",
-			"Cookie",
-			"Content-Length",
-			"Host",
-			"User-Agent",
-			"Accept",
-			"Accept-Encoding",
-			"Connection",
-			"X-Requested-Width",
-			"Content-Type",
-			"Origin",
-			"Access-Control-Allow-Origin",
-			"Access-Control-Allow-Headers",
-			"Access-Control-Allow-Methods",
-			"Access-Control-Allow-Credentials",
-			"User-Token"},
+		AllowedHeaders: headers,
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"OPTIONS", "GET", "READ", "POST", "CREATE", "UPDATE", "DELETE"},
 	})

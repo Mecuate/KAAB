@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+	"kaab/src/libs/config"
 	"kaab/src/libs/db"
 	"kaab/src/models"
 	"net/http"
@@ -34,6 +36,7 @@ var AllowedDataUpdateActions = AllowedDataFunc{
 }
 
 func UpdateFailed(args ...any) any {
+	fmt.Println("UpdateFailed got called")
 	return DATA_FAIL
 }
 
@@ -108,10 +111,16 @@ func UpdateMediaItem(args ...any) any {
 	var payload models.CreateMediaRequest
 	err := GetBody(r, &payload)
 	if err != nil {
+		config.Err(fmt.Sprintf("@=payload.error: %s", err.Error()))
 		return DATA_FAIL
 	}
-	R, err := db.UpdateMediaItem(payload, instanceData, subjectId, itemId, ReqApi)
+	mediaUpdateValue := models.InternalMediaCtrlFields{}
+	if payload.ChallengeID != "" {
+		mediaUpdateValue = CreateMediaCtrlFields(payload.ChallengeID, instanceData.Id)
+	}
+	R, err := db.UpdateMediaItem(payload, instanceData, subjectId, itemId, ReqApi, KAAB_VERSION[ReqApi].Publish, mediaUpdateValue)
 	if err != nil {
+		config.Err(fmt.Sprintf("@=db.error: %s", err.Error()))
 		return DATA_FAIL
 	}
 	return R

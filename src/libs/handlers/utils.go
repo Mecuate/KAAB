@@ -64,7 +64,6 @@ func MapToStringSlice(m map[string]string) []string {
 
 func RequestAuth(w http.ResponseWriter) {
 	http.Header.Add(w.Header(), "WWW-Authenticate", `JWT realm="Restricted"`)
-	http.Header.Add(w.Header(), "User-Token", `token`)
 	http.Error(w, "", http.StatusUnauthorized)
 }
 
@@ -318,8 +317,8 @@ func CreateCtrlFields(idnt string) models.InternalCtrlFields {
 	return res
 }
 
-func CreateMediaCtrlFields(challengeID string) models.InternalMediaCtrlFields {
-	sys := ObtainSystemMedia(challengeID)
+func CreateMediaCtrlFields(challengeID string, instanceID string) models.InternalMediaCtrlFields {
+	sys := ObtainSystemMedia(challengeID, instanceID)
 	res := models.InternalMediaCtrlFields{
 		Thumb:      sys.ThumbAddres,
 		Url:        sys.UrlAddress,
@@ -329,24 +328,22 @@ func CreateMediaCtrlFields(challengeID string) models.InternalMediaCtrlFields {
 	return res
 }
 
-func ObtainSystemMedia(challengeID string) models.SystemMediaAddress {
-	env := config.WEBENV.Environment
+func ObtainSystemMedia(challengeID string, instanceID string) models.SystemMediaAddress {
 	urlAddres := config.WEBENV.UrlAddress
 	thumbs := config.WEBENV.Thumbs
-	uriAddress := config.WEBENV.UriAddress
+	uriAddress := fmt.Sprintf(config.WEBENV.UriAddress, instanceID)
 	physicalName := config.WEBENV.PhysicalName
 
 	res := models.SystemMediaAddress{
 		UrlAddress:   fmt.Sprintf(urlAddres, challengeID),
 		ThumbAddres:  fmt.Sprintf(thumbs, challengeID),
-		UriAddress:   fmt.Sprintf(uriAddress, env, challengeID),
+		UriAddress:   fmt.Sprintf("%s/%s", uriAddress, challengeID),
 		PhysicalName: fmt.Sprintf(physicalName, challengeID),
 	}
-	fmt.Println("++@@", res)
 	return res
 }
 
-func ModificationRecord(idnt string, ix int16) models.ModificationRecord {
+func ModificationRecord(idnt string, ix int64) models.ModificationRecord {
 	t := fmt.Sprintf("%v", time.Now().Unix())
 	return models.ModificationRecord{
 		Person: idnt,
@@ -358,4 +355,24 @@ func ModificationRecord(idnt string, ix int16) models.ModificationRecord {
 func EmptyUserAction(args ...any) interface{} {
 	var Res interface{}
 	return Res
+}
+
+func MaskURIAddress(values any) []interface{} {
+	Result := []interface{}{}
+	address := []models.MediaItemStorageValue{}
+
+	jps, err := json.Marshal(values)
+	if err != nil {
+		return Result
+	}
+	err = json.Unmarshal(jps, &address)
+	if err != nil {
+		return Result
+	}
+
+	for _, a := range address {
+		a.UriAddress = "*"
+		Result = append(Result, a)
+	}
+	return Result
 }

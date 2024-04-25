@@ -106,7 +106,7 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		copy(values, recordDocument.Value)
 		value := []interface{}{models.EndpointCode{Get: val.Get, Post: val.Post, Delete: val.Delete}}
 		update["$set"].(bson.M)["value"] = AppendValue(values, value)
-		update["$set"].(bson.M)["size"] = int16(len(fmt.Sprintf("%v", data.Value)))
+		update["$set"].(bson.M)["size"] = int64(len(fmt.Sprintf("%v", data.Value)))
 	}
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())
@@ -146,8 +146,8 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 			Name:   pubDocument.Name,
 			Status: pubDocument.Status,
 			RefId:  pubDocument.RefId,
+			Thumb:  pubDocument.Thumb,
 		}
-		fmt.Println(instData.RefId, subjectId, updeateRecord)
 		err = UpdateEndpointListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
 		if err != nil {
 			config.Err(fmt.Sprintf("Error updating Endpoint List for published item: %v", err))
@@ -155,9 +155,9 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 	}
 
 	return map[string]interface{}{
-		"ref":       recordDocument.RefId,
 		"id":        itemId,
+		"ref":       recordDocument.RefId,
 		"operation": updateRes != nil,
-		"published": true,
+		"published": data.Bump,
 	}, nil
 }

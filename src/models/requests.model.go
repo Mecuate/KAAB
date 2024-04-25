@@ -41,10 +41,9 @@ type CreateSchemaRequest struct {
 type CreateMediaRequest struct {
 	Name        string         `json:"name" bson:"name"`
 	Description string         `json:"description" bson:"description"`
-	Size        int16          `json:"size" bson:"size"`
-	Value       []interface{}  `json:"value" bson:"value"`
+	Size        int64          `json:"size" bson:"size"`
 	Ttype       string         `json:"type" bson:"type"`
-	Duration    int16          `json:"duration" bson:"duration"`
+	Duration    int64          `json:"duration" bson:"duration"`
 	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
 	Service     string         `json:"service" bson:"service"`
 	Bump        bool           `json:"bump" bson:"bump"`

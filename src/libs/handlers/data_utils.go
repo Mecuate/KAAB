@@ -1,5 +1,10 @@
 package handlers
 
+import (
+	"fmt"
+	"kaab/src/models"
+)
+
 type any = interface{}
 type ArgsObject map[string]string
 type AllowedDataFunc map[string]map[string]func(...any) interface{}
@@ -27,4 +32,15 @@ func validDataAction(action string, reqType string, section string) bool {
 	}
 
 	return false
+}
+
+func VerifyMediaFileName(instanceName string, subjectId string, name string) error {
+	MediaData := GetMediaList(instanceName, subjectId)
+	MedList := MediaData.(models.MediaFilesCollectionList)
+	for _, item := range MedList {
+		if item.Name == name {
+			return fmt.Errorf("error name already in use")
+		}
+	}
+	return nil
 }

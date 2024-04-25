@@ -47,8 +47,10 @@ func FailedGetItem(args ...any) any {
 
 /* nodes */
 func GetEndpointList(args ...any) any {
-	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	instanceName := args[0].(string)
+	subjectId := args[1].(string)
+	ReqApi := args[4].(string)
+	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY
@@ -82,8 +84,10 @@ func GetEndpointItem(args ...any) any {
 
 /* nodes */
 func GetNodeList(args ...any) any {
-	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	instanceName := args[0].(string)
+	subjectId := args[1].(string)
+	ReqApi := args[4].(string)
+	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY
@@ -139,8 +143,10 @@ func GetNodeItems(args ...any) any {
 
 /* content */
 func GetContentList(args ...any) any {
-	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	instanceName := args[0].(string)
+	subjectId := args[1].(string)
+	ReqApi := args[4].(string)
+	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY
@@ -198,7 +204,9 @@ func GetContentItems(args ...any) any {
 func GetMediaList(args ...any) any {
 	instanceName := args[0].(string)
 	subjectId := args[1].(string)
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	ReqApi := args[4].(string)
+	fmt.Println("instanceName: ", instanceName, "subjectId: [[", subjectId, "]]")
+	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY
@@ -214,15 +222,13 @@ func GetMediaItem(args ...any) any {
 		config.Err(fmt.Sprintf("Error getting mediaItem: %v", err))
 		return DATA_FAIL
 	}
-	ReqSearch := args[3].(models.URLFilterSearchParams)
-	mediaF := AssortData(mediaItem.Value, ReqSearch, mediaItem.Versions)
 	return models.MediaItemResponse{
 		Uuid:        mediaItem.Uuid,
 		Name:        mediaItem.Name,
 		Description: mediaItem.Description,
 		Size:        mediaItem.Size,
-		Versions:    mediaF.version(),
-		Value:       mediaF.data(),
+		Versions:    mediaItem.Versions,
+		Value:       MaskURIAddress(mediaItem.Value),
 		Ttype:       mediaItem.Ttype,
 		Duration:    mediaItem.Duration,
 		Dimensions:  mediaItem.Dimensions,
@@ -252,8 +258,10 @@ func GetMediaItems(args ...any) any {
 
 /* schemas */
 func GetSchemaList(args ...any) any {
-	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	instanceName := args[0].(string)
+	subjectId := args[1].(string)
+	ReqApi := args[4].(string)
+	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY
@@ -305,8 +313,10 @@ func GetSchemaItems(args ...any) any {
 
 /* instance */
 func GetInstanceList(args ...any) any {
-	instanceName, subjectId := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1])
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	instanceName := args[0].(string)
+	subjectId := args[1].(string)
+	ReqApi := args[4].(string)
+	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY
@@ -315,8 +325,11 @@ func GetInstanceList(args ...any) any {
 }
 
 func GetInstanceItem(args ...any) any {
-	instanceName, subjectId, selected := fmt.Sprintf("%v", args[0]), fmt.Sprintf("%v", args[1]), fmt.Sprintf("%v", args[2])
-	instance, err := db.GetInstanceInfo(instanceName, subjectId)
+	instanceName := args[0].(string)
+	subjectId := args[1].(string)
+	selected := args[2].(string)
+	ReqApi := args[4].(string)
+	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))
 		return EMPTY_ARRAY

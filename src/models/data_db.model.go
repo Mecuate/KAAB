@@ -1,14 +1,14 @@
 package models
 
 type DimentionsType struct {
-	Width  int16 `json:"width" bson:"width"`
-	Height int16 `json:"height" bson:"height"`
+	Width  int64 `json:"width" bson:"width"`
+	Height int64 `json:"height" bson:"height"`
 }
 
 type ModificationRecord struct {
 	Person string `json:"_person" bson:"_person"`
 	Date   string `json:"_date" bson:"_date"`
-	Index  int16  `json:"_index" bson:"_index"`
+	Index  int64  `json:"_index" bson:"_index"`
 }
 
 type ModificationList []ModificationRecord
@@ -17,7 +17,7 @@ type DBstorageFile struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
-	Size             int16            `json:"size" bson:"size"`
+	Size             int64            `json:"size" bson:"size"`
 	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string           `json:"creation_date" bson:"creation_date"`
 	ModificationDate string           `json:"modification_date" bson:"modification_date"`
@@ -32,7 +32,7 @@ type EndpointItem struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
-	Size             int16            `json:"size" bson:"size"`
+	Size             int64            `json:"size" bson:"size"`
 	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string           `json:"creation_date" bson:"creation_date"`
 	ModificationDate string           `json:"modification_date" bson:"modification_date"`
@@ -43,6 +43,7 @@ type EndpointItem struct {
 	MemFile          string           `json:"mem_file" bson:"mem_file"`
 	Status           string           `json:"status" bson:"status"`
 	TargetId         string           `json:"target_id" bson:"target_id"`
+	Thumb            string           `json:"thumb" bson:"thumb"`
 }
 
 type SchemaItem struct {
@@ -50,7 +51,7 @@ type SchemaItem struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
-	Size             int16            `json:"size" bson:"size"`
+	Size             int64            `json:"size" bson:"size"`
 	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string           `json:"creation_date" bson:"creation_date"`
 	ModificationDate string           `json:"modification_date" bson:"modification_date"`
@@ -59,6 +60,7 @@ type SchemaItem struct {
 	Value            []interface{}    `json:"value" bson:"value"`
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	Status           string           `json:"status" bson:"status"`
+	Thumb            string           `json:"thumb" bson:"thumb"`
 }
 
 type TextFileItem struct {
@@ -66,7 +68,7 @@ type TextFileItem struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
-	Size             int16            `json:"size" bson:"size"`
+	Size             int64            `json:"size" bson:"size"`
 	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string           `json:"creation_date" bson:"creation_date"`
 	ModificationDate string           `json:"modification_date" bson:"modification_date"`
@@ -76,6 +78,7 @@ type TextFileItem struct {
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	Schema           string           `json:"schema_ref" bson:"schema_ref"`
 	Status           string           `json:"status" bson:"status"`
+	Thumb            string           `json:"thumb" bson:"thumb"`
 }
 
 type NodeFileItem struct {
@@ -83,7 +86,7 @@ type NodeFileItem struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
-	Size             int16            `json:"size" bson:"size"`
+	Size             int64            `json:"size" bson:"size"`
 	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string           `json:"creation_date" bson:"creation_date"`
 	ModificationDate string           `json:"modification_date" bson:"modification_date"`
@@ -93,6 +96,7 @@ type NodeFileItem struct {
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	Schema           string           `json:"schema_ref" bson:"schema_ref"`
 	Status           string           `json:"status" bson:"status"`
+	Thumb            string           `json:"thumb" bson:"thumb"`
 }
 
 type MediaFileItem struct {
@@ -100,7 +104,7 @@ type MediaFileItem struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
-	Size             int16            `json:"size" bson:"size"`
+	Size             int64            `json:"size" bson:"size"`
 	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string           `json:"creation_date" bson:"creation_date"`
 	ModificationDate string           `json:"modification_date" bson:"modification_date"`
@@ -109,7 +113,7 @@ type MediaFileItem struct {
 	Value            []interface{}    `json:"value" bson:"value"`
 	RefId            string           `json:"ref_id" bson:"ref_id"`
 	Ttype            string           `json:"type" bson:"type"`
-	Duration         int16            `json:"duration" bson:"duration"`
+	Duration         int64            `json:"duration" bson:"duration"`
 	Dimensions       DimentionsType   `json:"dimensions" bson:"dimensions"`
 	Service          string           `json:"service" bson:"service"`
 	Thumb            string           `json:"thumb" bson:"thumb"`
@@ -117,6 +121,20 @@ type MediaFileItem struct {
 	UriAddress       string           `json:"uri" bson:"uri"`
 	File             string           `json:"file_data" bson:"file_data"`
 	Status           string           `json:"status" bson:"status"`
+}
+
+type MediaItemStorageValue struct {
+	Description string         `json:"description" bson:"description"`
+	Size        int64          `json:"size" bson:"size"`
+	Ttype       string         `json:"type" bson:"type"`
+	Duration    int64          `json:"duration" bson:"duration"`
+	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
+	Service     string         `json:"service" bson:"service"`
+	Thumb       string         `json:"thumb" bson:"thumb"`
+	Url         string         `json:"url" bson:"url"`
+	UriAddress  string         `json:"uri" bson:"uri"`
+	File        string         `json:"file_data" bson:"file_data"`
+	Status      string         `json:"status" bson:"status"`
 }
 
 type MediaFilesCollectionList []DataEntryIdentity
@@ -143,6 +161,7 @@ type InstanceCollection struct {
 	TextFilesList  TextFilesCollectionList  `json:"files_collection_list" bson:"files_collection_list"`
 	NodesFilesList NodesFilesCollectionList `json:"nodes_collection_list" bson:"nodes_collection_list"`
 	Sys            SysData                  `json:"sys" bson:"sys"`
+	Thumb          string                   `json:"thumb" bson:"thumb"`
 }
 
 type ShallowInstanceCollection struct {
@@ -178,7 +197,7 @@ type EndpointFile struct {
 	Uuid             string           `json:"uuid" bson:"uuid"`
 	Name             string           `json:"name" bson:"name"`
 	Description      string           `json:"description" bson:"description"`
-	Size             int16            `json:"size" bson:"size"`
+	Size             int64            `json:"size" bson:"size"`
 	Versions         []string         `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string           `json:"creation_date" bson:"creation_date"`
 	ModificationDate string           `json:"modification_date" bson:"modification_date"`
@@ -231,7 +250,7 @@ type DataEntryIdentity struct {
 }
 
 type APICollections struct {
-	Size      int16               `json:"size" bson:"size"`
+	Size      int64               `json:"size" bson:"size"`
 	Instances []DataEntryIdentity `json:"instances" bson:"instances"`
 }
 

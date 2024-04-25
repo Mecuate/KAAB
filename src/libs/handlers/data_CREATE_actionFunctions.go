@@ -68,7 +68,7 @@ func CreateEndpointItem(args ...any) (any, error) {
 		Value:            []interface{}{payload.Value},
 		RefId:            newReferenceID,
 		Uuid:             ctrlData.Uuid,
-		Size:             int16(len(fmt.Sprintf("%v", payload.Value))),
+		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
 		Versions:         ctrlData.Versions,
 		CreationDate:     ctrlData.CreationDate,
 		ModificationDate: ctrlData.ModificationDate,
@@ -116,7 +116,7 @@ func CreateNodeItem(args ...any) (any, error) {
 		RefId:            payload.RefId,
 		Schema:           payload.Schema,
 		Uuid:             ctrlData.Uuid,
-		Size:             int16(len(fmt.Sprintf("%v", payload.Value))),
+		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
 		Versions:         ctrlData.Versions,
 		CreationDate:     ctrlData.CreationDate,
 		ModificationDate: ctrlData.ModificationDate,
@@ -165,7 +165,7 @@ func CreateNodeItems(args ...any) (any, error) {
 			RefId:            item.RefId,
 			Schema:           item.Schema,
 			Uuid:             ctrlData.Uuid,
-			Size:             int16(len(fmt.Sprintf("%v", item.Value))),
+			Size:             int64(len(fmt.Sprintf("%v", item.Value))),
 			Versions:         ctrlData.Versions,
 			CreationDate:     ctrlData.CreationDate,
 			ModificationDate: ctrlData.ModificationDate,
@@ -215,7 +215,7 @@ func CreateContentItem(args ...any) (any, error) {
 		RefId:            payload.RefId,
 		Schema:           payload.Schema,
 		Uuid:             ctrlData.Uuid,
-		Size:             int16(len(fmt.Sprintf("%v", payload.Value))),
+		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
 		Versions:         ctrlData.Versions,
 		CreationDate:     ctrlData.CreationDate,
 		ModificationDate: ctrlData.ModificationDate,
@@ -264,7 +264,7 @@ func CreateContentItems(args ...any) (any, error) {
 			RefId:            item.RefId,
 			Schema:           item.Schema,
 			Uuid:             ctrlData.Uuid,
-			Size:             int16(len(fmt.Sprintf("%v", item.Value))),
+			Size:             int64(len(fmt.Sprintf("%v", item.Value))),
 			Versions:         ctrlData.Versions,
 			CreationDate:     ctrlData.CreationDate,
 			ModificationDate: ctrlData.ModificationDate,
@@ -288,10 +288,15 @@ func CreateContentItems(args ...any) (any, error) {
 func CreateMediaItem(args ...any) (any, error) {
 	id := args[0].(string)
 	r := args[1].(*http.Request)
+	instanceData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
 	var payload models.CreateMediaRequest
 	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+	err = VerifyMediaFileName(instanceData.Name, subjectId, payload.Name)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -308,7 +313,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		}
 		return args[2].(models.DataEntryIdentity)
 	}()
-	mediaAddress := CreateMediaCtrlFields(payload.ChallengeID)
+	mediaAddress := CreateMediaCtrlFields(payload.ChallengeID, newRefID)
 	mediaItem := models.MediaFileItem{
 		Uuid:             ctrlData.Uuid,
 		Versions:         ctrlData.Versions,
@@ -319,7 +324,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		Name:             payload.Name,
 		Description:      payload.Description,
 		Size:             payload.Size,
-		Value:            payload.Value,
+		Value:            []interface{}{mediaAddress},
 		RefId:            newRefID,
 		Ttype:            payload.Ttype,
 		Duration:         payload.Duration,
@@ -360,13 +365,13 @@ func CreateMediaItems(args ...any) (any, error) {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
 					RefId:  newRefID,
-					Status: item.Status,
+					Status: "active",
 					Id:     ctrlData.Uuid,
 				}
 			}
 			return args[2].(models.DataEntryIdentity)
 		}()
-		mediaAddress := CreateMediaCtrlFields(item.ChallengeID)
+		mediaAddress := CreateMediaCtrlFields(item.ChallengeID, newRefID)
 		mediaItem := models.MediaFileItem{
 			Uuid:             ctrlData.Uuid,
 			Versions:         ctrlData.Versions,
@@ -377,7 +382,7 @@ func CreateMediaItems(args ...any) (any, error) {
 			Name:             item.Name,
 			Description:      item.Description,
 			Size:             item.Size,
-			Value:            append([]interface{}{mediaAddress}, item.Value...),
+			Value:            []interface{}{mediaAddress},
 			RefId:            newRefID,
 			Ttype:            item.Ttype,
 			Duration:         item.Duration,
@@ -429,7 +434,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 		Description:      payload.Description,
 		Value:            payload.Value,
 		Uuid:             ctrlData.Uuid,
-		Size:             int16(len(fmt.Sprintf("%v", payload.Value))),
+		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
 		Versions:         ctrlData.Versions,
 		CreationDate:     ctrlData.CreationDate,
 		ModificationDate: ctrlData.ModificationDate,
@@ -476,7 +481,7 @@ func CreateSchemaItems(args ...any) (any, error) {
 			Description:      item.Description,
 			Value:            item.Value,
 			Uuid:             ctrlData.Uuid,
-			Size:             int16(len(fmt.Sprintf("%v", item.Value))),
+			Size:             int64(len(fmt.Sprintf("%v", item.Value))),
 			Versions:         ctrlData.Versions,
 			CreationDate:     ctrlData.CreationDate,
 			ModificationDate: ctrlData.ModificationDate,

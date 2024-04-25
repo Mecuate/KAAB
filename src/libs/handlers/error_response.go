@@ -19,7 +19,7 @@ func FailReq(args ...any) {
 		2:  "No data found.",
 		3:  "Data, does not exist.",
 		4:  "Params cannot be extracted.",
-		5:  "User info cannot be pulled.",
+		5:  "Not Found.",
 		6:  "Response payload cannot be parsed.",
 		7:  "Unknown url",
 		99: "Error not possible",
@@ -35,6 +35,7 @@ func FailReq(args ...any) {
 		7:   http.StatusInternalServerError,
 		99:  http.StatusNoContent,
 		101: http.StatusNotAcceptable,
+		403: http.StatusForbidden,
 	}
 
 	var message string
@@ -46,6 +47,6 @@ func FailReq(args ...any) {
 		str, _ := JSON(CustomError{Code: num, Message: msg[num]})
 		message = str
 	}
-
+	// w.WriteHeader(codes[num])
 	http.Error(w, message, codes[num])
 }

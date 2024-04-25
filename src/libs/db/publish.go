@@ -78,7 +78,7 @@ func InjectTarget(COLLECTION string, refid string, name string, publishApiTarget
 		opts := options.Replace().SetUpsert(true)
 		identify := bson.M{"name": name, "uuid": refid, "api_base": publishApiTarget}
 
-		var recordDocument = assignToType(source, COLLECTION, refid, name, publishApiTarget)
+		var recordDocument = assignToType(source, COLLECTION, refid, publishApiTarget)
 		updateResult, err := Db.coll.ReplaceOne(ctx, identify, recordDocument, opts)
 		if err != nil {
 			return FailedPublishing, err
@@ -91,9 +91,9 @@ func InjectTarget(COLLECTION string, refid string, name string, publishApiTarget
 	return SuccessfulPublishing, nil
 }
 
-func assignToType(source interface{}, COLLECTION string, refid string, name string, publishApiTarget string) interface{} {
+func assignToType(source interface{}, COLLECTION string, refid string, publishApiTarget string) interface{} {
 	switch COLLECTION {
-	case "nodes":
+	case NODES:
 		var customStruct models.NodeFileItem
 		data, err := bson.Marshal(source)
 		if err != nil {
@@ -103,11 +103,15 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		if err != nil {
 			return source
 		}
-		customStruct.Name = refid
-		customStruct.RefId = name
+		customStruct.Value = customStruct.Value[0:1]
+		customStruct.Versions = customStruct.Versions[0:1]
+		customStruct.ModifiedBy = customStruct.ModifiedBy[0:1]
+		customStruct.RefId = customStruct.Uuid
+		customStruct.Uuid = refid
 		customStruct.ApiBase = publishApiTarget
+
 		return customStruct
-	case "schemas":
+	case SCHEMAS:
 		var customStruct models.SchemaItem
 		data, err := bson.Marshal(source)
 		if err != nil {
@@ -117,11 +121,15 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		if err != nil {
 			return source
 		}
-		customStruct.Name = refid
-		customStruct.RefId = name
+		customStruct.Value = customStruct.Value[0:1]
+		customStruct.Versions = customStruct.Versions[0:1]
+		customStruct.ModifiedBy = customStruct.ModifiedBy[0:1]
+		customStruct.RefId = customStruct.Uuid
+		customStruct.Uuid = refid
 		customStruct.ApiBase = publishApiTarget
+
 		return customStruct
-	case "endpoints":
+	case ENDPOINTS:
 		var customStruct models.EndpointItem
 		data, err := bson.Marshal(source)
 		if err != nil {
@@ -137,8 +145,9 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		customStruct.RefId = customStruct.Uuid
 		customStruct.Uuid = refid
 		customStruct.ApiBase = publishApiTarget
+
 		return customStruct
-	case "content":
+	case FILES:
 		var customStruct models.TextFileItem
 		data, err := bson.Marshal(source)
 		if err != nil {
@@ -148,11 +157,15 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		if err != nil {
 			return source
 		}
-		customStruct.Name = refid
-		customStruct.RefId = name
+		customStruct.Value = customStruct.Value[0:1]
+		customStruct.Versions = customStruct.Versions[0:1]
+		customStruct.ModifiedBy = customStruct.ModifiedBy[0:1]
+		customStruct.RefId = customStruct.Uuid
+		customStruct.Uuid = refid
 		customStruct.ApiBase = publishApiTarget
+
 		return customStruct
-	case "media":
+	case MEDIA:
 		var customStruct models.MediaFileItem
 		data, err := bson.Marshal(source)
 		if err != nil {
@@ -162,11 +175,15 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		if err != nil {
 			return source
 		}
-		customStruct.Name = refid
-		customStruct.RefId = name
+		customStruct.Value = customStruct.Value[0:1]
+		customStruct.Versions = customStruct.Versions[0:1]
+		customStruct.ModifiedBy = customStruct.ModifiedBy[0:1]
+		customStruct.RefId = customStruct.Uuid
+		customStruct.Uuid = refid
 		customStruct.ApiBase = publishApiTarget
+
 		return customStruct
-	case "instance":
+	case INSTANCE_INFO:
 		var customStruct models.InstanceCollection
 		data, err := bson.Marshal(source)
 		if err != nil {
@@ -176,12 +193,8 @@ func assignToType(source interface{}, COLLECTION string, refid string, name stri
 		if err != nil {
 			return source
 		}
-		customStruct.Name = refid
-		customStruct.RefId = name
-		customStruct.ApiBase = publishApiTarget
+
 		return customStruct
 	}
 	return source
 }
-
-/* 660cd8518394427830a593b8 */

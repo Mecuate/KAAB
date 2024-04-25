@@ -7,7 +7,7 @@ type KeyValue struct {
 
 type InternalCtrlFields struct {
 	Uuid             string               `json:"uuid" bson:"uuid"`
-	Size             int16                `json:"size" bson:"size"`
+	Size             int64                `json:"size" bson:"size"`
 	Versions         []string             `json:"versions" bson:"versions" default:"[]"`
 	CreationDate     string               `json:"creation_date" bson:"creation_date"`
 	ModificationDate string               `json:"modification_date" bson:"modification_date"`
@@ -19,7 +19,7 @@ type NodeItemResponse struct {
 	Uuid        string        `json:"uuid" bson:"uuid"`
 	Name        string        `json:"name" bson:"name"`
 	Description string        `json:"description" bson:"description"`
-	Size        int16         `json:"size" bson:"size"`
+	Size        int64         `json:"size" bson:"size"`
 	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
@@ -33,7 +33,7 @@ type ContentItemResponse struct {
 	Uuid        string        `json:"uuid" bson:"uuid"`
 	Name        string        `json:"name" bson:"name"`
 	Description string        `json:"description" bson:"description"`
-	Size        int16         `json:"size" bson:"size"`
+	Size        int64         `json:"size" bson:"size"`
 	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
@@ -47,7 +47,7 @@ type SchemaItemResponse struct {
 	Uuid        string        `json:"uuid" bson:"uuid"`
 	Name        string        `json:"name" bson:"name"`
 	Description string        `json:"description" bson:"description"`
-	Size        int16         `json:"size" bson:"size"`
+	Size        int64         `json:"size" bson:"size"`
 	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{} `json:"value" bson:"value"`
 	Status      string        `json:"status" bson:"status"`
@@ -59,11 +59,11 @@ type MediaItemResponse struct {
 	Uuid        string         `json:"uuid" bson:"uuid"`
 	Name        string         `json:"name" bson:"name"`
 	Description string         `json:"description" bson:"description"`
-	Size        int16          `json:"size" bson:"size"`
+	Size        int64          `json:"size" bson:"size"`
 	Versions    []string       `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{}  `json:"value" bson:"value"`
 	Ttype       string         `json:"type" bson:"type"`
-	Duration    int16          `json:"duration" bson:"duration"`
+	Duration    int64          `json:"duration" bson:"duration"`
 	Dimensions  DimentionsType `json:"dimensions" bson:"dimensions"`
 	Service     string         `json:"service" bson:"service"`
 	Thumb       string         `json:"thumb" bson:"thumb"`
@@ -79,7 +79,7 @@ type EndpointItemResponse struct {
 	Uuid           string      `json:"uuid" bson:"uuid"`
 	Name           string      `json:"name" bson:"name"`
 	Description    string      `json:"description" bson:"description"`
-	Size           int16       `json:"size" bson:"size"`
+	Size           int64       `json:"size" bson:"size"`
 	Versions       []string    `json:"versions" bson:"versions" default:"0.0"`
 	CurrentVersion []string    `json:"current_version" bson:"current_version" default:"0.0"`
 	Value          interface{} `json:"value" bson:"value"`

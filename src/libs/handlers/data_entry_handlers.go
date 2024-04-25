@@ -38,7 +38,11 @@ func DataEntryCRUD(r *mux.Router, path string) {
 
 func DataHandler_READ(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr)
+			return
+		}
 
 		if authorized && claims.Realms.Read().Apis {
 			userId := claims.Id
@@ -68,7 +72,8 @@ func DataHandler_READ(path string) crud.HandleFunc {
 					FailReq(w, 5)
 					return
 				}
-				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, ReqSearch, ReqApi)
+				fmt.Println("#####: ", instanceId, "subjectId: [[", claims, "]]")
+				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, ReqSearch, ReqApi, KAAB_VERSION[ReqApi].Publish)
 				responseBody, err := JSON(resp)
 				if err != nil {
 					config.Err(fmt.Sprintf("Error JSON: %v", err))
@@ -79,6 +84,7 @@ func DataHandler_READ(path string) crud.HandleFunc {
 			} else {
 				config.Err(fmt.Sprintf("Error Validating Data Action: Invalid Action [%s] or Section [%s]", action, section))
 				FailReq(w, 99)
+				return
 			}
 		} else {
 			RequestAuth(w)
@@ -88,7 +94,11 @@ func DataHandler_READ(path string) crud.HandleFunc {
 
 func DataHandler_CREATE(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr.Error())
+			return
+		}
 
 		if authorized && claims.Realms.Create().Apis {
 			userId := claims.Id
@@ -136,13 +146,19 @@ func DataHandler_CREATE(path string) crud.HandleFunc {
 			}
 		} else {
 			RequestAuth(w)
+			return
 		}
 	}
 }
 
 func DataHandler_UPDATE(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr.Error())
+			return
+		}
+
 		if authorized && claims.Realms.Update().Apis {
 			userId := claims.Id
 			ReqApi, rerr := getReqApi(r)
@@ -179,13 +195,19 @@ func DataHandler_UPDATE(path string) crud.HandleFunc {
 			}
 		} else {
 			RequestAuth(w)
+			return
 		}
 	}
 }
 
 func DataHandler_DELETE(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr.Error())
+			return
+		}
+
 		if authorized && claims.Realms.Delete().Apis {
 			userId := claims.Id
 			ReqApi, rerr := getReqApi(r)
@@ -222,6 +244,7 @@ func DataHandler_DELETE(path string) crud.HandleFunc {
 			}
 		} else {
 			RequestAuth(w)
+			return
 		}
 	}
 }

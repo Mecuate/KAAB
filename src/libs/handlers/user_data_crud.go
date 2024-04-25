@@ -24,7 +24,11 @@ func UserDataCRUD(r *mux.Router, path string) {
 
 func UserDataHandler_READ(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr.Error())
+			return
+		}
 
 		if authorized && claims.Realms.Read().Apis {
 			id := claims.Id
@@ -70,7 +74,12 @@ func UserDataHandler_READ(path string) crud.HandleFunc {
 
 func UserDataHandler_CREATE(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr.Error())
+			return
+		}
+
 		if authorized && claims.Realms.Create().Apis {
 			params, err := ExtractPathParams(r, Params.USER)
 			if err != nil {
@@ -114,7 +123,12 @@ func UserDataHandler_CREATE(path string) crud.HandleFunc {
 
 func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr.Error())
+			return
+		}
+
 		if authorized && claims.Realms.Update().Apis {
 			params, err := ExtractPathParams(r, Params.USER)
 			if err != nil {
@@ -159,7 +173,12 @@ func UserDataHandler_UPDATE(path string) crud.HandleFunc {
 
 func UserDataHandler_DELETE(path string) crud.HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized, claims := auth.Authorized(w, r)
+		authorized, claims, authErr := auth.Authorized(r)
+		if authErr != nil {
+			FailReq(w, 403, authErr.Error())
+			return
+		}
+
 		if authorized && claims.Realms.Delete().Apis {
 			params, err := ExtractPathParams(r, Params.USER)
 			if err != nil {

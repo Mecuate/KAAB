@@ -33,3 +33,5 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
+
+replace github.com/Mecuate/auth_module => ../auth_module
