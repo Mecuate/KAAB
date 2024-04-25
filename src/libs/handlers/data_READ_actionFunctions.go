@@ -205,7 +205,6 @@ func GetMediaList(args ...any) any {
 	instanceName := args[0].(string)
 	subjectId := args[1].(string)
 	ReqApi := args[4].(string)
-	fmt.Println("instanceName: ", instanceName, "subjectId: [[", subjectId, "]]")
 	instance, err := db.GetInstanceInfo(instanceName, subjectId, ReqApi)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error getting instance info: %v", err))

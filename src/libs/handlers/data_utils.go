@@ -34,8 +34,8 @@ func validDataAction(action string, reqType string, section string) bool {
 	return false
 }
 
-func VerifyMediaFileName(instanceName string, subjectId string, name string) error {
-	MediaData := GetMediaList(instanceName, subjectId)
+func VerifyMediaFileName(instanceName string, subjectId string, name string, ReqApi string) error {
+	MediaData := GetMediaList(instanceName, subjectId, "", "", ReqApi)
 	MedList := MediaData.(models.MediaFilesCollectionList)
 	for _, item := range MedList {
 		if item.Name == name {

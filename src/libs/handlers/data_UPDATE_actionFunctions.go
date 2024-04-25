@@ -111,7 +111,7 @@ func UpdateMediaItem(args ...any) any {
 	var payload models.CreateMediaRequest
 	err := GetBody(r, &payload)
 	if err != nil {
-		config.Err(fmt.Sprintf("@=payload.error: %s", err.Error()))
+		config.Err(fmt.Sprintf("payload.error: %s", err.Error()))
 		return DATA_FAIL
 	}
 	mediaUpdateValue := models.InternalMediaCtrlFields{}
@@ -120,7 +120,7 @@ func UpdateMediaItem(args ...any) any {
 	}
 	R, err := db.UpdateMediaItem(payload, instanceData, subjectId, itemId, ReqApi, KAAB_VERSION[ReqApi].Publish, mediaUpdateValue)
 	if err != nil {
-		config.Err(fmt.Sprintf("@=db.error: %s", err.Error()))
+		config.Err(fmt.Sprintf("db.error: %s", err.Error()))
 		return DATA_FAIL
 	}
 	return R

@@ -291,12 +291,13 @@ func CreateMediaItem(args ...any) (any, error) {
 	instanceData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
+	fmt.Println("instanceData: ", instanceData)
 	var payload models.CreateMediaRequest
 	err := GetBody(r, &payload)
 	if err != nil {
 		return DATA_FAIL, err
 	}
-	err = VerifyMediaFileName(instanceData.Name, subjectId, payload.Name)
+	err = VerifyMediaFileName(instanceData.Name, subjectId, payload.Name, ReqApi)
 	if err != nil {
 		return DATA_FAIL, err
 	}

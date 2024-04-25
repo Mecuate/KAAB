@@ -58,8 +58,8 @@ func CreateEndpointItem(data models.EndpointItem, instData models.DataEntryIdent
 	return nil
 }
 
-func DeleteEndpointItem(ref_id string) (models.Delition, error) {
-	var R models.Delition
+func DeleteEndpointItem(ref_id string) (models.Deletion, error) {
+	var R models.Deletion
 	var res models.EndpointItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {
@@ -76,7 +76,7 @@ func DeleteEndpointItem(ref_id string) (models.Delition, error) {
 }
 
 func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, publishApiTarget string) (interface{}, error) {
-	var R models.Delition
+	var R models.Deletion
 	var recordDocument models.EndpointItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, ENDPOINTS)
 	if err != nil {

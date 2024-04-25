@@ -153,7 +153,6 @@ func GetInstanceInfo(instanceName string, subjectId string, ReqApi string) (mode
 		return res, err
 	}
 	ctx := context.Background()
-	fmt.Println("@@@@@@@@@@@@@@@@@@@@@@: ", "name", instanceName, "api_base", ReqApi, "members$in", subjectId)
 	identify := bson.M{"name": instanceName, "api_base": ReqApi, "members": bson.M{"$in": []string{subjectId}}}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
@@ -491,8 +490,8 @@ func UnsetContentList(instanceName string, subjectId string, itemId string) erro
 	return nil
 }
 
-func DeleteInstanceItem(ref_id string) (models.Delition, error) {
-	var R models.Delition
+func DeleteInstanceItem(ref_id string) (models.Deletion, error) {
+	var R models.Deletion
 	var res models.InstanceCollection
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
@@ -524,7 +523,7 @@ func AddNewEndpointToList(instanceName string, subjectId string, data models.Dat
 }
 
 func UpdateInstanceItem(data models.CreateInstanceRequest, instData models.DataEntryIdentity, subjectId string, itemId string, apiName string) (interface{}, error) {
-	var R models.Delition
+	var R models.Deletion
 	var recordDocument models.InstanceCollection
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {

@@ -72,7 +72,6 @@ func DataHandler_READ(path string) crud.HandleFunc {
 					FailReq(w, 5)
 					return
 				}
-				fmt.Println("#####: ", instanceId, "subjectId: [[", claims, "]]")
 				resp := AllowedDataReadActions[section][action](instanceId, userId, ref_id, ReqSearch, ReqApi, KAAB_VERSION[ReqApi].Publish)
 				responseBody, err := JSON(resp)
 				if err != nil {

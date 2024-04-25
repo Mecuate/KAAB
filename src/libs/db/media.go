@@ -52,8 +52,8 @@ func CreateMediaItem(data models.MediaFileItem, instData models.DataEntryIdentit
 	return nil
 }
 
-func DeleteMediaItem(ref_id string) (models.Delition, error) {
-	var R models.Delition
+func DeleteMediaItem(ref_id string) (models.Deletion, error) {
+	var R models.Deletion
 	var res models.MediaFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
 	if err != nil {
@@ -70,7 +70,7 @@ func DeleteMediaItem(ref_id string) (models.Delition, error) {
 }
 
 func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, publishApiTarget string, mediaControlFiels models.InternalMediaCtrlFields) (interface{}, error) {
-	var R models.Delition
+	var R models.Deletion
 	var recordDocument models.MediaFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
 	if err != nil {
@@ -85,9 +85,6 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 
 	var mediaValueInfo models.MediaItemStorageValue
 	update := ConformMediaUpdate(&mediaValueInfo, &data, &recordDocument, &mediaControlFiels, subjectId)
-	fmt.Println("@mediaValueInfo", mediaValueInfo)
-	fmt.Println("@mediaValueInfo", update)
-
 	updateRes, err := Db.coll.UpdateOne(ctx, identify, update)
 	if err != nil {
 		return R, err
@@ -199,8 +196,6 @@ func ConformMediaUpdate(mediaValueInfo *models.MediaItemStorageValue, data *mode
 
 	valuesList := AppendMediaValue(recordDocument.Value, []interface{}{mediaValueInfo})
 	update["$set"].(bson.M)["value"] = valuesList
-	fmt.Println("@valuesList", valuesList)
-
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())
 	update["$set"].(bson.M)["versions"] = UpdateMediaVersions(recordDocument.Versions, data.Bump)
 	update["$set"].(bson.M)["modified_by"] = AppendModificationRecord(recordDocument.ModifiedBy, subjectId, timeStamp)

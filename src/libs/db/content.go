@@ -55,7 +55,7 @@ func CreateContentItem(data models.TextFileItem, instData models.DataEntryIdenti
 }
 
 func UpdateContentItem(data models.CreateContentRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
-	var R models.Delition
+	var R models.Deletion
 	var recordDocument models.TextFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
 	if err != nil {
@@ -126,8 +126,8 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 	return updateRes, nil
 }
 
-func DeleteContentItem(ref_id string) (models.Delition, error) {
-	var R models.Delition
+func DeleteContentItem(ref_id string) (models.Deletion, error) {
+	var R models.Deletion
 	var res models.NodeFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
 	if err != nil {
