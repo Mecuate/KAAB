@@ -1,10 +1,12 @@
 package db
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
 	"kaab/src/models"
+	mrand "math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -189,4 +191,31 @@ func MakeSHA1Hash(data string) string {
 	sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
 	return sha
+}
+
+func RandomRefID() string {
+	return uuid.New().String()
+}
+
+func ShortRefID() string {
+	numBytes := (12 * 4) / 2
+	randomBytes := make([]byte, numBytes)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return cleanString("f---------------")
+	}
+	res := base64.URLEncoding.EncodeToString(randomBytes)
+	return cleanString(res[:16])
+}
+
+func cleanString(input string) string {
+	mrand.Seed(time.Now().UnixNano())
+	result := []rune(input)
+	for i, char := range result {
+		if char == '-' || char == '_' {
+			randomChar := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdeghijklmnopqrstuvwxyz0123456789")[mrand.Intn(61)]
+			result[i] = randomChar
+		}
+	}
+	return string(result)
 }

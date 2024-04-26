@@ -43,6 +43,7 @@ func GetBody(r *http.Request, mo interface{}) error {
 	defer r.Body.Close()
 	err = json.Unmarshal(body, &mo)
 	if err != nil {
+		fmt.Println("Error Unmarshalling Body: ", err)
 		return err
 	}
 	return nil

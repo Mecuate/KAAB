@@ -87,7 +87,9 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 		update["$set"].(bson.M)["status"] = val
 	}
 	if val := data.Value; len(val) > 0 {
-		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
+		fmt.Println("@@@ -- Update::Value: ", val)
+		fmt.Println("@@@ -- Update::data.Value: ", data.Value)
+		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{val})
 	}
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())

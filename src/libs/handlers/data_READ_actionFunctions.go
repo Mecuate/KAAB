@@ -190,7 +190,7 @@ func GetContentItems(args ...any) any {
 			Description: contentItem.Description,
 			Size:        contentItem.Size,
 			Versions:    contentItem.Versions,
-			Value:       contentItem.Value[0:1],
+			Value:       contentItem.Value,
 			RefId:       contentItem.RefId,
 			Schema:      contentItem.Schema,
 			Status:      contentItem.Status,

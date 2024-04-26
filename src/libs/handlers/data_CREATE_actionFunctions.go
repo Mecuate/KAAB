@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"kaab/src/libs/config"
 	"kaab/src/libs/db"
 	"kaab/src/models"
 	"net/http"
@@ -98,11 +99,12 @@ func CreateNodeItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
+	newReferenceID := db.RandomRefID()
 	instData := func() models.DataEntryIdentity {
 		if args[2] == nil {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
-				RefId:  payload.RefId,
+				RefId:  newReferenceID,
 				Status: payload.Status,
 				Id:     ctrlData.Uuid,
 			}
@@ -113,7 +115,7 @@ func CreateNodeItem(args ...any) (any, error) {
 		Name:             payload.Name,
 		Description:      payload.Description,
 		Value:            payload.Value,
-		RefId:            payload.RefId,
+		RefId:            newReferenceID,
 		Schema:           payload.Schema,
 		Uuid:             ctrlData.Uuid,
 		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
@@ -146,12 +148,13 @@ func CreateNodeItems(args ...any) (any, error) {
 	}
 	RES := []any{}
 	for _, item := range payload {
+		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
 		instData := func() models.DataEntryIdentity {
 			if args[2] == nil {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
-					RefId:  item.RefId,
+					RefId:  newReferenceID,
 					Status: item.Status,
 					Id:     ctrlData.Uuid,
 				}
@@ -162,7 +165,7 @@ func CreateNodeItems(args ...any) (any, error) {
 			Name:             item.Name,
 			Description:      item.Description,
 			Value:            item.Value,
-			RefId:            item.RefId,
+			RefId:            newReferenceID,
 			Schema:           item.Schema,
 			Uuid:             ctrlData.Uuid,
 			Size:             int64(len(fmt.Sprintf("%v", item.Value))),
@@ -194,14 +197,16 @@ func CreateContentItem(args ...any) (any, error) {
 	var payload models.CreateContentRequest
 	err := GetBody(r, &payload)
 	if err != nil {
+		config.Err(fmt.Sprintf("payload.error: %s", err.Error()))
 		return DATA_FAIL, err
 	}
 	ctrlData := CreateCtrlFields(id)
+	newReferenceID := db.RandomRefID()
 	instData := func() models.DataEntryIdentity {
 		if args[2] == nil {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
-				RefId:  payload.RefId,
+				RefId:  newReferenceID,
 				Status: payload.Status,
 				Id:     ctrlData.Uuid,
 			}
@@ -211,8 +216,8 @@ func CreateContentItem(args ...any) (any, error) {
 	contentItem := models.TextFileItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
-		Value:            payload.Value,
-		RefId:            payload.RefId,
+		Value:            []interface{}{payload.Value},
+		RefId:            newReferenceID,
 		Schema:           payload.Schema,
 		Uuid:             ctrlData.Uuid,
 		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
@@ -245,12 +250,13 @@ func CreateContentItems(args ...any) (any, error) {
 	}
 	RES := []any{}
 	for _, item := range payload {
+		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
 		instData := func() models.DataEntryIdentity {
 			if args[2] == nil {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
-					RefId:  item.RefId,
+					RefId:  newReferenceID,
 					Status: item.Status,
 					Id:     ctrlData.Uuid,
 				}
@@ -261,7 +267,7 @@ func CreateContentItems(args ...any) (any, error) {
 			Name:             item.Name,
 			Description:      item.Description,
 			Value:            item.Value,
-			RefId:            item.RefId,
+			RefId:            newReferenceID,
 			Schema:           item.Schema,
 			Uuid:             ctrlData.Uuid,
 			Size:             int64(len(fmt.Sprintf("%v", item.Value))),
@@ -301,20 +307,20 @@ func CreateMediaItem(args ...any) (any, error) {
 	if err != nil {
 		return DATA_FAIL, err
 	}
-	newRefID := db.RandomRefID()
+	newReferenceID := db.RandomRefID()
 	ctrlData := CreateCtrlFields(id)
 	instData := func() models.DataEntryIdentity {
 		if args[2] == nil {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
-				RefId:  newRefID,
+				RefId:  newReferenceID,
 				Status: "active",
 				Id:     ctrlData.Uuid,
 			}
 		}
 		return args[2].(models.DataEntryIdentity)
 	}()
-	mediaAddress := CreateMediaCtrlFields(payload.ChallengeID, newRefID)
+	mediaAddress := CreateMediaCtrlFields(payload.ChallengeID, newReferenceID)
 	mediaItem := models.MediaFileItem{
 		Uuid:             ctrlData.Uuid,
 		Versions:         ctrlData.Versions,
@@ -326,7 +332,7 @@ func CreateMediaItem(args ...any) (any, error) {
 		Description:      payload.Description,
 		Size:             payload.Size,
 		Value:            []interface{}{mediaAddress},
-		RefId:            newRefID,
+		RefId:            newReferenceID,
 		Ttype:            payload.Ttype,
 		Duration:         payload.Duration,
 		Dimensions:       payload.Dimensions,
@@ -359,20 +365,20 @@ func CreateMediaItems(args ...any) (any, error) {
 	}
 	RES := []any{}
 	for _, item := range payload {
-		newRefID := db.RandomRefID()
+		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
 		instData := func() models.DataEntryIdentity {
 			if args[2] == nil {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
-					RefId:  newRefID,
+					RefId:  newReferenceID,
 					Status: "active",
 					Id:     ctrlData.Uuid,
 				}
 			}
 			return args[2].(models.DataEntryIdentity)
 		}()
-		mediaAddress := CreateMediaCtrlFields(item.ChallengeID, newRefID)
+		mediaAddress := CreateMediaCtrlFields(item.ChallengeID, newReferenceID)
 		mediaItem := models.MediaFileItem{
 			Uuid:             ctrlData.Uuid,
 			Versions:         ctrlData.Versions,
@@ -384,7 +390,7 @@ func CreateMediaItems(args ...any) (any, error) {
 			Description:      item.Description,
 			Size:             item.Size,
 			Value:            []interface{}{mediaAddress},
-			RefId:            newRefID,
+			RefId:            newReferenceID,
 			Ttype:            item.Ttype,
 			Duration:         item.Duration,
 			Dimensions:       item.Dimensions,
@@ -418,12 +424,13 @@ func CreateSchemaItem(args ...any) (any, error) {
 	if err != nil {
 		return DATA_FAIL, err
 	}
+	newReferenceID := db.RandomRefID()
 	ctrlData := CreateCtrlFields(id)
 	instData := func() models.DataEntryIdentity {
 		if args[2] == nil {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
-				RefId:  payload.RefId,
+				RefId:  newReferenceID,
 				Status: payload.Status,
 				Id:     ctrlData.Uuid,
 			}
@@ -465,12 +472,13 @@ func CreateSchemaItems(args ...any) (any, error) {
 	}
 	RES := []any{}
 	for _, item := range payload {
+		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
 		instData := func() models.DataEntryIdentity {
 			if args[2] == nil {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
-					RefId:  item.RefId,
+					RefId:  newReferenceID,
 					Status: item.Status,
 					Id:     ctrlData.Uuid,
 				}
@@ -519,12 +527,12 @@ func CreateInstanceItem(args ...any) (any, error) {
 		return DATA_FAIL, fmt.Errorf("cannot create instance without a name")
 	}
 	ctrlData := CreateCtrlFields(id)
-	newRefID := db.RandomRefID()
+	newReferenceID := db.RandomRefID()
 	instData := func() models.DataEntryIdentity {
 		if args[2] == nil {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
-				RefId:  newRefID,
+				RefId:  newReferenceID,
 				Status: payload.Status,
 				Id:     ctrlData.Uuid,
 			}

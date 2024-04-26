@@ -2,12 +2,9 @@ package db
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"kaab/src/libs/config"
 	"kaab/src/models"
-	mrand "math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -106,29 +103,6 @@ func AppendInstanceToRegistry(data models.InstanceCollection, apiName string, FK
 		return "", err
 	}
 	return item.Id, nil
-}
-
-func RandomRefID() string {
-	numBytes := (12 * 4) / 2
-	randomBytes := make([]byte, numBytes)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return cleanString("f---------------")
-	}
-	res := base64.URLEncoding.EncodeToString(randomBytes)
-	return cleanString(res[:16])
-}
-
-func cleanString(input string) string {
-	mrand.Seed(time.Now().UnixNano())
-	result := []rune(input)
-	for i, char := range result {
-		if char == '-' || char == '_' {
-			randomChar := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdeghijklmnopqrstuvwxyz0123456789")[mrand.Intn(61)]
-			result[i] = randomChar
-		}
-	}
-	return string(result)
 }
 
 func VerifyInstanceExist(instanceName string, apiName string) (models.DataEntryIdentity, error) {

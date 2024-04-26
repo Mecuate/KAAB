@@ -206,7 +206,7 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 	var Res []interface{}
 	var Result []interface{}
 	var selItem int
-	if len(itemValues) <= 0 {
+	if len(itemValues) == 0 {
 		return AssortedData{
 			DataSelected:    itemValues,
 			VersionSelected: versions[selItem],
@@ -222,8 +222,10 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 		Res = append(Res, itemValues[selItem])
 	}
 	var selectedItem []map[string]interface{}
+	fmt.Println("@@@ Res", Res[0])
 	res, _ := json.Marshal(Res[0])
 	json.Unmarshal(res, &selectedItem)
+	fmt.Println("@@@ selectedItem", selectedItem)
 
 	if ReqSearch.Sorting != "" {
 		selectedItem = SortData(selectedItem, ReqSearch.Sorting)
@@ -259,6 +261,8 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 	if Result == nil {
 		Result = append(Result, selectedItem)
 	}
+
+	fmt.Println("@@@ Result", Result)
 
 	return AssortedData{
 		DataSelected:    Result,
