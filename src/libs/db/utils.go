@@ -190,8 +190,6 @@ func MakeSHA1Hash(data string) string {
 	bv := []byte(data)
 	hasher := sha1.New()
 	hasher.Write(bv)
-	hashBytes := hasher.Sum(nil)
-	fmt.Println(hex.EncodeToString(hashBytes))
 	sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
 	return sha
@@ -258,6 +256,20 @@ func convertToMapArray(arr primitive.A) []models.MAPDATA {
 	return result
 }
 
+func CreateToMapArray(arr []interface{}) []models.MAPDATA {
+	result := make([]models.MAPDATA, len(arr))
+	for i, v := range arr {
+		switch elem := v.(type) {
+		case interface{}:
+			result[i] = elem.(map[string]interface{})
+			continue
+		default:
+			result[i] = elem.(map[string]interface{})
+		}
+	}
+	return result
+}
+
 func DeleteItemFromArray(arr *[]models.MAPDATA, index int) {
 	if index < 0 || index >= len(*arr) {
 		return
@@ -282,4 +294,19 @@ func AddItemFromArray(arr *[]models.MAPDATA, index int, newItem models.MAPDATA) 
 	}
 	newItem["$__i"] = MakeHash(fmt.Sprintf("%d:%v:v_:%v", index, time.Now().UnixNano(), newItem))
 	*arr = append(*arr, newItem)
+}
+
+func HandleContentCreationItems(arr []models.MAPDATA) []interface{} {
+	Total := len(arr)
+	if Total <= 0 {
+		return []interface{}{[]models.MAPDATA{}}
+	}
+	res := make([]models.MAPDATA, Total)
+	for i, v := range arr {
+		hash := MakeHash(fmt.Sprintf("%d:%v:v_:%v", i, time.Now().UnixNano(), v))[30:]
+		newItem := v
+		newItem["$__i"] = hash
+		res[i] = newItem
+	}
+	return []interface{}{res}
 }

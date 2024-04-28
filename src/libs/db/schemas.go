@@ -36,11 +36,12 @@ func CreateSchemaItem(data models.SchemaItem, instData models.DataEntryIdentity,
 		return err
 	}
 	config.Log(fmt.Sprintf("Schema Item Created: %v", res))
+	newReferenceID := RandomRefID()
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: data.Status,
-		RefId:  "",
+		Status: STATUS.Activate(),
+		RefId:  newReferenceID,
 	}
 	err = AddNewSchemasList(instData.Name, subjectId, newRecord)
 	if err != nil {
@@ -83,17 +84,11 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 	update := bson.M{
 		"$set": bson.M{},
 	}
-	if val := data.Name; val != "" {
-		update["$set"].(bson.M)["name"] = val
-	}
 	if val := data.Description; val != "" {
 		update["$set"].(bson.M)["description"] = val
 	}
-	if val := data.Status; val != "" {
+	if val := data.Status; val != "" && STATUS.Contains(val) {
 		update["$set"].(bson.M)["status"] = val
-	}
-	if val := data.RefId; val != "" {
-		update["$set"].(bson.M)["ref_id"] = val
 	}
 	if val := data.Value; len(val) > 0 {
 		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
@@ -107,24 +102,14 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id: itemId,
-		Name: func() string {
-			if val := data.Name; val != "" {
-				return val
-			}
-			return recordDocument.Name
-		}(),
+		Id:    itemId,
+		Name:  recordDocument.Name,
+		RefId: recordDocument.RefId,
 		Status: func() string {
-			if val := data.Status; val != "" {
+			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status
-		}(),
-		RefId: func() string {
-			if val := data.RefId; val != "" {
-				return val
-			}
-			return recordDocument.RefId
 		}(),
 	}
 	err = UpdateSchemaListItem(instData.Name, subjectId, newRecord)

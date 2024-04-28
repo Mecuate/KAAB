@@ -40,7 +40,7 @@ func CreateNodeItem(data models.NodeFileItem, instData models.DataEntryIdentity,
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: data.Status,
+		Status: STATUS.Activate(),
 		RefId:  data.RefId,
 	}
 	err = AddNewNodeToList(instName, subjectId, newRecord)
@@ -96,7 +96,7 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 	if val := data.Schema; val != "" {
 		update["$set"].(bson.M)["schema_ref"] = val
 	}
-	if val := data.Status; val != "" {
+	if val := data.Status; val != "" && STATUS.Contains(val) {
 		update["$set"].(bson.M)["status"] = val
 	}
 	if val := data.Value; len(val) > 0 {
@@ -119,7 +119,7 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 			return recordDocument.Name
 		}(),
 		Status: func() string {
-			if val := data.Status; val != "" {
+			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status

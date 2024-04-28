@@ -63,11 +63,11 @@ func makeFile(fdir string, str []byte) {
 func appendToFile(fdir string, payload string) {
 	file, err := os.OpenFile(fdir, os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {
-		log.Println(err)
+		log.Printf("os.openfile.ERROR:%s", err.Error())
 	}
 	defer file.Close()
 	if _, err := file.WriteString(payload); err != nil {
-		fmt.Printf("err appendToFile.WriteString : %v\n", err)
+		log.Printf("appendToFile.WriteString: %v\n", err.Error())
 	}
 }
 

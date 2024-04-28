@@ -57,7 +57,7 @@ func CreateEndpointItem(args ...any) (any, error) {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
 				RefId:  newReferenceID,
-				Status: payload.Status,
+				Status: db.STATUS.Activate(),
 				Id:     ctrlData.Uuid,
 			}
 		}
@@ -75,7 +75,7 @@ func CreateEndpointItem(args ...any) (any, error) {
 		ModificationDate: ctrlData.ModificationDate,
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
-		Status:           payload.Status,
+		Status:           db.STATUS.Activate(),
 		ApiBase:          ReqApi,
 	}
 	err = db.CreateEndpointItem(endpointItem, instData, subjectId, ReqApi)
@@ -105,7 +105,7 @@ func CreateNodeItem(args ...any) (any, error) {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
 				RefId:  newReferenceID,
-				Status: payload.Status,
+				Status: db.STATUS.Activate(),
 				Id:     ctrlData.Uuid,
 			}
 		}
@@ -124,7 +124,7 @@ func CreateNodeItem(args ...any) (any, error) {
 		ModificationDate: ctrlData.ModificationDate,
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
-		Status:           payload.Status,
+		Status:           db.STATUS.Activate(),
 		ApiBase:          ReqApi,
 	}
 	err = db.CreateNodeItem(nodeItem, instData, subjectId)
@@ -155,7 +155,7 @@ func CreateNodeItems(args ...any) (any, error) {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
 					RefId:  newReferenceID,
-					Status: item.Status,
+					Status: db.STATUS.Activate(),
 					Id:     ctrlData.Uuid,
 				}
 			}
@@ -174,7 +174,7 @@ func CreateNodeItems(args ...any) (any, error) {
 			ModificationDate: ctrlData.ModificationDate,
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
-			Status:           item.Status,
+			Status:           db.STATUS.Activate(),
 			ApiBase:          ReqApi,
 		}
 		err = db.CreateNodeItem(nodeItem, instData, subjectId)
@@ -201,7 +201,13 @@ func CreateContentItem(args ...any) (any, error) {
 		config.Err(fmt.Sprintf("payload.error: %s", err.Error()))
 		return DATA_FAIL, err
 	}
+
 	err = VerifyContentFileName(instanceData.Name, subjectId, payload.Name, ReqApi)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+
+	err = VerifySchemaConform(instanceData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -213,7 +219,7 @@ func CreateContentItem(args ...any) (any, error) {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
 				RefId:  newReferenceID,
-				Status: payload.Status,
+				Status: db.STATUS.Activate(),
 				Id:     ctrlData.Uuid,
 			}
 		}
@@ -222,7 +228,7 @@ func CreateContentItem(args ...any) (any, error) {
 	contentItem := models.TextFileItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
-		Value:            []interface{}{payload.Value},
+		Value:            payload.Value,
 		RefId:            newReferenceID,
 		Schema:           payload.Schema,
 		Uuid:             ctrlData.Uuid,
@@ -232,7 +238,7 @@ func CreateContentItem(args ...any) (any, error) {
 		ModificationDate: ctrlData.ModificationDate,
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
-		Status:           payload.Status,
+		Status:           db.STATUS.Activate(),
 		ApiBase:          ReqApi,
 	}
 	err = db.CreateContentItem(contentItem, instData, subjectId)
@@ -263,13 +269,13 @@ func CreateContentItems(args ...any) (any, error) {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
 					RefId:  newReferenceID,
-					Status: item.Status,
+					Status: db.STATUS.Activate(),
 					Id:     ctrlData.Uuid,
 				}
 			}
 			return args[2].(models.DataEntryIdentity)
 		}()
-		nodeItem := models.TextFileItem{
+		contentItem := models.TextFileItem{
 			Name:             item.Name,
 			Description:      item.Description,
 			Value:            item.Value,
@@ -282,10 +288,10 @@ func CreateContentItems(args ...any) (any, error) {
 			ModificationDate: ctrlData.ModificationDate,
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
-			Status:           item.Status,
+			Status:           db.STATUS.Activate(),
 			ApiBase:          ReqApi,
 		}
-		err = db.CreateContentItem(nodeItem, instData, subjectId)
+		err = db.CreateContentItem(contentItem, instData, subjectId)
 		if err != nil {
 			return DATA_FAIL, err
 		}
@@ -319,7 +325,7 @@ func CreateMediaItem(args ...any) (any, error) {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
 				RefId:  newReferenceID,
-				Status: "active",
+				Status: db.STATUS.Activate(),
 				Id:     ctrlData.Uuid,
 			}
 		}
@@ -377,7 +383,7 @@ func CreateMediaItems(args ...any) (any, error) {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
 					RefId:  newReferenceID,
-					Status: "active",
+					Status: db.STATUS.Activate(),
 					Id:     ctrlData.Uuid,
 				}
 			}
@@ -404,7 +410,7 @@ func CreateMediaItems(args ...any) (any, error) {
 			Url:              mediaAddress.Url,
 			UriAddress:       mediaAddress.UriAddress,
 			File:             mediaAddress.File,
-			Status:           item.Status,
+			Status:           db.STATUS.Activate(),
 			ApiBase:          ReqApi,
 		}
 		err = db.CreateMediaItem(mediaItem, instData, subjectId)
@@ -422,10 +428,15 @@ func CreateMediaItems(args ...any) (any, error) {
 func CreateSchemaItem(args ...any) (any, error) {
 	id := args[0].(string)
 	r := args[1].(*http.Request)
+	instanceData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
 	var payload models.CreateSchemaRequest
 	err := GetBody(r, &payload)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+	err = VerifySchemaItemName(instanceData.Name, subjectId, payload.Name, ReqApi)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -436,7 +447,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
 				RefId:  newReferenceID,
-				Status: payload.Status,
+				Status: db.STATUS.Activate(),
 				Id:     ctrlData.Uuid,
 			}
 		}
@@ -453,7 +464,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 		ModificationDate: ctrlData.ModificationDate,
 		ModifiedBy:       ctrlData.ModifiedBy,
 		CreatedBy:        ctrlData.CreatedBy,
-		Status:           payload.Status,
+		Status:           db.STATUS.Activate(),
 		ApiBase:          ReqApi,
 	}
 	err = db.CreateSchemaItem(schemaItem, instData, subjectId)
@@ -484,7 +495,7 @@ func CreateSchemaItems(args ...any) (any, error) {
 				return models.DataEntryIdentity{
 					Name:   item.Name,
 					RefId:  newReferenceID,
-					Status: item.Status,
+					Status: db.STATUS.Activate(),
 					Id:     ctrlData.Uuid,
 				}
 			}
@@ -501,7 +512,7 @@ func CreateSchemaItems(args ...any) (any, error) {
 			ModificationDate: ctrlData.ModificationDate,
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
-			Status:           item.Status,
+			Status:           db.STATUS.Activate(),
 			ApiBase:          ReqApi,
 		}
 		err = db.CreateSchemaItem(schemaItem, instData, subjectId)
@@ -538,7 +549,7 @@ func CreateInstanceItem(args ...any) (any, error) {
 			return models.DataEntryIdentity{
 				Name:   payload.Name,
 				RefId:  newReferenceID,
-				Status: payload.Status,
+				Status: db.STATUS.Activate(),
 				Id:     ctrlData.Uuid,
 			}
 		}
@@ -561,7 +572,7 @@ func CreateInstanceItem(args ...any) (any, error) {
 			ModificationDate: ctrlData.ModificationDate,
 			ModifiedBy:       ctrlData.ModifiedBy,
 			CreatedBy:        ctrlData.CreatedBy,
-			Status:           payload.Status,
+			Status:           db.STATUS.Activate(),
 		},
 	}
 	refID := ""

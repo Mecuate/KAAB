@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"kaab/src/libs/config"
 	"kaab/src/libs/db"
 	"kaab/src/libs/utils"
 	"kaab/src/models"
@@ -43,7 +44,7 @@ func GetBody(r *http.Request, mo interface{}) error {
 	defer r.Body.Close()
 	err = json.Unmarshal(body, &mo)
 	if err != nil {
-		fmt.Println("Error Unmarshalling Body: ", err)
+		config.Err(fmt.Sprintf("Err.Unmarshall.Body: %v@%s", err, r.RequestURI))
 		return err
 	}
 	return nil

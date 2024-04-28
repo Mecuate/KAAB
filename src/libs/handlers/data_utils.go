@@ -45,7 +45,29 @@ func VerifyMediaFileName(instanceName string, subjectId string, name string, Req
 	return nil
 }
 
+func VerifySchemaItemName(instanceName string, subjectId string, name string, ReqApi string) error {
+	SchemaData := GetSchemaList(instanceName, subjectId, "", "", ReqApi)
+	SchemaList := SchemaData.(models.SchemasCollectionList)
+	for _, item := range SchemaList {
+		if item.Name == name {
+			return fmt.Errorf("error name already in use")
+		}
+	}
+	return nil
+}
+
 func VerifyContentFileName(instanceName string, subjectId string, name string, ReqApi string) error {
+	Data := GetContentList(instanceName, subjectId, "", "", ReqApi)
+	List := Data.(models.TextFilesCollectionList)
+	for _, item := range List {
+		if item.Name == name {
+			return fmt.Errorf("error name already in use")
+		}
+	}
+	return nil
+}
+
+func VerifySchemaConform(instanceName string, subjectId string, name string, ReqApi string, data []interface{}) error {
 	Data := GetContentList(instanceName, subjectId, "", "", ReqApi)
 	List := Data.(models.TextFilesCollectionList)
 	for _, item := range List {

@@ -95,7 +95,7 @@ func AppendInstanceToRegistry(data models.InstanceCollection, apiName string, FK
 	item := models.DataEntryIdentity{
 		Name:   instanceName,
 		Id:     uuid.New().String(),
-		Status: "active",
+		Status: STATUS.Activate(),
 		RefId:  refID,
 	}
 	_, err = Db.coll.InsertOne(ctx, item)
@@ -538,7 +538,7 @@ func UpdateInstanceItem(data models.CreateInstanceRequest, instData models.DataE
 		// TODO: [` add and remove needs to be added `]-{2024-03-04}
 		update["$set"].(bson.M)["members"] = append(val, recordDocument.Members...)
 	}
-	if val := data.Status; val != "" {
+	if val := data.Status; val != "" && STATUS.Contains(val) {
 		sysData := models.SysData{
 			CreationDate:     recordDocument.Sys.CreationDate,
 			ModificationDate: timeStamp,
@@ -551,7 +551,7 @@ func UpdateInstanceItem(data models.CreateInstanceRequest, instData models.DataE
 			Id:   itemId,
 			Name: instData.Name,
 			Status: func() string {
-				if val := data.Status; val != "" {
+				if val := data.Status; val != "" && STATUS.Contains(val) {
 					return val
 				}
 				return recordDocument.Sys.Status

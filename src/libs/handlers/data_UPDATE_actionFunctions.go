@@ -36,7 +36,6 @@ var AllowedDataUpdateActions = AllowedDataFunc{
 }
 
 func UpdateFailed(args ...any) any {
-	fmt.Println("UpdateFailed got called")
 	return DATA_FAIL
 }
 

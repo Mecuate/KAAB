@@ -41,7 +41,7 @@ func CreateMediaItem(data models.MediaFileItem, instData models.DataEntryIdentit
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: data.Status,
+		Status: STATUS.Activate(),
 		RefId:  data.RefId,
 		Thumb:  data.Thumb,
 	}
@@ -94,7 +94,7 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 		Name:  recordDocument.Name,
 		RefId: recordDocument.RefId,
 		Status: func() string {
-			if val := data.Status; val != "" {
+			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status
@@ -169,7 +169,7 @@ func ConformMediaUpdate(mediaValueInfo *models.MediaItemStorageValue, data *mode
 	} else {
 		mediaValueInfo.Service = recordDocument.Service
 	}
-	if val := data.Status; val != "" {
+	if val := data.Status; val != "" && STATUS.Contains(val) {
 		update["$set"].(bson.M)["status"] = val
 		mediaValueInfo.Status = val
 	} else {

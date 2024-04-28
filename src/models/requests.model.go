@@ -37,7 +37,6 @@ type CreateSchemaRequest struct {
 	Name        string        `json:"name" bson:"name"`
 	Description string        `json:"description" bson:"description"`
 	Value       []interface{} `json:"value" bson:"value"`
-	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Bump        bool          `json:"bump" bson:"bump"`
 	Status      string        `json:"status" bson:"status"`
 }

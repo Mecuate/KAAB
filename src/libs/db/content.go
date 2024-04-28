@@ -37,6 +37,8 @@ func CreateContentItem(data models.TextFileItem, instData models.DataEntryIdenti
 		return err
 	}
 	ctx := context.Background()
+
+	data.Value = HandleContentCreationItems(CreateToMapArray(data.Value))
 	res, err := Db.coll.InsertOne(ctx, data)
 	if err != nil {
 		return err
@@ -45,7 +47,7 @@ func CreateContentItem(data models.TextFileItem, instData models.DataEntryIdenti
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: data.Status,
+		Status: STATUS.Activate(),
 		RefId:  data.RefId,
 	}
 	err = AddNewContentList(instData.Name, subjectId, newRecord)
@@ -81,7 +83,7 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 	if val := data.Schema; val != "" {
 		update["$set"].(bson.M)["schema_ref"] = val
 	}
-	if val := data.Status; val != "" {
+	if val := data.Status; val != "" && STATUS.Contains(val) {
 		update["$set"].(bson.M)["status"] = val
 	}
 
@@ -146,7 +148,7 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 		Name:  recordDocument.Name,
 		RefId: recordDocument.RefId,
 		Status: func() string {
-			if val := data.Status; val != "" {
+			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status

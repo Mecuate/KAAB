@@ -48,7 +48,7 @@ func CreateEndpointItem(data models.EndpointItem, instData models.DataEntryIdent
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
-		Status: data.Status,
+		Status: STATUS.Activate(),
 		RefId:  newReferenceID,
 	}
 	err = AddNewEndpointToList(instData.Name, subjectId, newRecord)
@@ -98,7 +98,7 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 	if val := data.Schema; val != "" {
 		update["$set"].(bson.M)["schema_ref"] = val
 	}
-	if val := data.Status; val != "" {
+	if val := data.Status; val != "" && STATUS.Contains(val) {
 		update["$set"].(bson.M)["status"] = val
 	}
 	if val := data.Value; val.Get != "" || val.Post != "" || val.Delete != "" {
@@ -120,7 +120,7 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		Id:   itemId,
 		Name: recordDocument.Name,
 		Status: func() string {
-			if val := data.Status; val != "" {
+			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status
