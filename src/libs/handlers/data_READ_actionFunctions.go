@@ -282,8 +282,10 @@ func GetSchemaItem(args ...any) any {
 		Description: schemaItem.Description,
 		Size:        schemaItem.Size,
 		Versions:    schema.version(),
-		Value:       schema.data(),
+		Value:       ExtractObjectItem(schema.data()),
 		Status:      schemaItem.Status,
+		RefId:       schemaItem.RefId,
+		Thumb:       schemaItem.Thumb,
 	}
 }
 
@@ -301,9 +303,11 @@ func GetSchemaItems(args ...any) any {
 			Name:        schemaItem.Name,
 			Description: schemaItem.Description,
 			Size:        schemaItem.Size,
-			Versions:    schemaItem.Versions,
+			Versions:    schemaItem.Versions[0:1],
 			Value:       schemaItem.Value[0:1],
 			Status:      schemaItem.Status,
+			RefId:       schemaItem.RefId,
+			Thumb:       schemaItem.Thumb,
 		}
 		schemaItems = append(schemaItems, result)
 	}

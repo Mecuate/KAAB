@@ -207,7 +207,7 @@ func CreateContentItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 
-	err = VerifySchemaConform(instanceData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
+	err = VerifySchemaExist(instanceData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -253,6 +253,7 @@ func CreateContentItem(args ...any) (any, error) {
 func CreateContentItems(args ...any) (any, error) {
 	id := args[0].(string)
 	r := args[1].(*http.Request)
+	instanceData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
 	var payload []models.CreateContentRequest
@@ -262,6 +263,15 @@ func CreateContentItems(args ...any) (any, error) {
 	}
 	RES := []any{}
 	for _, item := range payload {
+		err = VerifyContentFileName(instanceData.Name, subjectId, item.Name, ReqApi)
+		if err != nil {
+			return DATA_FAIL, err
+		}
+
+		err = VerifySchemaExist(instanceData.Name, subjectId, item.Schema, ReqApi, item.Value)
+		if err != nil {
+			return DATA_FAIL, err
+		}
 		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
 		instData := func() models.DataEntryIdentity {
@@ -456,7 +466,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 	schemaItem := models.SchemaItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
-		Value:            payload.Value,
+		Value:            []interface{}{payload.Value},
 		Uuid:             ctrlData.Uuid,
 		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
 		Versions:         ctrlData.Versions,
@@ -466,6 +476,7 @@ func CreateSchemaItem(args ...any) (any, error) {
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           db.STATUS.Activate(),
 		ApiBase:          ReqApi,
+		RefId:            newReferenceID,
 	}
 	err = db.CreateSchemaItem(schemaItem, instData, subjectId)
 	if err != nil {
@@ -514,6 +525,7 @@ func CreateSchemaItems(args ...any) (any, error) {
 			CreatedBy:        ctrlData.CreatedBy,
 			Status:           db.STATUS.Activate(),
 			ApiBase:          ReqApi,
+			RefId:            newReferenceID,
 		}
 		err = db.CreateSchemaItem(schemaItem, instData, subjectId)
 		if err != nil {

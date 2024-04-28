@@ -376,3 +376,11 @@ func MaskURIAddress(values any) []interface{} {
 	}
 	return Result
 }
+
+func ExtractObjectItem(arr []interface{}) interface{} {
+	if len(arr) == 0 {
+		return models.MAPDATA{}
+	}
+	res := arr[0].([]map[string]interface{})
+	return res[0]
+}

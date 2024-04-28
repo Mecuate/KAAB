@@ -68,12 +68,23 @@ func VerifyContentFileName(instanceName string, subjectId string, name string, R
 }
 
 func VerifySchemaConform(instanceName string, subjectId string, name string, ReqApi string, data []interface{}) error {
-	Data := GetContentList(instanceName, subjectId, "", "", ReqApi)
-	List := Data.(models.TextFilesCollectionList)
+	Data := GetSchemaList(instanceName, subjectId, "", "", ReqApi)
+	List := Data.(models.SchemasCollectionList)
 	for _, item := range List {
 		if item.Name == name {
 			return fmt.Errorf("error name already in use")
 		}
 	}
 	return nil
+}
+
+func VerifySchemaExist(instanceName string, subjectId string, name string, ReqApi string, data []interface{}) error {
+	Data := GetSchemaList(instanceName, subjectId, "", "", ReqApi)
+	List := Data.(models.SchemasCollectionList)
+	for _, item := range List {
+		if item.Name == name {
+			return nil
+		}
+	}
+	return fmt.Errorf("error no schema by that reference found")
 }

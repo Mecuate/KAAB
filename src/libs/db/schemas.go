@@ -10,14 +10,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetSchemaItem(ref_id string) (models.SchemaItemResponse, error) {
-	var res models.SchemaItemResponse
+func GetSchemaItem(uuid string) (models.SchemaItem, error) {
+	var res models.SchemaItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
 	if err != nil {
 		return res, err
 	}
 	ctx := context.Background()
-	identify := bson.M{"uuid": ref_id}
+	identify := bson.M{"uuid": uuid}
 	err = Db.coll.FindOne(ctx, identify).Decode(&res)
 	if err != nil {
 		return res, err
@@ -36,12 +36,11 @@ func CreateSchemaItem(data models.SchemaItem, instData models.DataEntryIdentity,
 		return err
 	}
 	config.Log(fmt.Sprintf("Schema Item Created: %v", res))
-	newReferenceID := RandomRefID()
 	newRecord := models.DataEntryIdentity{
 		Name:   data.Name,
 		Id:     data.Uuid,
 		Status: STATUS.Activate(),
-		RefId:  newReferenceID,
+		RefId:  data.RefId,
 	}
 	err = AddNewSchemasList(instData.Name, subjectId, newRecord)
 	if err != nil {
@@ -90,8 +89,8 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 	if val := data.Status; val != "" && STATUS.Contains(val) {
 		update["$set"].(bson.M)["status"] = val
 	}
-	if val := data.Value; len(val) > 0 {
-		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
+	if val := data.Value; len(val) == 1 {
+		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{val})
 	}
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())

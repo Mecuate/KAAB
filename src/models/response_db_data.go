@@ -44,13 +44,15 @@ type ContentItemResponse struct {
 type ManyContentItemResponse = []ContentItemResponse
 
 type SchemaItemResponse struct {
-	Uuid        string        `json:"uuid" bson:"uuid"`
-	Name        string        `json:"name" bson:"name"`
-	Description string        `json:"description" bson:"description"`
-	Size        int64         `json:"size" bson:"size"`
-	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
-	Value       []interface{} `json:"value" bson:"value"`
-	Status      string        `json:"status" bson:"status"`
+	Uuid        string      `json:"uuid" bson:"uuid"`
+	Name        string      `json:"name" bson:"name"`
+	Description string      `json:"description" bson:"description"`
+	Size        int64       `json:"size" bson:"size"`
+	Versions    []string    `json:"versions" bson:"versions" default:"[]"`
+	Value       interface{} `json:"value" bson:"value"`
+	Status      string      `json:"status" bson:"status"`
+	RefId       string      `json:"ref_id" bson:"ref_id"`
+	Thumb       string      `json:"thumb" bson:"thumb"`
 }
 
 type ManySchemaItemResponse = []SchemaItemResponse
