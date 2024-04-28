@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type KeyValue struct {
@@ -54,8 +55,8 @@ func CreateContentItem(data models.TextFileItem, instData models.DataEntryIdenti
 	return nil
 }
 
-func UpdateContentItem(data models.CreateContentRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
-	var R models.Deletion
+func UpdateContentItem(data models.CreateContentRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, publishApiTarget string) (interface{}, error) {
+	var R models.SingleIDMap
 	var recordDocument models.TextFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
 	if err != nil {
@@ -71,9 +72,6 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 	update := bson.M{
 		"$set": bson.M{},
 	}
-	if val := data.Name; val != "" {
-		update["$set"].(bson.M)["name"] = val
-	}
 	if val := data.Description; val != "" {
 		update["$set"].(bson.M)["description"] = val
 	}
@@ -86,11 +84,55 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 	if val := data.Status; val != "" {
 		update["$set"].(bson.M)["status"] = val
 	}
-	if val := data.Value; len(val) > 0 {
-		fmt.Println("@@@ -- Update::Value: ", val)
-		fmt.Println("@@@ -- Update::data.Value: ", data.Value)
-		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{val})
+
+	shouldUpdateVal := true
+	currentIndex := func() int64 {
+		r := IndexOf(recordDocument.Versions, data.Version)
+		if r == -1 {
+			return 0
+		}
+		return r
+	}()
+	valueItems := convertToMapArray(recordDocument.Value[currentIndex].(primitive.A)) //.([]models.MAPDATA)
+	deletes := data.Deletes
+	patches := data.Patches
+	appends := data.Appends
+	if len(deletes) > 0 {
+		shouldUpdateVal = false
+		for _, d := range deletes {
+			for k, v := range valueItems {
+				if v["$__i"] == d["$__i"] {
+					DeleteItemFromArray(&valueItems, k)
+				}
+			}
+		}
 	}
+	if len(patches) > 0 {
+		shouldUpdateVal = false
+		for _, p := range patches {
+			for k, v := range valueItems {
+				if v["$__i"] == p["$__i"] {
+					UpdateItemFromArray(&valueItems, k, p)
+				}
+			}
+
+		}
+	}
+	if len(appends) > 0 {
+		shouldUpdateVal = false
+		tl := len(valueItems)
+		for p, v := range appends {
+			AddItemFromArray(&valueItems, tl+p, v)
+		}
+	}
+	if shouldUpdateVal {
+		if val := data.Value; len(val) > 0 {
+			update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{val})
+		}
+	} else {
+		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{valueItems})
+	}
+
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())
 	update["$set"].(bson.M)["modified_by"] = AppendModificationRecord(recordDocument.ModifiedBy, subjectId, timeStamp)
@@ -100,36 +142,53 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id: itemId,
-		Name: func() string {
-			if val := data.Name; val != "" {
-				return val
-			}
-			return recordDocument.Name
-		}(),
+		Id:    itemId,
+		Name:  recordDocument.Name,
+		RefId: recordDocument.RefId,
 		Status: func() string {
 			if val := data.Status; val != "" {
 				return val
 			}
 			return recordDocument.Status
 		}(),
-		RefId: func() string {
-			if val := data.RefId; val != "" {
-				return val
-			}
-			return recordDocument.RefId
-		}(),
 	}
-	err = UpdateContentListItem(instData.Name, subjectId, newRecord)
+	err = UpdateContentListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Content List: %v", err))
 	}
 
-	return updateRes, nil
+	if data.Bump {
+		publishResponse, err := PublishTarget(FILES, instData, recordDocument.Name, recordDocument.RefId, subjectId, newRecord, publishApiTarget)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Publish Content List: %v", err))
+			return nil, fmt.Errorf("error publishing")
+		}
+
+		pubDocument := publishResponse.Meta.(models.TextFileItem)
+
+		updeateRecord := models.DataEntryIdentity{
+			Id:     pubDocument.Uuid,
+			Name:   pubDocument.Name,
+			Status: pubDocument.Status,
+			RefId:  pubDocument.RefId,
+			Thumb:  pubDocument.Thumb,
+		}
+		err = UpdateContentListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Content List for published item: %v", err))
+		}
+	}
+
+	return map[string]any{
+		"id":        itemId,
+		"ref":       recordDocument.RefId,
+		"operation": updateRes != nil,
+		"published": data.Bump,
+	}, nil
 }
 
-func DeleteContentItem(ref_id string) (models.Deletion, error) {
-	var R models.Deletion
+func DeleteContentItem(ref_id string) (models.SingleIDMap, error) {
+	var R models.SingleIDMap
 	var res models.NodeFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, FILES)
 	if err != nil {

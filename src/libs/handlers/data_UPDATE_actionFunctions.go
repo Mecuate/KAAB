@@ -93,15 +93,11 @@ func UpdateContentItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateContentItem(payload, instanceData, subjectId, itemId, ReqApi)
+	R, err := db.UpdateContentItem(payload, instanceData, subjectId, itemId, ReqApi, KAAB_VERSION[ReqApi].Publish)
 	if err != nil {
 		return DATA_FAIL
 	}
-	return map[string]interface{}{
-		"status":    "success",
-		"message":   "Content item updated successfully",
-		"operation": int64(len(fmt.Sprintf("%v", R))) > 0,
-	}
+	return R
 }
 
 /* media */

@@ -50,8 +50,8 @@ func CreateNodeItem(data models.NodeFileItem, instData models.DataEntryIdentity,
 	return nil
 }
 
-func DeleteNodeItem(ref_id string) (models.Deletion, error) {
-	var R models.Deletion
+func DeleteNodeItem(ref_id string) (models.SingleIDMap, error) {
+	var R models.SingleIDMap
 	var res models.NodeFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, NODES)
 	if err != nil {
@@ -68,7 +68,7 @@ func DeleteNodeItem(ref_id string) (models.Deletion, error) {
 }
 
 func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
-	var R models.Deletion
+	var R models.SingleIDMap
 	var recordDocument models.NodeFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, NODES)
 	if err != nil {

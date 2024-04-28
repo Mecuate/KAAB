@@ -44,3 +44,14 @@ func VerifyMediaFileName(instanceName string, subjectId string, name string, Req
 	}
 	return nil
 }
+
+func VerifyContentFileName(instanceName string, subjectId string, name string, ReqApi string) error {
+	Data := GetContentList(instanceName, subjectId, "", "", ReqApi)
+	List := Data.(models.TextFilesCollectionList)
+	for _, item := range List {
+		if item.Name == name {
+			return fmt.Errorf("error name already in use")
+		}
+	}
+	return nil
+}

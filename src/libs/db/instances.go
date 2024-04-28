@@ -423,18 +423,30 @@ func AddNewContentList(instanceName string, subjectId string, data models.DataEn
 	return nil
 }
 
-func UpdateContentListItem(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+func UpdateContentListItem(instanceName string, subjectId string, data models.DataEntryIdentity, publish bool) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
-	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}, "files_collection_list.id": data.Id}
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	update := bson.M{"$set": bson.M{
 		"files_collection_list.$.name":   data.Name,
 		"files_collection_list.$.status": data.Status,
 		"files_collection_list.$.ref_id": data.RefId,
 	}}
+	if publish {
+		update["$set"].(bson.M)["files_collection_list.$.id"] = data.Id
+	} else {
+		identify["files_collection_list.id"] = data.Id
+	}
+
+	// identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}, "files_collection_list.id": data.Id}
+	// update := bson.M{"$set": bson.M{
+	// 	"files_collection_list.$.name":   data.Name,
+	// 	"files_collection_list.$.status": data.Status,
+	// 	"files_collection_list.$.ref_id": data.RefId,
+	// }}
 	res, err := Db.coll.UpdateOne(ctx, identify, update)
 	if err != nil {
 		config.Err(fmt.Sprintf("List of Content Items UPDATE_ERROR: %v", err))
@@ -464,8 +476,8 @@ func UnsetContentList(instanceName string, subjectId string, itemId string) erro
 	return nil
 }
 
-func DeleteInstanceItem(ref_id string) (models.Deletion, error) {
-	var R models.Deletion
+func DeleteInstanceItem(ref_id string) (models.SingleIDMap, error) {
+	var R models.SingleIDMap
 	var res models.InstanceCollection
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
@@ -497,7 +509,7 @@ func AddNewEndpointToList(instanceName string, subjectId string, data models.Dat
 }
 
 func UpdateInstanceItem(data models.CreateInstanceRequest, instData models.DataEntryIdentity, subjectId string, itemId string, apiName string) (interface{}, error) {
-	var R models.Deletion
+	var R models.SingleIDMap
 	var recordDocument models.InstanceCollection
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {

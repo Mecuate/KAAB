@@ -259,3 +259,5 @@ type CollectionBasis struct {
 	Name    string `json:"_name" bson:"_name"`
 	Created string `json:"created" bson:"created"`
 }
+
+type MAPDATA map[string]interface{}

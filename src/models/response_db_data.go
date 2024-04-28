@@ -102,7 +102,7 @@ type SystemMediaAddress struct {
 	PhysicalName string
 }
 
-type Deletion struct {
+type SingleIDMap struct {
 	Id string `json:"id" bson:"id"`
 }
 

@@ -14,6 +14,10 @@ type CreateContentRequest struct {
 	Name        string        `json:"name" bson:"name"`
 	Description string        `json:"description" bson:"description"`
 	Value       []interface{} `json:"value" bson:"value"`
+	Deletes     []MAPDATA     `json:"deletes" bson:"deletes" default:"[]"`
+	Appends     []MAPDATA     `json:"appends" bson:"appends" default:"[]"`
+	Patches     []MAPDATA     `json:"patches" bson:"patches" default:"[]"`
+	Version     string        `json:"version" bson:"version"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
 	Bump        bool          `json:"bump" bson:"bump"`

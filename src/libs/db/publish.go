@@ -11,12 +11,12 @@ import (
 )
 
 var CollectionType = map[string]interface{}{
-	"nodes":     models.NodeFileItem{},
-	"instance":  models.InstanceCollection{},
-	"content":   models.TextFileItem{},
-	"media":     models.MediaFileItem{},
-	"schemas":   models.SchemaItem{},
-	"endpoints": models.EndpointItem{},
+	NODES:         models.NodeFileItem{},
+	INSTANCE_INFO: models.InstanceCollection{},
+	FILES:         models.TextFileItem{},
+	MEDIA:         models.MediaFileItem{},
+	SCHEMAS:       models.SchemaItem{},
+	ENDPOINTS:     models.EndpointItem{},
 }
 
 var FailedPublishing = models.PublishResponse{

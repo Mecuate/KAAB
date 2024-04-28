@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"kaab/src/models"
 	mrand "math/rand"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func EncodeSignature(instId string, usrId string) string {
@@ -188,9 +190,19 @@ func MakeSHA1Hash(data string) string {
 	bv := []byte(data)
 	hasher := sha1.New()
 	hasher.Write(bv)
+	hashBytes := hasher.Sum(nil)
+	fmt.Println(hex.EncodeToString(hashBytes))
 	sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
 	return sha
+}
+
+func MakeHash(data string) string {
+	bv := []byte(data)
+	hasher := sha1.New()
+	hasher.Write(bv)
+
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func RandomRefID() string {
@@ -218,4 +230,56 @@ func cleanString(input string) string {
 		}
 	}
 	return string(result)
+}
+
+func IndexOf(slice []string, item string) int64 {
+	if item == "" {
+		return int64(0)
+	}
+	for i, v := range slice {
+		if v == item {
+			return int64(i)
+		}
+	}
+	return int64(-1)
+}
+
+func convertToMapArray(arr primitive.A) []models.MAPDATA {
+	result := make([]models.MAPDATA, len(arr))
+	for i, v := range arr {
+		switch elem := v.(type) {
+		case primitive.M:
+			result[i] = models.MAPDATA(elem)
+			continue
+		default:
+			result[i] = models.MAPDATA(nil)
+		}
+	}
+	return result
+}
+
+func DeleteItemFromArray(arr *[]models.MAPDATA, index int) {
+	if index < 0 || index >= len(*arr) {
+		return
+	}
+	start := (*arr)[:index]
+	end := (*arr)[index+1:]
+	*arr = append(start, end...)
+}
+
+func UpdateItemFromArray(arr *[]models.MAPDATA, index int, mod models.MAPDATA) {
+	if index < 0 || index >= len(*arr) {
+		return
+	}
+	start := append((*arr)[:index], mod)
+	end := (*arr)[index+1:]
+	*arr = append(start, end...)
+}
+
+func AddItemFromArray(arr *[]models.MAPDATA, index int, newItem models.MAPDATA) {
+	if index < len(*arr) {
+		return
+	}
+	newItem["$__i"] = MakeHash(fmt.Sprintf("%d:%v:v_:%v", index, time.Now().UnixNano(), newItem))
+	*arr = append(*arr, newItem)
 }

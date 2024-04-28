@@ -192,6 +192,7 @@ func CreateNodeItems(args ...any) (any, error) {
 func CreateContentItem(args ...any) (any, error) {
 	id := args[0].(string)
 	r := args[1].(*http.Request)
+	instanceData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
 	var payload models.CreateContentRequest
@@ -200,6 +201,11 @@ func CreateContentItem(args ...any) (any, error) {
 		config.Err(fmt.Sprintf("payload.error: %s", err.Error()))
 		return DATA_FAIL, err
 	}
+	err = VerifyContentFileName(instanceData.Name, subjectId, payload.Name, ReqApi)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+
 	ctrlData := CreateCtrlFields(id)
 	newReferenceID := db.RandomRefID()
 	instData := func() models.DataEntryIdentity {
@@ -297,7 +303,6 @@ func CreateMediaItem(args ...any) (any, error) {
 	instanceData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
-	fmt.Println("instanceData: ", instanceData)
 	var payload models.CreateMediaRequest
 	err := GetBody(r, &payload)
 	if err != nil {

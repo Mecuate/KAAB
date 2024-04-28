@@ -49,8 +49,8 @@ func CreateSchemaItem(data models.SchemaItem, instData models.DataEntryIdentity,
 	return nil
 }
 
-func DeleteSchemaItem(ref_id string) (models.Deletion, error) {
-	var R models.Deletion
+func DeleteSchemaItem(ref_id string) (models.SingleIDMap, error) {
+	var R models.SingleIDMap
 	var res models.SchemaItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
 	if err != nil {
@@ -67,7 +67,7 @@ func DeleteSchemaItem(ref_id string) (models.Deletion, error) {
 }
 
 func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
-	var R models.Deletion
+	var R models.SingleIDMap
 	var recordDocument models.SchemaItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
 	if err != nil {

@@ -52,8 +52,8 @@ func CreateMediaItem(data models.MediaFileItem, instData models.DataEntryIdentit
 	return nil
 }
 
-func DeleteMediaItem(ref_id string) (models.Deletion, error) {
-	var R models.Deletion
+func DeleteMediaItem(ref_id string) (models.SingleIDMap, error) {
+	var R models.SingleIDMap
 	var res models.MediaFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
 	if err != nil {
@@ -70,7 +70,7 @@ func DeleteMediaItem(ref_id string) (models.Deletion, error) {
 }
 
 func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, publishApiTarget string, mediaControlFiels models.InternalMediaCtrlFields) (interface{}, error) {
-	var R models.Deletion
+	var R models.SingleIDMap
 	var recordDocument models.MediaFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, MEDIA)
 	if err != nil {
@@ -90,15 +90,15 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id:   itemId,
-		Name: recordDocument.Name,
+		Id:    itemId,
+		Name:  recordDocument.Name,
+		RefId: recordDocument.RefId,
 		Status: func() string {
 			if val := data.Status; val != "" {
 				return val
 			}
 			return recordDocument.Status
 		}(),
-		RefId: recordDocument.RefId,
 	}
 	err = UpdateMediaListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {
@@ -123,7 +123,7 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 		}
 		err = UpdateMediaListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
 		if err != nil {
-			config.Err(fmt.Sprintf("Error updating Endpoint List for published item: %v", err))
+			config.Err(fmt.Sprintf("Error updating Media List for published item: %v", err))
 		}
 	}
 
