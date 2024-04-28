@@ -66,7 +66,7 @@ func DeleteSchemaItem(ref_id string) (models.SingleIDMap, error) {
 	return R, nil
 }
 
-func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
+func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, publishApiTarget string) (interface{}, error) {
 	var R models.SingleIDMap
 	var recordDocument models.SchemaItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, SCHEMAS)
@@ -111,10 +111,37 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 			return recordDocument.Status
 		}(),
 	}
-	err = UpdateSchemaListItem(instData.Name, subjectId, newRecord)
+	err = UpdateSchemaListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
 	}
 
-	return updateRes, nil
+	if data.Bump {
+		publishResponse, err := PublishTarget(SCHEMAS, instData, recordDocument.Name, recordDocument.RefId, subjectId, newRecord, publishApiTarget)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Schema List: %v", err))
+			return nil, fmt.Errorf("error publishing")
+		}
+
+		pubDocument := publishResponse.Meta.(models.SchemaItem)
+
+		updeateRecord := models.DataEntryIdentity{
+			Id:     pubDocument.Uuid,
+			Name:   pubDocument.Name,
+			Status: pubDocument.Status,
+			RefId:  pubDocument.RefId,
+			Thumb:  pubDocument.Thumb,
+		}
+		err = UpdateSchemaListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Media List for published item: %v", err))
+		}
+	}
+
+	return map[string]any{
+		"id":        itemId,
+		"ref":       recordDocument.RefId,
+		"operation": updateRes != nil,
+		"published": data.Bump,
+	}, nil
 }

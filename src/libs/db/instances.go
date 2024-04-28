@@ -367,18 +367,23 @@ func AddNewSchemasList(instanceName string, subjectId string, data models.DataEn
 	return nil
 }
 
-func UpdateSchemaListItem(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+func UpdateSchemaListItem(instanceName string, subjectId string, data models.DataEntryIdentity, publish bool) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
-	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}, "schemas_collection_list.id": data.Id}
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	update := bson.M{"$set": bson.M{
 		"schemas_collection_list.$.name":   data.Name,
 		"schemas_collection_list.$.status": data.Status,
 		"schemas_collection_list.$.ref_id": data.RefId,
 	}}
+	if publish {
+		update["$set"].(bson.M)["schemas_collection_list.$.id"] = data.Id
+	} else {
+		identify["schemas_collection_list.id"] = data.Id
+	}
 	res, err := Db.coll.UpdateOne(ctx, identify, update)
 	if err != nil {
 		config.Err(fmt.Sprintf("List of Schema Items UPDATE_ERROR: %v", err))
