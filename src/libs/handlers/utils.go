@@ -23,7 +23,6 @@ type KeyValue struct {
 	Value interface{} `json:"Value"`
 }
 
-/* funcs */
 func (s NewStringArray) Contains(target string) bool {
 	for _, elem := range s.elements {
 		if elem == target {

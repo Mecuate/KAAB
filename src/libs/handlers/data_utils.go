@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"kaab/src/models"
+	"reflect"
 )
 
 type any = interface{}
@@ -67,13 +68,62 @@ func VerifyContentFileName(instanceName string, subjectId string, name string, R
 	return nil
 }
 
-func VerifySchemaConform(instanceName string, subjectId string, name string, ReqApi string, data []interface{}) error {
+func VerifySchemaConform(instanceName string, subjectId string, schema string, ReqApi string, data []interface{}) error {
 	Data := GetSchemaList(instanceName, subjectId, "", "", ReqApi)
 	List := Data.(models.SchemasCollectionList)
+	selected := models.SchemaItemResponse{}
 	for _, item := range List {
-		if item.Name == name {
-			return fmt.Errorf("error name already in use")
+		if item.Name == schema {
+			schemaData := GetSchemaItem(instanceName, subjectId, item.Id, models.URLFilterSearchParams{}, ReqApi)
+			selected = schemaData.(models.SchemaItemResponse)
 		}
+	}
+	if ok := selected.Value.(models.MAPDATA); ok != nil {
+		OK := selected.Value.(models.MAPDATA)
+
+		for _, item := range data {
+			if _, oki := item.(models.MAPDATA); !oki {
+				return fmt.Errorf("wrong type in payload")
+			}
+
+			for k, v := range item.(models.MAPDATA) {
+				if k == "$__i" {
+					continue
+				}
+				if part := OK[k]; part != nil {
+					testType := fmt.Sprintf("%v", reflect.TypeOf(v))
+
+					switch testType {
+					case "string":
+						if part == "string" && len(v.(string)) < 255 {
+							continue
+						}
+						if part == "long_string" {
+							continue
+						}
+					case "bool":
+						if part == "bool" {
+							continue
+						}
+					case "float64":
+						if part == "number" {
+							continue
+						}
+					case "[]interface {}":
+						if part == "object" {
+							continue
+						}
+					default:
+						return fmt.Errorf("data does not conform to schema")
+					}
+
+				} else {
+					return fmt.Errorf("key-value pair out of range")
+				}
+			}
+		}
+	} else {
+		return fmt.Errorf("data does not conform to schema")
 	}
 	return nil
 }

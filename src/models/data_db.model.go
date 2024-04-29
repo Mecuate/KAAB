@@ -260,4 +260,4 @@ type CollectionBasis struct {
 	Created string `json:"created" bson:"created"`
 }
 
-type MAPDATA map[string]interface{}
+type MAPDATA = map[string]interface{}

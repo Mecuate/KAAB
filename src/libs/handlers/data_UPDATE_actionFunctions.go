@@ -92,6 +92,18 @@ func UpdateContentItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
+
+	err = VerifySchemaExist(instanceData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
+	if err != nil {
+		return DATA_FAIL
+	}
+
+	err = VerifySchemaConform(instanceData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
+	if err != nil {
+		DATA_FAIL["Message"] = err.Error()
+		return DATA_FAIL
+	}
+
 	R, err := db.UpdateContentItem(payload, instanceData, subjectId, itemId, ReqApi, KAAB_VERSION[ReqApi].Publish)
 	if err != nil {
 		return DATA_FAIL

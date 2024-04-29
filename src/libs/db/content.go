@@ -95,7 +95,7 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 		}
 		return r
 	}()
-	valueItems := convertToMapArray(recordDocument.Value[currentIndex].(primitive.A)) //.([]models.MAPDATA)
+	valueItems := convertToMapArray(recordDocument.Value[currentIndex].(primitive.A))
 	deletes := data.Deletes
 	patches := data.Patches
 	appends := data.Appends
@@ -153,6 +153,7 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 			}
 			return recordDocument.Status
 		}(),
+		Thumb: recordDocument.Thumb,
 	}
 	err = UpdateContentListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {
