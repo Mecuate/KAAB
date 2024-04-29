@@ -93,6 +93,7 @@ func UpdateMediaItem(data models.CreateMediaRequest, instData models.DataEntryId
 		Id:    itemId,
 		Name:  recordDocument.Name,
 		RefId: recordDocument.RefId,
+		Thumb: recordDocument.Thumb,
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val

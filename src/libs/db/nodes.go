@@ -67,7 +67,7 @@ func DeleteNodeItem(ref_id string) (models.SingleIDMap, error) {
 	return R, nil
 }
 
-func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string) (interface{}, error) {
+func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIdentity, subjectId string, itemId string, ReqApi string, publishApiTarget string) (interface{}, error) {
 	var R models.SingleIDMap
 	var recordDocument models.NodeFileItem
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, NODES)
@@ -84,16 +84,11 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 	update := bson.M{
 		"$set": bson.M{},
 	}
-	if val := data.Name; val != "" {
-		update["$set"].(bson.M)["name"] = val
-	}
 	if val := data.Description; val != "" {
 		update["$set"].(bson.M)["description"] = val
 	}
-	if val := data.RefId; val != "" {
-		update["$set"].(bson.M)["ref_id"] = val
-	}
 	if val := data.Schema; val != "" {
+		// TODO: [` validate schema for node?? `]-{2024-04-28}
 		update["$set"].(bson.M)["schema_ref"] = val
 	}
 	if val := data.Status; val != "" && STATUS.Contains(val) {
@@ -111,30 +106,48 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id: itemId,
-		Name: func() string {
-			if val := data.Name; val != "" {
-				return val
-			}
-			return recordDocument.Name
-		}(),
+		Id:    itemId,
+		Name:  recordDocument.Name,
+		RefId: recordDocument.RefId,
+		Thumb: recordDocument.Thumb,
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status
 		}(),
-		RefId: func() string {
-			if val := data.RefId; val != "" {
-				return val
-			}
-			return recordDocument.RefId
-		}(),
 	}
-	err = UpdateNodeListItem(instData.Name, subjectId, newRecord)
+	err = UpdateNodeListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {
 		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
 	}
 
-	return updateRes, nil
+	if data.Bump {
+		publishResponse, err := PublishTarget(NODES, instData, recordDocument.Name, recordDocument.RefId, subjectId, newRecord, publishApiTarget)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Nodes List: %v", err))
+			return nil, fmt.Errorf("error publishing")
+		}
+
+		pubDocument := publishResponse.Meta.(models.NodeFileItem)
+
+		updeateRecord := models.DataEntryIdentity{
+			Id:     pubDocument.Uuid,
+			Name:   pubDocument.Name,
+			Status: pubDocument.Status,
+			RefId:  pubDocument.RefId,
+			Thumb:  pubDocument.Thumb,
+		}
+		err = UpdateNodeListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
+		if err != nil {
+			config.Err(fmt.Sprintf("Error updating Nodes List for published item: %v", err))
+		}
+	}
+
+	return map[string]any{
+		"id":        itemId,
+		"ref":       recordDocument.RefId,
+		"operation": updateRes != nil,
+		"published": data.Bump,
+	}, nil
 }

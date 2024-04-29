@@ -72,7 +72,7 @@ func UpdateNodeItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
-	R, err := db.UpdateNodeItem(payload, instanceData, subjectId, itemId, ReqApi)
+	R, err := db.UpdateNodeItem(payload, instanceData, subjectId, itemId, ReqApi, KAAB_VERSION[ReqApi].Publish)
 	if err != nil {
 		return DATA_FAIL
 	}

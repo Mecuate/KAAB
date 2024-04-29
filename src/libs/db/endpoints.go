@@ -117,15 +117,16 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id:   itemId,
-		Name: recordDocument.Name,
+		Id:    itemId,
+		Name:  recordDocument.Name,
+		RefId: recordDocument.RefId,
+		Thumb: recordDocument.Thumb,
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status
 		}(),
-		RefId: recordDocument.RefId,
 	}
 	err = UpdateEndpointListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {

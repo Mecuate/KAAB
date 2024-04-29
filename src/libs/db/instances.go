@@ -165,18 +165,23 @@ func AddNewNodeToList(instanceName string, subjectId string, data models.DataEnt
 	return nil
 }
 
-func UpdateNodeListItem(instanceName string, subjectId string, data models.DataEntryIdentity) error {
+func UpdateNodeListItem(instanceName string, subjectId string, data models.DataEntryIdentity, publish bool) error {
 	Db, err := InitMongoDB(config.WEBENV.PubDbName, INSTANCE_INFO)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
-	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}, "nodes_collection_list.id": data.Id}
+	identify := bson.M{"name": instanceName, "members": bson.M{"$in": []string{subjectId}}}
 	update := bson.M{"$set": bson.M{
 		"nodes_collection_list.$.name":   data.Name,
 		"nodes_collection_list.$.status": data.Status,
 		"nodes_collection_list.$.ref_id": data.RefId,
 	}}
+	if publish {
+		update["$set"].(bson.M)["nodes_collection_list.$.id"] = data.Id
+	} else {
+		identify["nodes_collection_list.id"] = data.Id
+	}
 	res, err := Db.coll.UpdateOne(ctx, identify, update)
 	if err != nil {
 		config.Err(fmt.Sprintf("List of Node Items UPDATE_ERROR: %v", err))
@@ -553,8 +558,10 @@ func UpdateInstanceItem(data models.CreateInstanceRequest, instData models.DataE
 		}
 		update["$set"].(bson.M)["sys"] = sysData
 		newRecord := models.DataEntryIdentity{
-			Id:   itemId,
-			Name: instData.Name,
+			Id:    itemId,
+			Name:  instData.Name,
+			RefId: instData.RefId,
+			Thumb: instData.Thumb,
 			Status: func() string {
 				if val := data.Status; val != "" && STATUS.Contains(val) {
 					return val

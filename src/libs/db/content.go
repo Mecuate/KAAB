@@ -147,13 +147,13 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 		Id:    itemId,
 		Name:  recordDocument.Name,
 		RefId: recordDocument.RefId,
+		Thumb: recordDocument.Thumb,
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
 			}
 			return recordDocument.Status
 		}(),
-		Thumb: recordDocument.Thumb,
 	}
 	err = UpdateContentListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {

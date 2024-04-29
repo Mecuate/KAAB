@@ -104,6 +104,7 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 		Id:    itemId,
 		Name:  recordDocument.Name,
 		RefId: recordDocument.RefId,
+		Thumb: recordDocument.Thumb,
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
@@ -113,7 +114,7 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 	}
 	err = UpdateSchemaListItem(instData.Name, subjectId, newRecord, false)
 	if err != nil {
-		config.Err(fmt.Sprintf("Error updating Node List: %v", err))
+		config.Err(fmt.Sprintf("Error updating Schema List: %v", err))
 	}
 
 	if data.Bump {
@@ -134,7 +135,7 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 		}
 		err = UpdateSchemaListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
 		if err != nil {
-			config.Err(fmt.Sprintf("Error updating Media List for published item: %v", err))
+			config.Err(fmt.Sprintf("Error updating Schema List for published item: %v", err))
 		}
 	}
 
