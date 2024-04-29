@@ -94,6 +94,7 @@ type NodeFileItem struct {
 	CreatedBy        string           `json:"created_by" bson:"created_by"`
 	Value            []interface{}    `json:"value" bson:"value"`
 	RefId            string           `json:"ref_id" bson:"ref_id"`
+	RefName          string           `json:"ref_name" bson:"ref_name"`
 	Schema           string           `json:"schema_ref" bson:"schema_ref"`
 	Status           string           `json:"status" bson:"status"`
 	Thumb            string           `json:"thumb" bson:"thumb"`
@@ -242,11 +243,12 @@ type ProfileConform struct {
 }
 
 type DataEntryIdentity struct {
-	Name   string `json:"name" bson:"name"`
-	Id     string `json:"id" bson:"id"`
-	Status string `json:"status" bson:"status"`
-	RefId  string `json:"ref_id" bson:"ref_id"`
-	Thumb  string `json:"thumb" bson:"thumb"`
+	Name    string `json:"name" bson:"name"`
+	Id      string `json:"id" bson:"id"`
+	Status  string `json:"status" bson:"status"`
+	RefId   string `json:"ref_id" bson:"ref_id"`
+	RefName string `json:"ref_name" bson:"ref_name"`
+	Thumb   string `json:"thumb" bson:"thumb"`
 }
 
 type APICollections struct {

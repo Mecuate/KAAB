@@ -129,7 +129,8 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 	}
 	if shouldUpdateVal {
 		if val := data.Value; len(val) > 0 {
-			update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{val})
+			updatedValues := HandleContentCreationItems(CreateToMapArray(val))
+			update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, updatedValues)
 		}
 	} else {
 		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{valueItems})

@@ -22,6 +22,7 @@ func GetNodeItem(ref_id string) (models.NodeFileItem, error) {
 	if err != nil {
 		return res, err
 	}
+	fmt.Println(res)
 	return res, nil
 }
 
@@ -38,10 +39,12 @@ func CreateNodeItem(data models.NodeFileItem, instData models.DataEntryIdentity,
 	}
 	config.Log(fmt.Sprintf("Node Item Created: %v", res))
 	newRecord := models.DataEntryIdentity{
-		Name:   data.Name,
-		Id:     data.Uuid,
-		Status: STATUS.Activate(),
-		RefId:  data.RefId,
+		Name:    data.Name,
+		Id:      data.Uuid,
+		Status:  STATUS.Activate(),
+		RefId:   data.RefId,
+		RefName: data.RefName,
+		Thumb:   data.Thumb,
 	}
 	err = AddNewNodeToList(instName, subjectId, newRecord)
 	if err != nil {

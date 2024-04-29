@@ -102,7 +102,7 @@ func GetNodeItem(args ...any) any {
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
-	node := AssortData(nodeItem.Value, ReqSearch, nodeItem.Versions)
+	node := AssortData([]interface{}{nodeItem.Value}, ReqSearch, nodeItem.Versions)
 	return models.NodeItemResponse{
 		Uuid:        nodeItem.Uuid,
 		Name:        nodeItem.Name,

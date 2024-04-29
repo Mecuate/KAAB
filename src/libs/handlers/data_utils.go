@@ -92,10 +92,9 @@ func VerifySchemaConform(instanceName string, subjectId string, schema string, R
 				}
 				if part := OK[k]; part != nil {
 					testType := fmt.Sprintf("%v", reflect.TypeOf(v))
-
 					switch testType {
 					case "string":
-						if part == "string" && len(v.(string)) < 255 {
+						if part == "string" && len(fmt.Sprintf("%v", v)) < 96 {
 							continue
 						}
 						if part == "long_string" {
@@ -110,13 +109,17 @@ func VerifySchemaConform(instanceName string, subjectId string, schema string, R
 							continue
 						}
 					case "[]interface {}":
+						if part == "array" {
+							continue
+						}
+					case "map[string]interface {}":
 						if part == "object" {
 							continue
 						}
 					default:
 						return fmt.Errorf("data does not conform to schema")
 					}
-
+					return fmt.Errorf("data does not conform to schema")
 				} else {
 					return fmt.Errorf("key-value pair out of range")
 				}

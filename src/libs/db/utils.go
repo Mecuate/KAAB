@@ -199,8 +199,8 @@ func MakeHash(data string) string {
 	bv := []byte(data)
 	hasher := sha1.New()
 	hasher.Write(bv)
-
-	return hex.EncodeToString(hasher.Sum(nil))
+	str := hex.EncodeToString(hasher.Sum(nil))
+	return str[len(str)-12:]
 }
 
 func RandomRefID() string {
@@ -303,7 +303,7 @@ func HandleContentCreationItems(arr []models.MAPDATA) []interface{} {
 	}
 	res := make([]models.MAPDATA, Total)
 	for i, v := range arr {
-		hash := MakeHash(fmt.Sprintf("%d:%v:v_:%v", i, time.Now().UnixNano(), v))[30:]
+		hash := MakeHash(fmt.Sprintf("%d:%v:v_:%v", i, time.Now().UnixNano(), v))
 		newItem := v
 		newItem["$__i"] = hash
 		res[i] = newItem

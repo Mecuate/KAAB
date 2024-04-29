@@ -91,6 +91,7 @@ func CreateEndpointItem(args ...any) (any, error) {
 func CreateNodeItem(args ...any) (any, error) {
 	id := args[0].(string)
 	r := args[1].(*http.Request)
+	instData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
 	var payload models.CreateNodeRequest
@@ -100,17 +101,7 @@ func CreateNodeItem(args ...any) (any, error) {
 	}
 	ctrlData := CreateCtrlFields(id)
 	newReferenceID := db.RandomRefID()
-	instData := func() models.DataEntryIdentity {
-		if args[2] == nil {
-			return models.DataEntryIdentity{
-				Name:   payload.Name,
-				RefId:  newReferenceID,
-				Status: db.STATUS.Activate(),
-				Id:     ctrlData.Uuid,
-			}
-		}
-		return args[2].(models.DataEntryIdentity)
-	}()
+
 	nodeItem := models.NodeFileItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
@@ -126,6 +117,8 @@ func CreateNodeItem(args ...any) (any, error) {
 		CreatedBy:        ctrlData.CreatedBy,
 		Status:           db.STATUS.Activate(),
 		ApiBase:          ReqApi,
+		RefName:          payload.RefName,
+		Thumb:            payload.Thumb,
 	}
 	err = db.CreateNodeItem(nodeItem, instData, subjectId)
 	if err != nil {
