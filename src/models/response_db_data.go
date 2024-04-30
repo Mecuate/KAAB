@@ -23,6 +23,7 @@ type NodeItemResponse struct {
 	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
+	RefName     string        `json:"ref_name" bson:"ref_name"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
 	Status      string        `json:"status" bson:"status"`
 }
@@ -37,6 +38,7 @@ type ContentItemResponse struct {
 	Versions    []string      `json:"versions" bson:"versions" default:"[]"`
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
+	RefName     string        `json:"ref_name" bson:"ref_name"`
 	Schema      string        `json:"schema_ref" bson:"schema_ref"`
 	Status      string        `json:"status" bson:"status"`
 }

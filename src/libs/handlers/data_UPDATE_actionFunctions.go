@@ -72,6 +72,13 @@ func UpdateNodeItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
+
+	err = VerifySchemaConform(instanceData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
+	if err != nil {
+		DATA_FAIL["Message"] = err.Error()
+		return DATA_FAIL
+	}
+
 	R, err := db.UpdateNodeItem(payload, instanceData, subjectId, itemId, ReqApi, KAAB_VERSION[ReqApi].Publish)
 	if err != nil {
 		return DATA_FAIL

@@ -5,8 +5,8 @@ type CreateNodeRequest struct {
 	Description string        `json:"description" bson:"description"`
 	Value       []interface{} `json:"value" bson:"value"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
-	RefName     string        `json:"ref_name" bson:"ref_name"`
-	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+	RefName     string        `json:"ref_name" bson:"ref_name" required:"true"`
+	Schema      string        `json:"schema_ref" bson:"schema_ref" required:"true"`
 	Bump        bool          `json:"bump" bson:"bump"`
 	Status      string        `json:"status" bson:"status"`
 	Thumb       string        `json:"thumb" bson:"thumb"`
@@ -21,7 +21,8 @@ type CreateContentRequest struct {
 	Patches     []MAPDATA     `json:"patches" bson:"patches" default:"[]"`
 	Version     string        `json:"version" bson:"version"`
 	RefId       string        `json:"ref_id" bson:"ref_id"`
-	Schema      string        `json:"schema_ref" bson:"schema_ref"`
+	RefName     string        `json:"ref_name" bson:"ref_name" required:"true"`
+	Schema      string        `json:"schema_ref" bson:"schema_ref" required:"true"`
 	Bump        bool          `json:"bump" bson:"bump"`
 	Status      string        `json:"status" bson:"status"`
 }

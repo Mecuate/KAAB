@@ -22,7 +22,7 @@ func GetNodeItem(ref_id string) (models.NodeFileItem, error) {
 	if err != nil {
 		return res, err
 	}
-	fmt.Println(res)
+
 	return res, nil
 }
 
@@ -33,6 +33,7 @@ func CreateNodeItem(data models.NodeFileItem, instData models.DataEntryIdentity,
 		return err
 	}
 	ctx := context.Background()
+	data.Value = []interface{}{data.Value}
 	res, err := Db.coll.InsertOne(ctx, data)
 	if err != nil {
 		return err
@@ -98,7 +99,7 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 		update["$set"].(bson.M)["status"] = val
 	}
 	if val := data.Value; len(val) > 0 {
-		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, val)
+		update["$set"].(bson.M)["value"] = AppendValue(recordDocument.Value, []interface{}{val})
 	}
 	update["$set"].(bson.M)["versions"] = UpdateVersions(recordDocument.Versions, data.Bump)
 	timeStamp := fmt.Sprintf("%v", time.Now().Unix())

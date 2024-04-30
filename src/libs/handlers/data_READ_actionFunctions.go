@@ -102,7 +102,7 @@ func GetNodeItem(args ...any) any {
 		return DATA_FAIL
 	}
 	ReqSearch := args[3].(models.URLFilterSearchParams)
-	node := AssortData([]interface{}{nodeItem.Value}, ReqSearch, nodeItem.Versions)
+	node := AssortData(nodeItem.Value, ReqSearch, nodeItem.Versions)
 	return models.NodeItemResponse{
 		Uuid:        nodeItem.Uuid,
 		Name:        nodeItem.Name,
@@ -111,6 +111,7 @@ func GetNodeItem(args ...any) any {
 		Versions:    node.version(),
 		Value:       node.data(),
 		RefId:       nodeItem.RefId,
+		RefName:     nodeItem.RefName,
 		Schema:      nodeItem.Schema,
 		Status:      nodeItem.Status,
 	}
@@ -133,6 +134,7 @@ func GetNodeItems(args ...any) any {
 			Versions:    nodeItem.Versions,
 			Value:       nodeItem.Value[0:1],
 			RefId:       nodeItem.RefId,
+			RefName:     nodeItem.RefName,
 			Schema:      nodeItem.Schema,
 			Status:      nodeItem.Status,
 		}
@@ -170,6 +172,7 @@ func GetContentItem(args ...any) any {
 		Versions:    content.version(),
 		Value:       content.data(),
 		RefId:       contentItem.RefId,
+		RefName:     contentItem.RefName,
 		Schema:      contentItem.Schema,
 		Status:      contentItem.Status,
 	}
@@ -192,6 +195,7 @@ func GetContentItems(args ...any) any {
 			Versions:    contentItem.Versions,
 			Value:       contentItem.Value,
 			RefId:       contentItem.RefId,
+			RefName:     contentItem.RefName,
 			Schema:      contentItem.Schema,
 			Status:      contentItem.Status,
 		}

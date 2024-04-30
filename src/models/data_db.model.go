@@ -76,6 +76,7 @@ type TextFileItem struct {
 	CreatedBy        string           `json:"created_by" bson:"created_by"`
 	Value            []interface{}    `json:"value" bson:"value"`
 	RefId            string           `json:"ref_id" bson:"ref_id"`
+	RefName          string           `json:"ref_name" bson:"ref_name"`
 	Schema           string           `json:"schema_ref" bson:"schema_ref"`
 	Status           string           `json:"status" bson:"status"`
 	Thumb            string           `json:"thumb" bson:"thumb"`

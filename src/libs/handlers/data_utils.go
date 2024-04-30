@@ -68,6 +68,17 @@ func VerifyContentFileName(instanceName string, subjectId string, name string, R
 	return nil
 }
 
+func VerifyNodeFileName(instanceName string, subjectId string, name string, ReqApi string) error {
+	Data := GetNodeList(instanceName, subjectId, "", "", ReqApi)
+	List := Data.(models.NodesFilesCollectionList)
+	for _, item := range List {
+		if item.Name == name {
+			return fmt.Errorf("error name already in use")
+		}
+	}
+	return nil
+}
+
 func VerifySchemaConform(instanceName string, subjectId string, schema string, ReqApi string, data []interface{}) error {
 	Data := GetSchemaList(instanceName, subjectId, "", "", ReqApi)
 	List := Data.(models.SchemasCollectionList)

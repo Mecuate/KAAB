@@ -99,6 +99,25 @@ func CreateNodeItem(args ...any) (any, error) {
 	if err != nil {
 		return DATA_FAIL, err
 	}
+	if payload.RefName == "" || payload.Schema == "" {
+		return DATA_FAIL, fmt.Errorf("cannot create node without required fields")
+	}
+	err = VerifyNodeFileName(instData.Name, subjectId, payload.Name, ReqApi)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+
+	err = VerifySchemaExist(instData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+
+	err = VerifySchemaConform(instData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
+	if err != nil {
+		DATA_FAIL["Message"] = err.Error()
+		return DATA_FAIL, err
+	}
+
 	ctrlData := CreateCtrlFields(id)
 	newReferenceID := db.RandomRefID()
 
@@ -132,6 +151,7 @@ func CreateNodeItem(args ...any) (any, error) {
 func CreateNodeItems(args ...any) (any, error) {
 	id := args[0].(string)
 	r := args[1].(*http.Request)
+	instData := args[2].(models.DataEntryIdentity)
 	subjectId := args[3].(string)
 	ReqApi := args[4].(string)
 	var payload []models.CreateNodeRequest
@@ -141,24 +161,17 @@ func CreateNodeItems(args ...any) (any, error) {
 	}
 	RES := []any{}
 	for _, item := range payload {
+		if item.RefName == "" || item.Schema == "" {
+			return DATA_FAIL, fmt.Errorf("cannot create node without required fields")
+		}
 		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
-		instData := func() models.DataEntryIdentity {
-			if args[2] == nil {
-				return models.DataEntryIdentity{
-					Name:   item.Name,
-					RefId:  newReferenceID,
-					Status: db.STATUS.Activate(),
-					Id:     ctrlData.Uuid,
-				}
-			}
-			return args[2].(models.DataEntryIdentity)
-		}()
 		nodeItem := models.NodeFileItem{
 			Name:             item.Name,
 			Description:      item.Description,
 			Value:            item.Value,
 			RefId:            newReferenceID,
+			RefName:          item.RefName,
 			Schema:           item.Schema,
 			Uuid:             ctrlData.Uuid,
 			Size:             int64(len(fmt.Sprintf("%v", item.Value))),
@@ -207,22 +220,13 @@ func CreateContentItem(args ...any) (any, error) {
 
 	ctrlData := CreateCtrlFields(id)
 	newReferenceID := db.RandomRefID()
-	instData := func() models.DataEntryIdentity {
-		if args[2] == nil {
-			return models.DataEntryIdentity{
-				Name:   payload.Name,
-				RefId:  newReferenceID,
-				Status: db.STATUS.Activate(),
-				Id:     ctrlData.Uuid,
-			}
-		}
-		return args[2].(models.DataEntryIdentity)
-	}()
+
 	contentItem := models.TextFileItem{
 		Name:             payload.Name,
 		Description:      payload.Description,
 		Value:            payload.Value,
 		RefId:            newReferenceID,
+		RefName:          payload.RefName,
 		Schema:           payload.Schema,
 		Uuid:             ctrlData.Uuid,
 		Size:             int64(len(fmt.Sprintf("%v", payload.Value))),
@@ -234,7 +238,7 @@ func CreateContentItem(args ...any) (any, error) {
 		Status:           db.STATUS.Activate(),
 		ApiBase:          ReqApi,
 	}
-	err = db.CreateContentItem(contentItem, instData, subjectId)
+	err = db.CreateContentItem(contentItem, instanceData, subjectId)
 	if err != nil {
 		return DATA_FAIL, err
 	}
@@ -267,22 +271,13 @@ func CreateContentItems(args ...any) (any, error) {
 		}
 		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
-		instData := func() models.DataEntryIdentity {
-			if args[2] == nil {
-				return models.DataEntryIdentity{
-					Name:   item.Name,
-					RefId:  newReferenceID,
-					Status: db.STATUS.Activate(),
-					Id:     ctrlData.Uuid,
-				}
-			}
-			return args[2].(models.DataEntryIdentity)
-		}()
+
 		contentItem := models.TextFileItem{
 			Name:             item.Name,
 			Description:      item.Description,
 			Value:            item.Value,
 			RefId:            newReferenceID,
+			RefName:          item.RefName,
 			Schema:           item.Schema,
 			Uuid:             ctrlData.Uuid,
 			Size:             int64(len(fmt.Sprintf("%v", item.Value))),
@@ -294,7 +289,7 @@ func CreateContentItems(args ...any) (any, error) {
 			Status:           db.STATUS.Activate(),
 			ApiBase:          ReqApi,
 		}
-		err = db.CreateContentItem(contentItem, instData, subjectId)
+		err = db.CreateContentItem(contentItem, instanceData, subjectId)
 		if err != nil {
 			return DATA_FAIL, err
 		}
