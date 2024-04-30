@@ -79,6 +79,28 @@ func VerifyNodeFileName(instanceName string, subjectId string, name string, ReqA
 	return nil
 }
 
+func VerifyNodeReferenceName(instanceName string, subjectId string, name string, ReqApi string) error {
+	Data := GetNodeList(instanceName, subjectId, "", "", ReqApi)
+	List := Data.(models.NodesFilesCollectionList)
+	for _, item := range List {
+		if item.RefName == name {
+			return fmt.Errorf("error ref_name already in use")
+		}
+	}
+	return nil
+}
+
+func VerifyContentReferenceName(instanceName string, subjectId string, name string, ReqApi string) error {
+	Data := GetNodeList(instanceName, subjectId, "", "", ReqApi)
+	List := Data.(models.TextFilesCollectionList)
+	for _, item := range List {
+		if item.RefName == name {
+			return fmt.Errorf("error ref_name already in use")
+		}
+	}
+	return nil
+}
+
 func VerifySchemaConform(instanceName string, subjectId string, schema string, ReqApi string, data []interface{}) error {
 	Data := GetSchemaList(instanceName, subjectId, "", "", ReqApi)
 	List := Data.(models.SchemasCollectionList)

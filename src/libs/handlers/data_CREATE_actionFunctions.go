@@ -100,8 +100,13 @@ func CreateNodeItem(args ...any) (any, error) {
 		return DATA_FAIL, err
 	}
 	if payload.RefName == "" || payload.Schema == "" {
-		return DATA_FAIL, fmt.Errorf("cannot create node without required fields")
+		return DATA_FAIL, fmt.Errorf("cannot create node without required fields [ref_name, schema]")
 	}
+	err = VerifyNodeReferenceName(instData.Name, subjectId, payload.RefName, ReqApi)
+	if err != nil {
+		return DATA_FAIL, err
+	}
+
 	err = VerifyNodeFileName(instData.Name, subjectId, payload.Name, ReqApi)
 	if err != nil {
 		return DATA_FAIL, err
@@ -162,7 +167,7 @@ func CreateNodeItems(args ...any) (any, error) {
 	RES := []any{}
 	for _, item := range payload {
 		if item.RefName == "" || item.Schema == "" {
-			return DATA_FAIL, fmt.Errorf("cannot create node without required fields")
+			return DATA_FAIL, fmt.Errorf("cannot create node without required fields [ref_name, schema]")
 		}
 		newReferenceID := db.RandomRefID()
 		ctrlData := CreateCtrlFields(id)
@@ -205,6 +210,14 @@ func CreateContentItem(args ...any) (any, error) {
 	err := GetBody(r, &payload)
 	if err != nil {
 		config.Err(fmt.Sprintf("payload.error: %s", err.Error()))
+		return DATA_FAIL, err
+	}
+
+	if payload.RefName == "" || payload.Schema == "" {
+		return DATA_FAIL, fmt.Errorf("cannot create content without required fields [ref_name, schema]")
+	}
+	err = VerifyContentReferenceName(instanceData.Name, subjectId, payload.RefName, ReqApi)
+	if err != nil {
 		return DATA_FAIL, err
 	}
 

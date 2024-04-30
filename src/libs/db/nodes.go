@@ -92,7 +92,6 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 		update["$set"].(bson.M)["description"] = val
 	}
 	if val := data.Schema; val != "" {
-		// TODO: [` validate schema for node?? `]-{2024-04-28}
 		update["$set"].(bson.M)["schema_ref"] = val
 	}
 	if val := data.Status; val != "" && STATUS.Contains(val) {
@@ -110,10 +109,11 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id:    itemId,
-		Name:  recordDocument.Name,
-		RefId: recordDocument.RefId,
-		Thumb: recordDocument.Thumb,
+		Id:      itemId,
+		Name:    recordDocument.Name,
+		RefId:   recordDocument.RefId,
+		RefName: recordDocument.RefName,
+		Thumb:   recordDocument.Thumb,
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val
@@ -136,11 +136,12 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 		pubDocument := publishResponse.Meta.(models.NodeFileItem)
 
 		updeateRecord := models.DataEntryIdentity{
-			Id:     pubDocument.Uuid,
-			Name:   pubDocument.Name,
-			Status: pubDocument.Status,
-			RefId:  pubDocument.RefId,
-			Thumb:  pubDocument.Thumb,
+			Id:      pubDocument.Uuid,
+			Name:    pubDocument.Name,
+			Status:  pubDocument.Status,
+			RefId:   pubDocument.RefId,
+			RefName: pubDocument.RefName,
+			Thumb:   pubDocument.Thumb,
 		}
 		err = UpdateNodeListItem(instData.RefId, subjectId, updeateRecord, data.Bump)
 		if err != nil {

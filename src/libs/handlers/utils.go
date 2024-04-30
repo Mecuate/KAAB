@@ -201,14 +201,14 @@ func (A *AssortedData) data() []interface{} {
 func (A *AssortedData) version() []string {
 	return []string{A.VersionSelected}
 }
-func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams, versions []string) AssortedData {
+func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams, versions []string, flag bool) AssortedData {
 	var Res []interface{}
 	var Result []interface{}
 	var selItem int
 	if len(itemValues) == 0 {
 		return AssortedData{
 			DataSelected:    itemValues,
-			VersionSelected: versions[selItem],
+			VersionSelected: versions[0],
 		}
 	}
 	if ReqSearch.Version != "" {
@@ -224,10 +224,10 @@ func AssortData(itemValues []interface{}, ReqSearch models.URLFilterSearchParams
 	res, _ := json.Marshal(Res[0])
 	json.Unmarshal(res, &selectedItem)
 
-	if ReqSearch.Sorting != "" {
+	if ReqSearch.Sorting != "" && flag {
 		selectedItem = SortData(selectedItem, ReqSearch.Sorting)
 	}
-	if ReqSearch.Limit != "" {
+	if ReqSearch.Limit != "" && flag {
 		fin, err := strconv.Atoi(ReqSearch.Limit)
 		if err != nil {
 			fin = len(selectedItem)
@@ -271,8 +271,8 @@ func AssortEndpointData(itemValues []interface{}, ReqSearch models.URLFilterSear
 	var selItem int
 	availVersions := NewStringArray{versions}
 	if ReqSearch.Version != "" && availVersions.Contains(ReqSearch.Version) {
+		selItem = IndexOf(versions, ReqSearch.Version)
 		if selItem > -1 && selItem < len(itemValues) {
-			selItem = IndexOf(versions, ReqSearch.Version)
 			Res = append(Res, itemValues[selItem])
 		}
 	} else {
@@ -349,11 +349,6 @@ func ModificationRecord(idnt string, ix int64) models.ModificationRecord {
 		Date:   t,
 		Index:  ix,
 	}
-}
-
-func EmptyUserAction(args ...any) interface{} {
-	var Res interface{}
-	return Res
 }
 
 func MaskURIAddress(values any) []interface{} {

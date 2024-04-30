@@ -72,6 +72,10 @@ func UpdateNodeItem(args ...any) any {
 	if err != nil {
 		return DATA_FAIL
 	}
+	if payload.Schema == "" {
+		DATA_FAIL["Message"] = "No schema provided"
+		return DATA_FAIL
+	}
 
 	err = VerifySchemaConform(instanceData.Name, subjectId, payload.Schema, ReqApi, payload.Value)
 	if err != nil {
