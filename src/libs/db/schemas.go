@@ -41,6 +41,7 @@ func CreateSchemaItem(data models.SchemaItem, instData models.DataEntryIdentity,
 		Id:     data.Uuid,
 		Status: STATUS.Activate(),
 		RefId:  data.RefId,
+		Thumb:  data.Thumb,
 	}
 	err = AddNewSchemasList(instData.Name, subjectId, newRecord)
 	if err != nil {
@@ -104,7 +105,12 @@ func UpdateSchemaItem(data models.CreateSchemaRequest, instData models.DataEntry
 		Id:    itemId,
 		Name:  recordDocument.Name,
 		RefId: recordDocument.RefId,
-		Thumb: recordDocument.Thumb,
+		Thumb: func() string {
+			if val := data.Thumb; val != "" {
+				return val
+			}
+			return recordDocument.Thumb
+		}(),
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val

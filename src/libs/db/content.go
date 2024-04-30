@@ -45,10 +45,12 @@ func CreateContentItem(data models.TextFileItem, instData models.DataEntryIdenti
 	}
 	config.Log(fmt.Sprintf("Content Item Created: %v", res))
 	newRecord := models.DataEntryIdentity{
-		Name:   data.Name,
-		Id:     data.Uuid,
-		Status: STATUS.Activate(),
-		RefId:  data.RefId,
+		Name:    data.Name,
+		Id:      data.Uuid,
+		Status:  STATUS.Activate(),
+		RefId:   data.RefId,
+		RefName: data.RefName,
+		Thumb:   data.Thumb,
 	}
 	err = AddNewContentList(instData.Name, subjectId, newRecord)
 	if err != nil {
@@ -145,10 +147,16 @@ func UpdateContentItem(data models.CreateContentRequest, instData models.DataEnt
 		return R, err
 	}
 	newRecord := models.DataEntryIdentity{
-		Id:    itemId,
-		Name:  recordDocument.Name,
-		RefId: recordDocument.RefId,
-		Thumb: recordDocument.Thumb,
+		Id:      itemId,
+		Name:    recordDocument.Name,
+		RefId:   recordDocument.RefId,
+		RefName: recordDocument.RefName,
+		Thumb: func() string {
+			if val := data.Thumb; val != "" {
+				return val
+			}
+			return recordDocument.Thumb
+		}(),
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val

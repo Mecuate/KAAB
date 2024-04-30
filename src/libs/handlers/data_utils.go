@@ -91,7 +91,7 @@ func VerifyNodeReferenceName(instanceName string, subjectId string, name string,
 }
 
 func VerifyContentReferenceName(instanceName string, subjectId string, name string, ReqApi string) error {
-	Data := GetNodeList(instanceName, subjectId, "", "", ReqApi)
+	Data := GetContentList(instanceName, subjectId, "", "", ReqApi)
 	List := Data.(models.TextFilesCollectionList)
 	for _, item := range List {
 		if item.RefName == name {

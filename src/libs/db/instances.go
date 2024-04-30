@@ -561,7 +561,12 @@ func UpdateInstanceItem(data models.CreateInstanceRequest, instData models.DataE
 			Id:    itemId,
 			Name:  instData.Name,
 			RefId: instData.RefId,
-			Thumb: instData.Thumb,
+			Thumb: func() string {
+				if val := data.Thumb; val != "" {
+					return val
+				}
+				return instData.Thumb
+			}(),
 			Status: func() string {
 				if val := data.Status; val != "" && STATUS.Contains(val) {
 					return val

@@ -113,7 +113,12 @@ func UpdateNodeItem(data models.CreateNodeRequest, instData models.DataEntryIden
 		Name:    recordDocument.Name,
 		RefId:   recordDocument.RefId,
 		RefName: recordDocument.RefName,
-		Thumb:   recordDocument.Thumb,
+		Thumb: func() string {
+			if val := data.Thumb; val != "" {
+				return val
+			}
+			return recordDocument.Thumb
+		}(),
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val

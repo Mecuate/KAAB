@@ -50,6 +50,7 @@ func CreateEndpointItem(data models.EndpointItem, instData models.DataEntryIdent
 		Id:     data.Uuid,
 		Status: STATUS.Activate(),
 		RefId:  newReferenceID,
+		Thumb:  data.Thumb,
 	}
 	err = AddNewEndpointToList(instData.Name, subjectId, newRecord)
 	if err != nil {
@@ -120,7 +121,12 @@ func UpdateEndpointItem(data models.CreateEndpointRequest, instData models.DataE
 		Id:    itemId,
 		Name:  recordDocument.Name,
 		RefId: recordDocument.RefId,
-		Thumb: recordDocument.Thumb,
+		Thumb: func() string {
+			if val := data.Thumb; val != "" {
+				return val
+			}
+			return recordDocument.Thumb
+		}(),
 		Status: func() string {
 			if val := data.Status; val != "" && STATUS.Contains(val) {
 				return val

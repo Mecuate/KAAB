@@ -25,6 +25,7 @@ type CreateContentRequest struct {
 	Schema      string        `json:"schema_ref" bson:"schema_ref" required:"true"`
 	Bump        bool          `json:"bump" bson:"bump"`
 	Status      string        `json:"status" bson:"status"`
+	Thumb       string        `json:"thumb" bson:"thumb"`
 }
 
 type CreateEndpointRequest struct {
@@ -34,6 +35,7 @@ type CreateEndpointRequest struct {
 	Schema      string       `json:"schema_ref" bson:"schema_ref"`
 	Bump        bool         `json:"bump" bson:"bump"`
 	Status      string       `json:"status" bson:"status"`
+	Thumb       string       `json:"thumb" bson:"thumb"`
 }
 
 type CreateSchemaRequest struct {
@@ -42,6 +44,7 @@ type CreateSchemaRequest struct {
 	Value       []interface{} `json:"value" bson:"value"`
 	Bump        bool          `json:"bump" bson:"bump"`
 	Status      string        `json:"status" bson:"status"`
+	Thumb       string        `json:"thumb" bson:"thumb"`
 }
 
 type CreateMediaRequest struct {
@@ -55,6 +58,7 @@ type CreateMediaRequest struct {
 	Bump        bool           `json:"bump" bson:"bump"`
 	Status      string         `json:"status" bson:"status"`
 	ChallengeID string         `json:"challenge" bson:"challenge"`
+	Thumb       string         `json:"thumb" bson:"thumb"`
 }
 
 type CreateInstanceRequest struct {
@@ -64,4 +68,5 @@ type CreateInstanceRequest struct {
 	Members []string `json:"members" bson:"members"`
 	Status  string   `json:"status" bson:"status"`
 	Bump    bool     `json:"bump" bson:"bump"`
+	Thumb   string   `json:"thumb" bson:"thumb"`
 }
