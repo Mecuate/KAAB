@@ -3,7 +3,7 @@ module kaab
 go 1.18
 
 require (
-	github.com/Mecuate/auth_module v0.1.2
+	github.com/Mecuate/auth_module v1.0.0
 	github.com/Mecuate/crud_module v0.0.3
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.5.1
@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.13.6 // indirect
@@ -34,4 +34,4 @@ require (
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
 
-replace github.com/Mecuate/auth_module => ../auth_module
+// replace github.com/Mecuate/auth_module => ../auth_module
