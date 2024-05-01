@@ -23,7 +23,6 @@ type LoggingConfig struct {
 
 type AppConfig struct {
 	ProcessName string `required:"true" split_words:"true"`
-	DbDir       string `required:"true" split_words:"true"`
 	Copyright   string `required:"true" split_words:"false"`
 }
 
