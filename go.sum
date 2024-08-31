@@ -2,6 +2,8 @@ github.com/Mecuate/auth_module v0.1.2 h1:0S9rMxGrQS//Jxt5LVJQEB3MGaG0Uw7XxsGWHBG
 github.com/Mecuate/auth_module v0.1.2/go.mod h1:jGYEkx3vQCFb/qyIshEH551H/URBNE+qc1EqWCDDRoI=
 github.com/Mecuate/auth_module v1.0.0 h1:xD+rabrdahsrA0bsvLozQ4DGDAyio+jpwaOyaBVw6N0=
 github.com/Mecuate/auth_module v1.0.0/go.mod h1:jGYEkx3vQCFb/qyIshEH551H/URBNE+qc1EqWCDDRoI=
+github.com/Mecuate/auth_module v1.0.2 h1:wWqaqv5GI6qXy9ULVSrzwgVK+8sgzP95m8v66CdgCPM=
+github.com/Mecuate/auth_module v1.0.2/go.mod h1:IgrNJmzB6Cjw3YNU79k2UoAeiihqT5vF5bN0WSQPPGM=
 github.com/Mecuate/crud_module v0.0.3 h1:9KFfRWh5k1oWlu9kRF9E8yNm67HKnP5VLpdoTiOHN74=
 github.com/Mecuate/crud_module v0.0.3/go.mod h1:P5rfjdUeSylOW+37umRQTV7F5n4z1+iXXlMDNvI78Po=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

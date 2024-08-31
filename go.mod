@@ -3,7 +3,7 @@ module kaab
 go 1.18
 
 require (
-	github.com/Mecuate/auth_module v1.0.0
+	github.com/Mecuate/auth_module v1.0.2
 	github.com/Mecuate/crud_module v0.0.3
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.5.1
